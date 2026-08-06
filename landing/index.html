@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Countersign — independent witnessing for AI agent evidence</title>
+<meta name="description" content="Self-signed audit logs prove nothing. Countersign is a Certificate-Transparency-style witness for AI agent evidence: append-only Merkle log, signed tree heads, offline-verifiable proofs.">
+<style>
+  :root { --bg:#0b0f14; --panel:#111823; --ink:#e8eef5; --dim:#8fa1b3; --acc:#1ec5ff; --ok:#3ddc97; }
+  * { box-sizing:border-box; margin:0; }
+  body { background:var(--bg); color:var(--ink); font:16px/1.65 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:860px; margin:0 auto; padding:48px 20px 80px; }
+  h1 { font-size:clamp(30px,5vw,44px); line-height:1.15; letter-spacing:-.5px; }
+  h1 em { color:var(--acc); font-style:normal; }
+  h2 { margin:56px 0 12px; font-size:22px; }
+  p { color:var(--dim); margin:14px 0; max-width:64ch; }
+  p strong { color:var(--ink); }
+  .tag { display:inline-block; border:1px solid #24313f; color:var(--acc); border-radius:999px; padding:3px 12px; font-size:13px; margin-bottom:22px; }
+  pre { background:var(--panel); border:1px solid #1d2836; border-radius:10px; padding:18px; overflow-x:auto; font:13.5px/1.7 ui-monospace,Consolas,monospace; color:#c9d7e4; margin:18px 0; }
+  pre .c { color:#5d7189; } pre .k { color:var(--acc); } pre .g { color:var(--ok); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px; margin:20px 0; }
+  .card { background:var(--panel); border:1px solid #1d2836; border-radius:10px; padding:18px; }
+  .card h3 { font-size:15px; margin-bottom:8px; color:var(--ink); }
+  .card p { font-size:14px; margin:0; }
+  .cta { display:inline-block; background:var(--acc); color:#04121c; font-weight:600; text-decoration:none; padding:12px 22px; border-radius:8px; margin:8px 12px 8px 0; }
+  .cta.ghost { background:transparent; color:var(--acc); border:1px solid var(--acc); }
+  .fine { font-size:13px; color:#5d7189; margin-top:40px; border-top:1px solid #1d2836; padding-top:18px; }
+</style>
+</head>
+<body>
+<main>
+  <span class="tag">Open protocol · Apache-2.0 · local-first</span>
+  <h1>Your AI agent's audit log <em>proves nothing.</em></h1>
+  <p><strong>Signed, hash-chained agent logs are self-attestation:</strong> the operator
+  holds the keys and the storage, so nothing stops a full rewrite-and-re-sign after an
+  incident. TLS had the same flaw until Certificate Transparency added public
+  append-only logs. Agent evidence has no CT.</p>
+  <p><strong>Countersign is that missing witness.</strong> It countersigns the digests of
+  your evidence — receipts, traces, audit packets, any format — into an append-only
+  Merkle log with signed tree heads, and exports proofs anyone can verify
+  <strong>offline</strong>, with no trust in you.</p>
+
+  <a class="cta" href="https://github.com/croviatrust">Get the CLI on GitHub</a>
+  <a class="cta ghost" href="mailto:hello@croviatrust.com?subject=Private%20witnessed%20logs%20—%20early%20access">Private logs — early access</a>
+
+  <h2>Sixty seconds, end to end</h2>
+<pre><span class="c"># independent witness log (keypair + signed genesis)</span>
+<span class="k">countersign</span> init --log ./witness-log
+
+<span class="c"># witness every receipt your agent stack already produces</span>
+<span class="k">countersign</span> witness --log ./witness-log --jsonl agent_receipts.jsonl
+
+<span class="c"># export a proof for one action; anyone verifies it offline</span>
+<span class="k">countersign</span> prove --log ./witness-log --digest 3b0c…855c --out proof.json
+<span class="k">countersign</span> verify proof.json --pubkey &lt;witness-key&gt;   <span class="g"># → ok: true</span></pre>
+
+  <div class="grid">
+    <div class="card"><h3>Format-agnostic</h3><p>Witnesses digests only. Works with any
+    receipts SDK, OpenTelemetry GenAI exports, audit packets, or raw files. Your
+    evidence never leaves your machine.</p></div>
+    <div class="card"><h3>Offline verification</h3><p>Proof bundles are self-contained:
+    Merkle inclusion + Ed25519 tree head. Auditors verify with one command and a
+    pinned public key. No API, no account.</p></div>
+    <div class="card"><h3>Honest threat model</h3><p>A single witness is a trust anchor,
+    not magic. The spec is open, multi-witness cosigning and Bitcoin anchoring are on
+    the roadmap, and the SECURITY.md says exactly what is and isn't proven.</p></div>
+  </div>
+
+  <h2>Why now</h2>
+  <p>EU AI Act Article 12 mandates automatic event recording for high-risk AI;
+  Articles 19/26 mandate retention. Financial and healthcare rules already demand
+  years of audit-grade logs. A log that can be silently rewritten has near-zero
+  evidentiary weight — independent witnessing is the cheapest way to fix that.</p>
+
+  <p class="fine">Built by the team behind the Crovia trust substrate — an Ed25519-signed,
+  Bitcoin-anchored public evidence ledger running continuously since 2026 with 220k+
+  signed records. Countersign is the product-shaped, open-protocol version of that
+  infrastructure. · info@croviatrust.com</p>
+</main>
+</body>
+</html>

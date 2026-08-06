@@ -1,0 +1,15 @@
+__pycache__/
+.venv*/
+venv/
+*.egg-info/
+.pytest_cache/
+dist/
+build/
+witness-log/
+*.key
+
+# internal strategy docs — never publish
+BUSINESS.md
+RESEARCH.md
+DISTRIBUTION.md
+LAUNCH.md
