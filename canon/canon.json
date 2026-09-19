@@ -314,11 +314,24 @@
       "values/{key_hex}.json",
       "ots/{epoch}.ots",
       "proofs/index.json",
-      "proofs/{slug}.seal.json"
+      "proofs/{slug}.seal.json",
+      "badges/{name}.json"
     ],
     "operator_pubkey_hex": "28d7faeb726187b05dec60bc744f8b055c719ba294815050e8b6831da5889712",
     "observer_pubkey_hex": "672c95c94ae6193d66d213611c98642443f0ac04c6f0e0fa2e52ba9dca55ea31",
     "issuer_id": "urn:crovia:seal-issuer:tacet",
-    "issuer_pubkey_hex": "628c15f65550e527a50b85a17b502010bc6c18e7249254483454e884eada837c"
+    "issuer_pubkey_hex": "628c15f65550e527a50b85a17b502010bc6c18e7249254483454e884eada837c",
+    "badges": {
+      "names": [
+        "epochs",
+        "models",
+        "negative",
+        "latest"
+      ],
+      "schema": "shields.io endpoint v1",
+      "source": "latest.json and targets.json, CANON §4 definitions",
+      "render": "https://img.shields.io/endpoint?url=<encoded badge URL>"
+    },
+    "browser_verifier": "/registry/seal/verify/?url=<proof URL under /registry/data/tacet/>"
   }
 }
