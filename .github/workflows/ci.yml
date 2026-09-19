@@ -67,8 +67,16 @@ jobs:
           EOF
       - name: Scripts compile
         run: |
-          python -m py_compile tools/audit_surfaces.py ops/phase0/*.py
-          bash -n ops/phase0/smoke_public_v2.sh ops/phase0/ots_stamp_substrate_root.sh
+          python -m py_compile tools/audit_surfaces.py
+          shopt -s nullglob
+          for f in ops/phase0/*.py; do python -m py_compile "$f"; done
+          for f in ops/phase0/*.sh site/deploy.sh; do bash -n "$f"; done
+          python - <<'EOF'
+          import json, pathlib
+          for f in pathlib.Path("site").rglob("*.json"):
+              json.loads(f.read_text())
+          print("site json ok")
+          EOF
 
   surface-audit:
     name: Live surface audit (report only)
