@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crovia-tacet-operator"
+version = "0.1.0"
+description = "Production operator for TACET: hourly epochs, signed surface snapshots, OTS anchoring, silence proofs as crovia.seal.v1"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Crovia Trust", email = "info@croviatrust.com" }]
+requires-python = ">=3.10"
+dependencies = ["crovia-tacet", "cryptography>=41.0.0"]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+tacet-operator = "tacet_operator.cli:main"
+
+[tool.setuptools]
+packages = ["tacet_operator", "tacet_operator.predicates"]

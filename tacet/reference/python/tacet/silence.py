@@ -71,20 +71,20 @@ def decode_paths(encoded: Dict[str, Any], epochs: Sequence[int]) -> List[List[by
 # ---------------------------------------------------------------------------
 
 def compute_silence(sheets: Sequence[Dict[str, Any]], observed_epochs: set) -> Dict[str, Any]:
-    """Silence accrues only across maximal runs of consecutive anchored epochs with a negative snapshot."""
+    """Silence is the sum of the durations of anchored epochs that carry a negative snapshot.
+
+    Epochs are contiguous hourly windows in normal operation, so this equals the
+    end-minus-start of each run of observed epochs; when sheets are separated by
+    a time gap (operator downtime) the gap is not counted, because no epoch
+    covers it.
+    """
     by_epoch = {s["epoch"]: s for s in sheets}
     total_seconds = 0
-    run_start: Optional[int] = None
-    ordered = [s["epoch"] for s in sheets]
-    for i, e in enumerate(ordered):
-        observed = e in observed_epochs
-        if observed and run_start is None:
-            run_start = e
-        last = i == len(ordered) - 1
-        if run_start is not None and (not observed or last):
-            run_end = e if observed else ordered[i - 1]
-            total_seconds += int((_ts(by_epoch[run_end]["epoch_end"]) - _ts(by_epoch[run_start]["epoch_start"])).total_seconds())
-            run_start = None
+    for e in observed_epochs:
+        s = by_epoch.get(e)
+        if s is None:
+            continue
+        total_seconds += int((_ts(s["epoch_end"]) - _ts(s["epoch_start"])).total_seconds())
     obs_sorted = sorted(observed_epochs)
     return {
         "map_epochs": len(sheets),

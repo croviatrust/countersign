@@ -308,13 +308,14 @@ is the minimum for any public statement about a target's disclosure.
 ```
 observed_epochs      = #{ e ∈ [from, to] : sheet(e).closed.status == "bitcoin"
                            ∧ ∃ negative snapshot s for target with s.epoch == e }
-silence_seconds      = Σ over maximal runs of consecutive observed epochs of
-                       (epoch_end(last) − epoch_start(first))
+silence_seconds      = Σ over observed epochs e of (epoch_end(e) − epoch_start(e))
 silence_days         = silence_seconds / 86400, rendered as a decimal string
 ```
 
 Epochs without a negative snapshot (observer down, surface unreachable,
 predicate error) contribute **nothing**. Unanchored epochs contribute nothing.
+Time between two sheets that no epoch covers (operator downtime; sheets may be
+separated in time, never in number) contributes nothing.
 `silence_days` therefore cannot grow while observation is paused, and a
 verifier can recompute it from the proof alone. `observed_to` MUST accompany
 every displayed silence figure.
