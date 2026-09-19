@@ -1,0 +1,14 @@
+{
+  "files": {
+    "invalid_001.json": "875beb27edd75c6a70dd2ca9ce22215c6cb64ecce61bc3153f59e3edb4e6fd34",
+    "map_001_primitives.json": "72c3e3d1e3bacf936417c8aa1b867e53abb3d4ff73d702ee64592e8c6afab514",
+    "sheets_001_chain.json": "892aff8fd276d8484d10e7b0fe2417070508195db664a16a27ce67732a373a9d",
+    "silence_001_level1.json": "aeb2228081592e7edff9647df9b23aa9276e9acc40ab3f34f174dc5c240094ea",
+    "silence_002_level2.json": "60447a9aefe1c2c506d7e14b5b143af3940d1149e1cf353d2145dacce43d33aa",
+    "silence_003_level3.json": "8b91551be189ee59cc5d4dde15a8c0dc9c899394388fc941c8c7eb6a7c7e4ce7",
+    "silence_004_before_disclosure.json": "49af9a15b75cafcbf260a2b506f3347f28a939eabbb2d4094dbefc41cb37d27a",
+    "snapshots_001_negative.json": "ff112e7e37ccf32a622f27f4c8a3154755a90ea811c2172292f0e4daa36261e9",
+    "wrapped_001_level3.json": "01a0123228d3df2ca02d94e663822dfbbeabcd49af748a4fde7910512f8fc0d5"
+  },
+  "vectors_version": "crovia.tacet.vectors.v1"
+}
