@@ -1,0 +1,43 @@
+name: Run an independent witness
+description: You want to fetch the same surfaces in the same epochs and countersign TACET sheets from your own infrastructure.
+title: "[witness] "
+labels: ["witness"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A level-3 silence proof needs at least one observer that is not Crovia. Witnesses fetch the epoch's
+        surfaces after the drand opening round, run the same predicate on their own bytes, and sign a
+        countersignature over the sheet root. Nothing is delegated: you keep your key, you publish your own log.
+  - type: input
+    id: who
+    attributes:
+      label: Organisation or person
+    validations:
+      required: true
+  - type: input
+    id: where
+    attributes:
+      label: Where the witness would run
+      placeholder: "cloud region / on-prem / university network — network position matters for independence"
+    validations:
+      required: true
+  - type: dropdown
+    id: coverage
+    attributes:
+      label: Coverage you can commit to
+      options:
+        - Every hourly epoch
+        - A subset of epochs (daily sample)
+        - Featured targets only
+    validations:
+      required: true
+  - type: input
+    id: key
+    attributes:
+      label: Ed25519 public key (hex) you intend to sign with
+      description: Optional now; required before the first countersignature is accepted into a proof.
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else

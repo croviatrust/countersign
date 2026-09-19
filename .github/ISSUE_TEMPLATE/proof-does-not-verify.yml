@@ -1,0 +1,39 @@
+name: A proof does not verify
+description: tacet-operator verify rejected a proof, or accepted one it should have rejected.
+title: "[verify] "
+labels: ["verifier"]
+body:
+  - type: input
+    id: proof
+    attributes:
+      label: Proof URL or file
+      placeholder: https://croviatrust.com/registry/data/tacet/proofs/<slug>.seal.json
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Verifier output
+      description: Paste the full output of `tacet-operator verify <file>` (add `--no-ots` if you ran it without the `ots` CLI).
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versions
+      placeholder: "countersign commit / crovia-tacet version / python version / ots-client version"
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of failure
+      options:
+        - Signature or canonical-encoding mismatch
+        - Non-inclusion proof does not reach the sheet root
+        - drand round does not open the epoch
+        - OpenTimestamps attestation not confirmed
+        - Predicate re-run gives a different verdict on the same bytes
+        - Verifier accepted something it should have rejected
+        - Other
+    validations:
+      required: true

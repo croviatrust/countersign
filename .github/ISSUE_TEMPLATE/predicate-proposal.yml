@@ -1,0 +1,44 @@
+name: Propose a predicate
+description: A new public predicate (what counts as "disclosure found" on a class of surfaces), or a false positive/negative in an existing one.
+title: "[predicate] "
+labels: ["predicate"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - New predicate for a surface class not covered today
+        - False negative — a real disclosure that crovia.pred.hf-card-training-data v1 misses
+        - False positive — text that v1 accepts as disclosure but is not one
+    validations:
+      required: true
+  - type: input
+    id: surface
+    attributes:
+      label: Example surface
+      placeholder: https://huggingface.co/<org>/<model>/raw/main/README.md
+    validations:
+      required: true
+  - type: textarea
+    id: bytes
+    attributes:
+      label: The exact bytes in question
+      description: Quote the passage. Predicates are evaluated on fetched bytes, not on your interpretation of the page.
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: rule
+    attributes:
+      label: Proposed rule
+      description: State it so that two independent implementations would return the same verdict. A predicate is a pure function of bytes; it may not call the network.
+    validations:
+      required: true
+  - type: checkboxes
+    id: ack
+    attributes:
+      label: Versioning
+      options:
+        - label: I understand a changed verdict requires a new predicate version; existing proofs stay valid under the version they name.
+          required: true

@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/croviatrust/countersign/blob/main/SECURITY.md
+    about: Forged epoch, false non-inclusion, predicate collision — email, do not open an issue.
+  - name: Live TACET log
+    url: https://croviatrust.com/registry/tacet/
+    about: Current epoch, observed models, featured proofs.
+  - name: Spec
+    url: https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md
+    about: TACET v0.1-draft. Read §8 before reporting a silence figure as wrong.
