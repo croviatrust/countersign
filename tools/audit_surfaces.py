@@ -70,8 +70,9 @@ DATA_PREFIX = "/registry/data/"
 REPO_ROOT = Path("/tmp/crovia")
 
 _CDN_EMAIL_RE = re.compile(
-    rb'<a href="/cdn-cgi/l/email-protection[^"]*"[^>]*>.*?</a>|<a href="mailto:[^"]*"[^>]*>.*?</a>'
+    rb'<a [^>]*href="/cdn-cgi/l/email-protection[^"]*"[^>]*>.*?</a>|<a [^>]*href="mailto:[^"]*"[^>]*>.*?</a>'
     rb'|<span class="__cf_email__"[^>]*>.*?</span>|<script data-cfasync="false" src="/cdn-cgi/scripts/[^"]*">\s*</script>'
+    rb'|<script[^>]*static\.cloudflareinsights\.com/beacon\.min\.js[^>]*>\s*</script>'
     rb'|info@croviatrust\.com|\s+', re.S)
 
 
