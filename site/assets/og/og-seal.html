@@ -1,0 +1,34 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+  html,body{margin:0;width:1200px;height:630px;background:#000;overflow:hidden}
+  body{font-family:'Inter',system-ui,sans-serif;color:#e4e8ee;position:relative}
+  .bg{position:absolute;inset:0;background:
+    radial-gradient(900px 520px at 88% 10%, rgba(30,197,255,.20), transparent 60%),
+    radial-gradient(700px 400px at 10% 100%, rgba(30,197,255,.10), transparent 60%),
+    #000}
+  .grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:60px 60px;mask-image:linear-gradient(180deg,rgba(0,0,0,.9),transparent 85%)}
+  .wrap{position:absolute;left:72px;top:64px;right:72px;bottom:56px}
+  .kicker{font:600 15px/1 'JetBrains Mono',monospace;letter-spacing:.32em;color:#1ec5ff;text-transform:uppercase}
+  h1{margin:34px 0 0;font:800 80px/1.02 'Inter';letter-spacing:-.035em;color:#fff;max-width:660px}
+  h1 em{font-style:normal;color:#1ec5ff}
+  .sub{margin-top:26px;font:400 26px/1.38 'Inter';color:#b9c1cc;max-width:640px}
+  .chips{position:absolute;left:0;bottom:84px;display:flex;gap:12px}
+  .chip{font:500 15px 'JetBrains Mono',monospace;color:#1ec5ff;border:1px solid rgba(30,197,255,.32);border-radius:999px;padding:9px 16px;background:rgba(30,197,255,.06)}
+  .foot{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:flex-end;border-top:1px solid rgba(30,197,255,.32);padding-top:16px}
+  .foot .l{font:400 17px 'Inter';color:#495162;font-style:italic}
+  .foot .r{font:500 17px 'JetBrains Mono',monospace;color:#b9c1cc}
+  .sheet{position:absolute;right:0;top:110px;width:330px;padding:18px 20px;border:1px solid rgba(30,197,255,.28);border-radius:14px;background:rgba(8,14,22,.85);font:500 14px/1.6 'JetBrains Mono',monospace;color:#b9c1cc;box-shadow:0 30px 80px rgba(0,0,0,.6)}
+  .sheet b{color:#1ec5ff;font-weight:500}
+  .sheet .ok{color:#3ddc97}
+</style></head><body>
+<div class="bg"></div><div class="grid"></div>
+<div class="wrap">
+  <div class="kicker">Crovia · Seal</div>
+  <h1>Crovia <em>Seal</em><br>crovia.seal.v1</h1>
+  <div class="sub">Tamper-evident, offline-verifiable receipts for AI outputs. IETF Internet-Draft, Python and TypeScript reference code.</div>
+  <div class="sheet">seal_version <b>crovia.seal.v1</b><br>issuer  urn:crovia:seal-issuer:<b>tacet</b><br>subject sha256:<b>d5524b9f</b>…<br>chain   seq 0 · prev <b>null</b><br>signature ed25519 · csc-1<br>verdict <span class="ok">VALID</span></div>
+  <div class="chips"><span class="chip">draft-crovia-seal</span><span class="chip">CSC-1</span><span class="chip">Ed25519</span><span class="chip">hash chain</span><span class="chip">witnesses</span></div>
+  <div class="foot"><div class="l">Every TACET proof is an unmodified Seal.</div><div class="r">croviatrust.com/registry/seal/</div></div>
+</div>
+</body></html>
