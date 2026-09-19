@@ -5,14 +5,14 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "countersign"
 version = "0.1.0"
-description = "Independent witnessing for AI agent evidence: append-only Merkle log, signed tree heads, offline-verifiable proofs."
+description = "countersign: CT-style witness log for AI evidence. Home of TACET — verifiable silence proofs for AI training-data disclosure (see tacet/)."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
-authors = [{ name = "Tarik En Nakhai" }]
+authors = [{ name = "Crovia Trust", email = "info@croviatrust.com" }]
 keywords = [
-  "ai-agents", "audit", "transparency-log", "merkle", "ed25519",
+  "ai-transparency", "training-data", "eu-ai-act", "tacet", "transparency-log", "merkle", "ed25519",
   "certificate-transparency", "evidence", "witness", "mcp", "compliance",
 ]
 classifiers = [

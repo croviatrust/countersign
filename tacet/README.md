@@ -22,11 +22,15 @@ tacet/
 ## What a silence proof says
 
 > Between drand round *r₁* (not before *T₁*) and Bitcoin block *b* (not after
-> *T₂*), the slot of `meta-llama/Llama-3.1-8B` in map `urn:crovia:tacet:map:disclosure`
-> was empty in every one of 2,124 consecutive epochs; in 2,117 of them, an
-> observer fetched the model card, ran predicate `crovia.pred.art53-summary@1.0.0`
-> and recorded a negative result bound to that epoch's beacon round; every
-> epoch head is countersigned by at least 2 of 3 named witnesses.
+> *T₂*), the slot of `<org>/<model>` in map `urn:crovia:tacet:map:disclosure`
+> was empty in every one of *N* consecutive epochs; in *M* of them, an
+> observer fetched the model card, ran predicate
+> `crovia.pred.hf-card-training-data@1.0.0` and recorded a negative result
+> bound to that epoch's beacon round; every epoch head is countersigned by at
+> least *k* of *n* named witnesses.
+
+(Illustrative wording of a level-3 proof. The live operator currently issues
+level-2 proofs; witnesses are the next milestone.)
 
 and, crucially, what it does **not** say: nothing about intent, nothing about
 surfaces that were not listed, nothing about epochs in which nobody looked.

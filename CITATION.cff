@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+message: "If you use TACET or cite Crovia's silence proofs, please cite this repository."
+title: "TACET: Verifiable Silence for AI Training Disclosure"
+type: software
+authors:
+  - name: "Crovia Trust"
+    email: info@croviatrust.com
+    website: https://croviatrust.com
+repository-code: https://github.com/croviatrust/countersign
+url: https://croviatrust.com/registry/tacet/
+license: Apache-2.0
+version: 0.1.0
+date-released: 2026-09-19
+keywords:
+  - AI transparency
+  - training data disclosure
+  - EU AI Act Article 53
+  - transparency log
+  - sparse Merkle tree
+  - proof of absence
+  - OpenTimestamps
+  - drand
+  - Ed25519
+abstract: >
+  TACET is a transparency-log protocol whose product is a portable, offline-verifiable
+  proof that no training-data disclosure was found on an AI model's public surfaces across
+  a range of hourly epochs, each opened by a drand randomness round and closed by a Bitcoin
+  block. Verdicts come from a public, versioned predicate over the fetched bytes; every
+  observation is signed; silence is the sum of anchored, observed epochs and never accrues
+  without observation. Proofs are delivered as unmodified crovia.seal.v1 objects.
+references:
+  - type: standard
+    title: "The Crovia Seal (draft-crovia-seal)"
+    url: https://datatracker.ietf.org/doc/draft-crovia-seal/
+    authors:
+      - name: "Crovia Trust"
