@@ -138,12 +138,15 @@
        The page then re-does <a href="https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md#85-verification" target="_blank" rel="noopener">SPEC §8.5</a>
        here: operator signatures and hash chain of every epoch sheet, the empty slot under each sheet's
        depth-256 sparse Merkle root, observer signatures and inclusion of every negative snapshot, and the
-       silence figure under the monotonicity rule. The one step a browser cannot do is the OpenTimestamps
-       Bitcoin attestation; <span class="mono">tacet-operator verify</span> does that.</p>
+       silence figure under the monotonicity rule. With network checks on it also does
+       <a href="https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md#86-checking-the-bitcoin-anchor-without-a-bitcoin-node" target="_blank" rel="noopener">§8.6</a>:
+       it parses each sheet's OpenTimestamps proof and matches its merkle root to the Bitcoin block header
+       from a public explorer. Same checks as <span class="mono">tacet-operator verify</span>; no Bitcoin node,
+       no <span class="mono">ots</span> client, no Crovia server trusted.</p>
     <div class="vf-row" style="margin-top:10px">
       <button class="vf-btn" id="btnTacet">Load a live TACET proof</button>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-soft);cursor:pointer">
-        <input type="checkbox" id="netChecks" checked> also check drand rounds against api.drand.sh and keys against the published trust root (network)
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text-soft);cursor:pointer;max-width:560px;line-height:1.45">
+        <input type="checkbox" id="netChecks" checked style="margin-top:3px"> <span>network checks: drand rounds against api.drand.sh, keys against the published trust root, and each .ots anchor against the Bitcoin block header (mempool.space / blockstream.info)</span>
       </label>
     </div>
   </div>

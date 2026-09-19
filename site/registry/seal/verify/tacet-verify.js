@@ -201,7 +201,8 @@
     const anchored = new Set(sheets.filter(s => s.closed.status === "bitcoin").map(s => s.epoch));
     const pending = sheets.length - anchored.size;
     note(anchored.size + " of " + sheets.length + " sheet(s) carry a Bitcoin attestation" + (pending ? " (" + pending + " pending)" : ""),
-         "the OpenTimestamps proof itself is not checked in the browser — run `tacet-operator verify` for that step");
+         opts.network ? "each .ots proof is parsed and matched to its Bitcoin block header in the network checks below (SPEC §8.6)"
+                      : "enable network checks to parse each .ots proof and match it to its Bitcoin block header (SPEC §8.6); offline, the anchors are taken as claimed");
 
     hdr("— non-inclusion of the target slot in every epoch");
     const E = await emptyTable();
