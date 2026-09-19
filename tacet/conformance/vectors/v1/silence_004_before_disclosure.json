@@ -115,7 +115,7 @@
     "sheets": [
       {
         "closed": {
-          "anchored_digest": "sha256:47df4c80c58ae8e0fde07ae8003323aef389db239d8b17fc45f532e320d50322",
+          "anchored_digest": "sha256:f20e70e5900cc3f9bddf766634136118eff6d207076aa3afd87dda8f8956956e",
           "block_height": 956000,
           "block_time": "2026-09-19T01:40:00Z",
           "kind": "ots",
@@ -130,7 +130,7 @@
           "chain_hash": "8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce",
           "kind": "drand",
           "randomness": "b031d753cee014e8a74da261a54481a6d6d19ea64cbc15e0b00b0ed6b9461e69",
-          "round": 1000000,
+          "round": 6478166,
           "signature": "4c33e15d4eaf568339a75bddef10fac5d6071cb5bf04b9cbcc7d405a2e8d52c53cbcf75747f832adbf01a4a290d7ea21043dd2c3964447a3b2e7089e45a04787"
         },
         "operator": {
@@ -146,14 +146,14 @@
         "signature": {
           "alg": "ed25519",
           "domain": "TACET-EPOCH-v1",
-          "sig_hex": "d2f8a262acdb470e7dead48bbcd65acbc5e6cad26e1d48ce247db43a054b8ec297c19faf2703188fddb886ddfc0066e6bcb1bb4620bb7c573713781a710dd10c"
+          "sig_hex": "4b5c9305e1de12395a98ae539420258c909aa1b91d690f8c520920275a23cb2dd3977f52ab6223a3893268385aea768ed9f98281422f65a1544829e8462b3707"
         },
         "size": 20,
-        "snapshots_root": "sha256:60e94c7bbe3b67449591267486a20d1867043fe820985ccc5f2edb056897a0c4"
+        "snapshots_root": "sha256:38a2093fc3c38f96d78e826309990af9cca675f5eccc358185fe3ab63108def6"
       },
       {
         "closed": {
-          "anchored_digest": "sha256:625fc846c5b552582e35e586f208394b08259e109efdd2e4166c0d87b2f8fc70",
+          "anchored_digest": "sha256:7282633fa08defaefa993f932de4bda1ff36afd95cfac41ecb5e45e643c0e709",
           "block_height": 956001,
           "block_time": "2026-09-19T02:40:00Z",
           "kind": "ots",
@@ -168,7 +168,7 @@
           "chain_hash": "8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce",
           "kind": "drand",
           "randomness": "83b903f14682a9f228f094ab30deb28a9ba8ee3260d88ccac4a156409d38b47d",
-          "round": 1001200,
+          "round": 6478286,
           "signature": "209fc107540ab96fbfadc8abc71e881dc4928035ef1f7d785af47d7521bf9f912d3fc5e88d6d3cd428fcc6691cadc59cb8b2303fd62e96e5814c376a027cf84c"
         },
         "operator": {
@@ -178,20 +178,20 @@
             "key_hex": "c88d1afc2ba507fb200380067a38cd3754f2489544028cc9134f1cee1f9223b9"
           }
         },
-        "prev_sheet_hash": "sha256:47df4c80c58ae8e0fde07ae8003323aef389db239d8b17fc45f532e320d50322",
+        "prev_sheet_hash": "sha256:f20e70e5900cc3f9bddf766634136118eff6d207076aa3afd87dda8f8956956e",
         "root": "sha256:86f38324d791670fd4849d253f5cb0e5ed3fe50270a689fae3e566db2e856789",
         "sheet_version": "crovia.tacet.epoch.v1",
         "signature": {
           "alg": "ed25519",
           "domain": "TACET-EPOCH-v1",
-          "sig_hex": "eca09e61efcbd4165cc394ced406ff4c5508eee47376f0c41507b33dbb180e120003575d1a8f0fc658645f20cb50ac2bd37c176520a2c798a0087d9349b1f103"
+          "sig_hex": "33ebd70d13c497bdac7bd3a8577521052cab40ff11ba71c8f887925bd84a016740483efc699b26ad409989e71230eed79a3e7688e0437f07039adee08507210e"
         },
         "size": 20,
-        "snapshots_root": "sha256:d6d00b9318c78d0ea95a7eb660382a40d28abe821c5ed488ad6fd58c09f43aa4"
+        "snapshots_root": "sha256:8f66044f9d9f63b5253b867c99c5dc50e63a46058b3f3f1e191486aa7f3e022e"
       },
       {
         "closed": {
-          "anchored_digest": "sha256:125539bf192b349d37cd47854e86de3746ccbd887fb6dad43c387ad89ec1cabe",
+          "anchored_digest": "sha256:5a4d49c41042f74bef31c1e1bdbd14f67c03d525217c6891ee5be396120fb597",
           "block_height": 956002,
           "block_time": "2026-09-19T03:40:00Z",
           "kind": "ots",
@@ -206,7 +206,7 @@
           "chain_hash": "8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce",
           "kind": "drand",
           "randomness": "add655f95597de11aa55e246f888ff36a7111a16a98e72f49eb2cf7e3b392acb",
-          "round": 1002400,
+          "round": 6478406,
           "signature": "f95de5e8e71b286fc18f16d4e398bc213ba2c2191075cd5e77c0d6ea75792b671b24f365b7a194201b5e134a9aa6702017b16ed5b01c92780ed36dc176dcdb2b"
         },
         "operator": {
@@ -216,20 +216,20 @@
             "key_hex": "c88d1afc2ba507fb200380067a38cd3754f2489544028cc9134f1cee1f9223b9"
           }
         },
-        "prev_sheet_hash": "sha256:625fc846c5b552582e35e586f208394b08259e109efdd2e4166c0d87b2f8fc70",
+        "prev_sheet_hash": "sha256:7282633fa08defaefa993f932de4bda1ff36afd95cfac41ecb5e45e643c0e709",
         "root": "sha256:9fc468a2c2b589a4f7bfc983349789f78da7bfe2b7f2925e642320d928535eff",
         "sheet_version": "crovia.tacet.epoch.v1",
         "signature": {
           "alg": "ed25519",
           "domain": "TACET-EPOCH-v1",
-          "sig_hex": "a1efc093da02943c603b88220a90cdcca7adecd967dbba1e750af8c480867fd455670ec7a3c100bc5e67b23d5ac17a2184eb02a469b328760708fd1cbfd22f08"
+          "sig_hex": "49bea073575ebbdef0fcba09cb5653b481c86cc2aeb955971d616f33e5b25abee8c11a361b7f5599fe32b77ce5419aee821cfab8356ea282a44d8127e8465a01"
         },
         "size": 21,
-        "snapshots_root": "sha256:0db89172e8231aa146dd461ab9282db9238020351c685aaac82293e0d55313b1"
+        "snapshots_root": "sha256:e4fc62d5321e456c91aa8296d2f688f5c908c24ca2b08b7c80dc3cd4bdb71647"
       },
       {
         "closed": {
-          "anchored_digest": "sha256:95950e855fcf649edf735001e01773631acc266635ba36d50672e11ca801efb3",
+          "anchored_digest": "sha256:d2682c88d803b89b9acce6d94e090e9065d0681b8f219612dd4663db13c9f58e",
           "block_height": 956003,
           "block_time": "2026-09-19T04:40:00Z",
           "kind": "ots",
@@ -244,7 +244,7 @@
           "chain_hash": "8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce",
           "kind": "drand",
           "randomness": "105ecafa13e92d9460527f45247f3acdf7920e8c7d90d944eb049c1220de3b4f",
-          "round": 1003600,
+          "round": 6478526,
           "signature": "40e987725c8fe650a5367a91df527a82ef719c37b9d863609f85dde225fa275a3a9993dc9c5fedfa06beaeb6c3e561521bd97c5648c48d710a4de9a13965d9e1"
         },
         "operator": {
@@ -254,20 +254,20 @@
             "key_hex": "c88d1afc2ba507fb200380067a38cd3754f2489544028cc9134f1cee1f9223b9"
           }
         },
-        "prev_sheet_hash": "sha256:125539bf192b349d37cd47854e86de3746ccbd887fb6dad43c387ad89ec1cabe",
+        "prev_sheet_hash": "sha256:5a4d49c41042f74bef31c1e1bdbd14f67c03d525217c6891ee5be396120fb597",
         "root": "sha256:9fc468a2c2b589a4f7bfc983349789f78da7bfe2b7f2925e642320d928535eff",
         "sheet_version": "crovia.tacet.epoch.v1",
         "signature": {
           "alg": "ed25519",
           "domain": "TACET-EPOCH-v1",
-          "sig_hex": "b0ca8f4dfddf1849fcbaeef1865284009dddb52804c3094e8d57ba0c970ef9c54e7f640904e2dd8310926a2dcbaadc208afbc0594435e4ad777072e055c5ee0b"
+          "sig_hex": "39cb77e39b7cc8dad96e9b69f812a933031fe0bbe01a7c6d9c475c001afb57216d7c89185be876b20990f99bcad84b2bd2855bddb106a8433e4aad3c0ee3c804"
         },
         "size": 21,
-        "snapshots_root": "sha256:833b33206935fabfadff4621ab6098ada45c0a83d54f6b2406b67dc4f1d3ffad"
+        "snapshots_root": "sha256:47a5bb12cc45db830ef2cfa8af9c7e874f226a855f25f24b3d87a4766520e893"
       },
       {
         "closed": {
-          "anchored_digest": "sha256:e59ef1024480699f745b99905b74a65024cbdf14ee5f7e98afbc3e20cc9024ff",
+          "anchored_digest": "sha256:403f60d8e3ad60a07bde13824f81aa0b951091c1d283abd2595e5f8b459e7870",
           "block_height": 956004,
           "block_time": "2026-09-19T05:40:00Z",
           "kind": "ots",
@@ -282,7 +282,7 @@
           "chain_hash": "8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce",
           "kind": "drand",
           "randomness": "35e9a236f10db19ce5118f347cc2e0a21305a0a70e17500bd3bcadf5364f1328",
-          "round": 1004800,
+          "round": 6478646,
           "signature": "cc24542c50edcc3f69958a97cbb693c8c8bd58a7eb66f064358e5f8ccc5a84015140049fb7522f63c3ceb1f188cdd6cfbf9ac3c8b78bda1d6aa356a97d2bcab6"
         },
         "operator": {
@@ -292,16 +292,16 @@
             "key_hex": "c88d1afc2ba507fb200380067a38cd3754f2489544028cc9134f1cee1f9223b9"
           }
         },
-        "prev_sheet_hash": "sha256:95950e855fcf649edf735001e01773631acc266635ba36d50672e11ca801efb3",
+        "prev_sheet_hash": "sha256:d2682c88d803b89b9acce6d94e090e9065d0681b8f219612dd4663db13c9f58e",
         "root": "sha256:9fc468a2c2b589a4f7bfc983349789f78da7bfe2b7f2925e642320d928535eff",
         "sheet_version": "crovia.tacet.epoch.v1",
         "signature": {
           "alg": "ed25519",
           "domain": "TACET-EPOCH-v1",
-          "sig_hex": "e15ae3708e818fe75a1df304048a082954eca56a1d7e00cdab63bafa4506243310e8b9d9a594add0e6e01bf574888391cc7769953f17b9bb55e3aca1f309a10c"
+          "sig_hex": "018271ca1111efaf98e729c76d80f53e601981fe740f8e0f42a2b164b19ef6e683728f569f7f26055635e11ad601b368f699404ce129eb8ad94dcbd2e44d4d0f"
         },
         "size": 21,
-        "snapshots_root": "sha256:316c5d8bc643f901b99a508110439d6e06f80293eadd8a251f10e1a77b22f8bb"
+        "snapshots_root": "sha256:6013755035c3cc16dbce2ffa47df820d685afbeed9b264371901eba4d8421e42"
       }
     ],
     "silence": {

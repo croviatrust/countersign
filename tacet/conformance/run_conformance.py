@@ -81,6 +81,16 @@ def main() -> int:
     except ImportError:
         print("  [SKIP] wrapped bundle (crovia_seal reference not installed)")
 
+    try:
+        import crovia_seal  # noqa: F401
+        for name, vec in load("wrapped_002_invalid.json").items():
+            res = verify_wrapped({"seal": vec["seal"], "query": vec["query"], "proof": vec["proof"]})
+            case(f"wrapped invalid/{name}: Seal valid, bundle rejected",
+                 res["seal_ok"] and not res["ok"] and any(vec["expect_error_contains"] in e for e in res["errors"]),
+                 "; ".join(res["errors"]) or "accepted")
+    except ImportError:
+        print("  [SKIP] wrapped invalid bundles (crovia_seal reference not installed)")
+
     inv = load("invalid_001.json")
     for name, vec in inv.items():
         r = verify_silence_proof(vec["proof"])

@@ -1,5 +1,9 @@
 {
   "insufficient_witnesses": {
+    "expect": {
+      "ok": false,
+      "seal_ok": true
+    },
     "expect_error_contains": "need 3",
     "proof": {
       "from_epoch": 0,
@@ -1187,9 +1191,71 @@
           }
         ]
       }
+    },
+    "query": {
+      "from_epoch": 0,
+      "map_id": "urn:crovia:tacet:map:disclosure",
+      "min_strength": 3,
+      "query_version": "crovia.tacet.query.v1",
+      "target_id": "meta-llama/Llama-3.1-8B",
+      "to_epoch": 11
+    },
+    "seal": {
+      "chain": {
+        "prev_seal_hash": null,
+        "sequence": 0
+      },
+      "checks": {
+        "tacet": {
+          "observed_to": "2026-09-19T11:00:00Z",
+          "silence_days": "0.33",
+          "strength": 3
+        }
+      },
+      "generator": {
+        "id": "crovia/tacet",
+        "params": {
+          "epochs": "0-11",
+          "map_id": "urn:crovia:tacet:map:disclosure",
+          "strength": "3"
+        },
+        "version": "0.1.0",
+        "weights_hash": null
+      },
+      "issuer": {
+        "id": "urn:crovia:seal-issuer:fixture",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "f8a66040542a0fd2b2549d15fb52dc995d9cc357a5e24e9fbf1b0a11af0caa65"
+        }
+      },
+      "seal_id": "cs_2026_TACETCONFORMANCEINVALIDAAA",
+      "seal_version": "crovia.seal.v1",
+      "signature": {
+        "alg": "ed25519",
+        "canon": "csc-1",
+        "domain": "CROVIA-SEAL-v1",
+        "payload_hash_alg": "sha256",
+        "sig_hex": "59b2d206b49c6174f500ae5874d056981bf009da9ae04072fda6800bdcd8b0a6f5d8473c4f2dce3aa1377259024727489afee63dfda2f9120b4861d340fb9309"
+      },
+      "subject": {
+        "input_hash": "sha256:57dc03b1ef9196fec631cca1a9fb735762610fd3c6db461350ea2bbb58fc1772",
+        "input_len": 168,
+        "modality": "text",
+        "output_hash": "sha256:c6e198ddf6cce42db9172b0515e2e4d5ceaae14559c223c17aa7e25867eb8fa2",
+        "output_len": 37754
+      },
+      "timestamp": {
+        "emitted_at": "2026-09-19T12:00:00.000Z",
+        "nonce": "TACETCONFORMANCEINVALIDAAA"
+      }
     }
   },
   "key_target_mismatch": {
+    "expect": {
+      "ok": false,
+      "seal_ok": true
+    },
     "expect_error_contains": "key does not match",
     "proof": {
       "from_epoch": 0,
@@ -2079,9 +2145,71 @@
       "target_id": "vendor30/model-30",
       "to_epoch": 11,
       "witnesses": {}
+    },
+    "query": {
+      "from_epoch": 0,
+      "map_id": "urn:crovia:tacet:map:disclosure",
+      "min_strength": 2,
+      "query_version": "crovia.tacet.query.v1",
+      "target_id": "vendor30/model-30",
+      "to_epoch": 11
+    },
+    "seal": {
+      "chain": {
+        "prev_seal_hash": null,
+        "sequence": 0
+      },
+      "checks": {
+        "tacet": {
+          "observed_to": "2026-09-19T11:00:00Z",
+          "silence_days": "0.33",
+          "strength": 2
+        }
+      },
+      "generator": {
+        "id": "crovia/tacet",
+        "params": {
+          "epochs": "0-11",
+          "map_id": "urn:crovia:tacet:map:disclosure",
+          "strength": "2"
+        },
+        "version": "0.1.0",
+        "weights_hash": null
+      },
+      "issuer": {
+        "id": "urn:crovia:seal-issuer:fixture",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "f8a66040542a0fd2b2549d15fb52dc995d9cc357a5e24e9fbf1b0a11af0caa65"
+        }
+      },
+      "seal_id": "cs_2026_TACETCONFORMANCEINVALIDBAA",
+      "seal_version": "crovia.seal.v1",
+      "signature": {
+        "alg": "ed25519",
+        "canon": "csc-1",
+        "domain": "CROVIA-SEAL-v1",
+        "payload_hash_alg": "sha256",
+        "sig_hex": "c3b4008883baa3021a1d686da4298a605da386fe874f9e092f508c3fbb9f697fe9abe60ce43d1f12c9ee47ff87e62afd5a8836bcd4822e9f9ccf5da5e0f8370b"
+      },
+      "subject": {
+        "input_hash": "sha256:6e8cde47db4653549e9d34962764c75cbf5416b358c4dbf74d666a277b6b6d34",
+        "input_len": 162,
+        "modality": "text",
+        "output_hash": "sha256:690aefbbff0609cffbd15a4ef188ff3ca5b2356558d48a5d8cc32890c5c76d87",
+        "output_len": 27369
+      },
+      "timestamp": {
+        "emitted_at": "2026-09-19T12:00:00.000Z",
+        "nonce": "TACETCONFORMANCEINVALIDBAA"
+      }
     }
   },
   "missing_sheet": {
+    "expect": {
+      "ok": false,
+      "seal_ok": true
+    },
     "expect_error_contains": "gap",
     "proof": {
       "from_epoch": 0,
@@ -3231,9 +3359,71 @@
           }
         ]
       }
+    },
+    "query": {
+      "from_epoch": 0,
+      "map_id": "urn:crovia:tacet:map:disclosure",
+      "min_strength": 3,
+      "query_version": "crovia.tacet.query.v1",
+      "target_id": "meta-llama/Llama-3.1-8B",
+      "to_epoch": 11
+    },
+    "seal": {
+      "chain": {
+        "prev_seal_hash": null,
+        "sequence": 0
+      },
+      "checks": {
+        "tacet": {
+          "observed_to": "2026-09-19T11:00:00Z",
+          "silence_days": "0.33",
+          "strength": 3
+        }
+      },
+      "generator": {
+        "id": "crovia/tacet",
+        "params": {
+          "epochs": "0-11",
+          "map_id": "urn:crovia:tacet:map:disclosure",
+          "strength": "3"
+        },
+        "version": "0.1.0",
+        "weights_hash": null
+      },
+      "issuer": {
+        "id": "urn:crovia:seal-issuer:fixture",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "f8a66040542a0fd2b2549d15fb52dc995d9cc357a5e24e9fbf1b0a11af0caa65"
+        }
+      },
+      "seal_id": "cs_2026_TACETCONFORMANCEINVALIDCAA",
+      "seal_version": "crovia.seal.v1",
+      "signature": {
+        "alg": "ed25519",
+        "canon": "csc-1",
+        "domain": "CROVIA-SEAL-v1",
+        "payload_hash_alg": "sha256",
+        "sig_hex": "ea4decef442ac89bcaa9fec58f706adcb35fc37ff9a60d6c7d1fcb4b66deb9fb903abfd698e3be1874e4dbab7d3c201b783b9e214e00964159e8fefc82ef2a0a"
+      },
+      "subject": {
+        "input_hash": "sha256:57dc03b1ef9196fec631cca1a9fb735762610fd3c6db461350ea2bbb58fc1772",
+        "input_len": 168,
+        "modality": "text",
+        "output_hash": "sha256:e5c5bf5205f94160cca5592ab4e7a5b53eeacf4844e5310b6fd2078c72b754b9",
+        "output_len": 36386
+      },
+      "timestamp": {
+        "emitted_at": "2026-09-19T12:00:00.000Z",
+        "nonce": "TACETCONFORMANCEINVALIDCAA"
+      }
     }
   },
   "overstated_silence": {
+    "expect": {
+      "ok": false,
+      "seal_ok": true
+    },
     "expect_error_contains": "monotonicity",
     "proof": {
       "from_epoch": 0,
@@ -4123,9 +4313,71 @@
       "target_id": "meta-llama/Llama-3.1-8B",
       "to_epoch": 11,
       "witnesses": {}
+    },
+    "query": {
+      "from_epoch": 0,
+      "map_id": "urn:crovia:tacet:map:disclosure",
+      "min_strength": 2,
+      "query_version": "crovia.tacet.query.v1",
+      "target_id": "meta-llama/Llama-3.1-8B",
+      "to_epoch": 11
+    },
+    "seal": {
+      "chain": {
+        "prev_seal_hash": null,
+        "sequence": 0
+      },
+      "checks": {
+        "tacet": {
+          "observed_to": "2026-09-19T11:00:00Z",
+          "silence_days": "0.50",
+          "strength": 2
+        }
+      },
+      "generator": {
+        "id": "crovia/tacet",
+        "params": {
+          "epochs": "0-11",
+          "map_id": "urn:crovia:tacet:map:disclosure",
+          "strength": "2"
+        },
+        "version": "0.1.0",
+        "weights_hash": null
+      },
+      "issuer": {
+        "id": "urn:crovia:seal-issuer:fixture",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "f8a66040542a0fd2b2549d15fb52dc995d9cc357a5e24e9fbf1b0a11af0caa65"
+        }
+      },
+      "seal_id": "cs_2026_TACETCONFORMANCEINVALIDDAA",
+      "seal_version": "crovia.seal.v1",
+      "signature": {
+        "alg": "ed25519",
+        "canon": "csc-1",
+        "domain": "CROVIA-SEAL-v1",
+        "payload_hash_alg": "sha256",
+        "sig_hex": "a0b16a97f336fffdc1352f931459724a194e034258ed4fddb1951581c54d5a4f7c6caa7be9bc5373f8b7c0edfcee47ad1654ec296a68bff0b82081d2a7f8ec0c"
+      },
+      "subject": {
+        "input_hash": "sha256:8d1cf12b38c851e65aa2d3cb8604b2af1f21911280c950e2a4d1284aaf3f708a",
+        "input_len": 168,
+        "modality": "text",
+        "output_hash": "sha256:60ad4244054bfc14d99756068e6321a2c02630228396453a99100ece443dc964",
+        "output_len": 27375
+      },
+      "timestamp": {
+        "emitted_at": "2026-09-19T12:00:00.000Z",
+        "nonce": "TACETCONFORMANCEINVALIDDAA"
+      }
     }
   },
   "tampered_delta": {
+    "expect": {
+      "ok": false,
+      "seal_ok": true
+    },
     "expect_error_contains": "non-inclusion fails",
     "proof": {
       "from_epoch": 0,
@@ -5308,9 +5560,71 @@
           }
         ]
       }
+    },
+    "query": {
+      "from_epoch": 0,
+      "map_id": "urn:crovia:tacet:map:disclosure",
+      "min_strength": 3,
+      "query_version": "crovia.tacet.query.v1",
+      "target_id": "meta-llama/Llama-3.1-8B",
+      "to_epoch": 11
+    },
+    "seal": {
+      "chain": {
+        "prev_seal_hash": null,
+        "sequence": 0
+      },
+      "checks": {
+        "tacet": {
+          "observed_to": "2026-09-19T11:00:00Z",
+          "silence_days": "0.33",
+          "strength": 3
+        }
+      },
+      "generator": {
+        "id": "crovia/tacet",
+        "params": {
+          "epochs": "0-11",
+          "map_id": "urn:crovia:tacet:map:disclosure",
+          "strength": "3"
+        },
+        "version": "0.1.0",
+        "weights_hash": null
+      },
+      "issuer": {
+        "id": "urn:crovia:seal-issuer:fixture",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "f8a66040542a0fd2b2549d15fb52dc995d9cc357a5e24e9fbf1b0a11af0caa65"
+        }
+      },
+      "seal_id": "cs_2026_TACETCONFORMANCEINVALIDEAA",
+      "seal_version": "crovia.seal.v1",
+      "signature": {
+        "alg": "ed25519",
+        "canon": "csc-1",
+        "domain": "CROVIA-SEAL-v1",
+        "payload_hash_alg": "sha256",
+        "sig_hex": "7ca31efe1e83b46676e40311cfe9c80f646699ea66574144a5f05d4eead030c9ee3fa169f04f2be4b609163423d3fcebd8bda4db03dbabc9389025666148f207"
+      },
+      "subject": {
+        "input_hash": "sha256:57dc03b1ef9196fec631cca1a9fb735762610fd3c6db461350ea2bbb58fc1772",
+        "input_len": 168,
+        "modality": "text",
+        "output_hash": "sha256:f746be3edb75f6ecd14766644fd61a3eaf91702cf15f747237d988df39391c7f",
+        "output_len": 37682
+      },
+      "timestamp": {
+        "emitted_at": "2026-09-19T12:00:00.000Z",
+        "nonce": "TACETCONFORMANCEINVALIDEAA"
+      }
     }
   },
   "tampered_root": {
+    "expect": {
+      "ok": false,
+      "seal_ok": true
+    },
     "expect_error_contains": "signature invalid",
     "proof": {
       "from_epoch": 0,
@@ -6497,6 +6811,64 @@
             "sig_hex": "d15f28ddddd72a31ef3f3d8b2372d2a34fe299a2d403762eafa7b6c390801521c96f00d3aff4d183a08d0ada20cf0109340a2d43fc86c88e4148304ccbb9b608"
           }
         ]
+      }
+    },
+    "query": {
+      "from_epoch": 0,
+      "map_id": "urn:crovia:tacet:map:disclosure",
+      "min_strength": 3,
+      "query_version": "crovia.tacet.query.v1",
+      "target_id": "meta-llama/Llama-3.1-8B",
+      "to_epoch": 11
+    },
+    "seal": {
+      "chain": {
+        "prev_seal_hash": null,
+        "sequence": 0
+      },
+      "checks": {
+        "tacet": {
+          "observed_to": "2026-09-19T11:00:00Z",
+          "silence_days": "0.33",
+          "strength": 3
+        }
+      },
+      "generator": {
+        "id": "crovia/tacet",
+        "params": {
+          "epochs": "0-11",
+          "map_id": "urn:crovia:tacet:map:disclosure",
+          "strength": "3"
+        },
+        "version": "0.1.0",
+        "weights_hash": null
+      },
+      "issuer": {
+        "id": "urn:crovia:seal-issuer:fixture",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "f8a66040542a0fd2b2549d15fb52dc995d9cc357a5e24e9fbf1b0a11af0caa65"
+        }
+      },
+      "seal_id": "cs_2026_TACETCONFORMANCEINVALIDFAA",
+      "seal_version": "crovia.seal.v1",
+      "signature": {
+        "alg": "ed25519",
+        "canon": "csc-1",
+        "domain": "CROVIA-SEAL-v1",
+        "payload_hash_alg": "sha256",
+        "sig_hex": "d2424cd3782a35c18db85f76ecf7742e2dd5d9167d0b587ac4c77002ff60a719b5c072f1ee0a136173ba8f845e2defedf5fad6cc2953309406f82f60ccbfc000"
+      },
+      "subject": {
+        "input_hash": "sha256:57dc03b1ef9196fec631cca1a9fb735762610fd3c6db461350ea2bbb58fc1772",
+        "input_len": 168,
+        "modality": "text",
+        "output_hash": "sha256:8f934e8ec6f505ff72ffbac0ab31d1b63c3f510a527788a3098a6970940d9cc0",
+        "output_len": 37754
+      },
+      "timestamp": {
+        "emitted_at": "2026-09-19T12:00:00.000Z",
+        "nonce": "TACETCONFORMANCEINVALIDFAA"
       }
     }
   }

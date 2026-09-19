@@ -128,6 +128,24 @@
     <div class="vf-steps" id="steps"></div>
   </div>
 
+  <div class="vf-sec" id="tacetSec">
+    <h2>Verify a TACET silence proof</h2>
+    <p>A TACET proof is a <span class="mono">crovia.seal.v1</span> wrapped around a
+       <span class="mono">crovia.tacet.silence.v1</span> object. Paste the whole file
+       (<span class="mono">{"seal":…,"query":…,"proof":…}</span>) above, or load one from the live log.
+       The page then re-does <a href="https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md#85-verification" target="_blank" rel="noopener">SPEC §8.5</a>
+       here: operator signatures and hash chain of every epoch sheet, the empty slot under each sheet's
+       depth-256 sparse Merkle root, observer signatures and inclusion of every negative snapshot, and the
+       silence figure under the monotonicity rule. The one step a browser cannot do is the OpenTimestamps
+       Bitcoin attestation; <span class="mono">tacet-operator verify</span> does that.</p>
+    <div class="vf-row" style="margin-top:10px">
+      <button class="vf-btn" id="btnTacet">Load a live TACET proof</button>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-soft);cursor:pointer">
+        <input type="checkbox" id="netChecks" checked> also check drand rounds against api.drand.sh and keys against the published trust root (network)
+      </label>
+    </div>
+  </div>
+
   <div class="vf-sec">
     <h2>Have the original AI output?</h2>
     <p>A seal never carries content — only hash commitments. Paste the exact output
@@ -153,157 +171,10 @@
   </div>
 </main>
 
+<script src="/registry/seal/verify/seal-core.js?v=20260919d"></script>
+<script src="/registry/seal/verify/tacet-verify.js?v=20260919d"></script>
 <script>
 "use strict";
-
-/* ------------------------------------------------------------------ *
- *  CSC-1 canonicalization (strict subset of RFC 8785; floats forbidden)
- * ------------------------------------------------------------------ */
-function csc1(value) {
-  if (value === null) return "null";
-  const t = typeof value;
-  if (t === "boolean") return value ? "true" : "false";
-  if (t === "number") {
-    if (!Number.isInteger(value)) throw new Error("NonCanonicalNumber: floats are forbidden in signed payloads");
-    if (Math.abs(value) > Number.MAX_SAFE_INTEGER) throw new Error("NonCanonicalNumber: outside ±(2^53-1)");
-    if (Object.is(value, -0)) throw new Error("NonCanonicalNumber: -0");
-    return String(value);
-  }
-  if (t === "string") return canonString(value);
-  if (Array.isArray(value)) return "[" + value.map(csc1).join(",") + "]";
-  if (t === "object") {
-    const keys = Object.keys(value).sort(); // default sort = UTF-16 code units
-    return "{" + keys.map(k => canonString(k) + ":" + csc1(value[k])).join(",") + "}";
-  }
-  throw new Error("unsupported type " + t);
-}
-function canonString(s) {
-  let out = '"';
-  for (const ch of s) {
-    const c = ch.codePointAt(0);
-    if (ch === '"') out += '\\"';
-    else if (ch === "\\") out += "\\\\";
-    else if (c === 8) out += "\\b";
-    else if (c === 12) out += "\\f";
-    else if (c === 10) out += "\\n";
-    else if (c === 13) out += "\\r";
-    else if (c === 9) out += "\\t";
-    else if (c < 0x20) out += "\\u" + c.toString(16).padStart(4, "0");
-    else out += ch;
-  }
-  return out + '"';
-}
-
-/* ------------------------------------------------------------------ *
- *  Crypto helpers: WebCrypto Ed25519, noble-ed25519 fallback
- * ------------------------------------------------------------------ */
-const enc = new TextEncoder();
-function hexToBytes(hex) {
-  if (!/^[0-9a-f]*$/.test(hex) || hex.length % 2) throw new Error("invalid hex");
-  const out = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
-  return out;
-}
-async function sha256hex(bytes) {
-  const d = await crypto.subtle.digest("SHA-256", bytes);
-  return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, "0")).join("");
-}
-let _noble = null;
-async function ed25519Verify(sigBytes, msgBytes, pubBytes) {
-  try {
-    const key = await crypto.subtle.importKey("raw", pubBytes, { name: "Ed25519" }, false, ["verify"]);
-    return await crypto.subtle.verify("Ed25519", key, sigBytes, msgBytes);
-  } catch (_) {
-    if (!_noble) _noble = await import("./noble-ed25519.js");
-    return await _noble.verifyAsync(sigBytes, msgBytes, pubBytes);
-  }
-}
-
-/* ------------------------------------------------------------------ *
- *  Seal verification (fail-closed, per SPEC v0.5 / draft-crovia-seal-01)
- * ------------------------------------------------------------------ */
-const KNOWN = ["seal_version","seal_id","issuer","subject","generator","timestamp","chain","checks","anchor","signature","witnesses"];
-const ID_RE = /^cs_[0-9]{4}_[A-Z2-7]{26}$/;
-
-async function payloadOf(seal) {
-  const stripped = {};
-  for (const k of Object.keys(seal)) if (k !== "signature" && k !== "witnesses") stripped[k] = seal[k];
-  const canon = csc1(stripped);
-  const canonBytes = enc.encode(canon);
-  const payload = new Uint8Array(15 + canonBytes.length);
-  payload.set(enc.encode("CROVIA-SEAL-v1"), 0);
-  payload[14] = 0x0A;
-  payload.set(canonBytes, 15);
-  return payload;
-}
-
-async function verifySeal(seal, steps) {
-  const step = (ok, label, det) => { steps.push({ ok, label, det }); if (!ok) throw new Error(label); };
-
-  const unknown = Object.keys(seal).filter(k => !KNOWN.includes(k));
-  step(unknown.length === 0, "no unknown top-level fields (fail-closed)", unknown.join(", "));
-  for (const req of ["seal_version","seal_id","issuer","subject","generator","timestamp","chain","signature"])
-    step(req in seal, "required field: " + req, "");
-  step(seal.seal_version === "crovia.seal.v1", "seal_version is crovia.seal.v1", String(seal.seal_version));
-  step(ID_RE.test(seal.seal_id || ""), "seal_id well-formed (cs_YYYY_ + 26×base32)", seal.seal_id || "");
-
-  const sig = seal.signature || {};
-  step(sig.alg === "ed25519", "signature.alg is ed25519", String(sig.alg));
-  step(sig.canon === "csc-1", "signature.canon is csc-1", String(sig.canon));
-  step(sig.domain === "CROVIA-SEAL-v1", "signature.domain is CROVIA-SEAL-v1", String(sig.domain));
-
-  let payload;
-  try { payload = await payloadOf(seal); } catch (e) { step(false, "CSC-1 canonicalization", e.message); }
-  step(true, "CSC-1 canonical payload built", payload.length + " bytes, domain-prefixed");
-  const phash = await sha256hex(payload);
-  step(true, "payload SHA-256 (chains to the next seal)", "sha256:" + phash.slice(0, 24) + "…");
-
-  const pub = hexToBytes((((seal.issuer || {}).pubkey) || {}).key_hex || "");
-  step(pub.length === 32, "issuer pubkey is 32 bytes", "");
-  const sigBytes = hexToBytes(sig.sig_hex || "");
-  step(sigBytes.length === 64, "signature is 64 bytes", "");
-  const okSig = await ed25519Verify(sigBytes, payload, pub);
-  step(okSig, "Ed25519 issuer signature", okSig ? "valid over P(S)" : "INVALID");
-
-  if (Array.isArray(seal.witnesses)) {
-    for (let i = 0; i < seal.witnesses.length; i++) {
-      const w = seal.witnesses[i];
-      const okW = await ed25519Verify(hexToBytes(w.sig_hex || ""), payload, hexToBytes(((w.pubkey||{}).key_hex) || ""));
-      step(okW, "witness " + (i + 1) + " signature (" + (w.id || "unnamed") + ")", okW ? "valid" : "INVALID");
-    }
-  }
-  return phash;
-}
-
-async function verifyChain(seals, steps) {
-  let expectedSeq = null, expectedPrev = null;
-  for (let i = 0; i < seals.length; i++) {
-    const s = seals[i];
-    steps.push({ ok: true, label: "— seal " + (i + 1) + "/" + seals.length + ": " + (s.seal_id || "?"), det: "sequence " + (s.chain||{}).sequence, hdr: true });
-    const phash = await verifySeal(s, steps);
-    const seq = (s.chain || {}).sequence;
-    const prev = (s.chain || {}).prev_seal_hash ?? null;
-    if (i === 0) {
-      // First seal: a genesis must have prev=null; a fragment start is accepted as-is.
-      if (seq === 0) {
-        const okGen = prev === null;
-        steps.push({ ok: okGen, label: "genesis seal has prev_seal_hash null", det: okGen ? "" : String(prev) });
-        if (!okGen) throw new Error("genesis with non-null prev_seal_hash");
-      } else {
-        steps.push({ ok: true, label: "chain fragment starts at sequence " + seq, det: "prev link not checkable without the preceding seal" });
-      }
-    } else {
-      const okSeq = seq === expectedSeq;
-      steps.push({ ok: okSeq, label: "chain sequence contiguous", det: okSeq ? "" : "expected " + expectedSeq + ", found " + seq });
-      if (!okSeq) throw new Error("chain gap or fork");
-      const okLink = prev === expectedPrev;
-      steps.push({ ok: okLink, label: "chain link (prev_seal_hash)", det: okLink ? "matches previous payload hash" : "MISMATCH — fork or tamper" });
-      if (!okLink) throw new Error("chain link broken");
-    }
-    expectedPrev = "sha256:" + phash;
-    expectedSeq = seq + 1;
-  }
-}
 
 /* ------------------------------------------------------------------ *
  *  UI
@@ -319,12 +190,22 @@ async function run() {
     if (!raw) throw new Error("paste a seal first");
     // Accept a single seal in any formatting (incl. pretty-printed JSON)
     // first; fall back to JSONL (one seal per line) for chains.
-    let seals;
-    try { seals = [JSON.parse(raw)]; }
+    let seals, single = null;
+    try { single = JSON.parse(raw); seals = [single]; }
     catch (_) {
       const lines = raw.split("\n").map(l => l.trim()).filter(Boolean);
       try { seals = lines.map(l => JSON.parse(l)); }
       catch (_) { throw new Error("input is not valid JSON (one seal, or one seal per line)"); }
+    }
+
+    if (single && window.isTacetEnvelope && isTacetEnvelope(single)) {
+      const r = await verifyTacetEnvelope(single, steps, { network: $("netChecks").checked });
+      verdict.className = "vf-verdict ok";
+      verdict.innerHTML = "&#10003;&nbsp; VALID <span class='sub'>TACET level-" + r.verified + " silence proof for <b>" + escapeHtml(r.target) + "</b>: "
+        + r.sheets + " epoch(s), " + r.anchored + " Bitcoin-attested, " + (r.silence ? r.silence.observed_epochs : 0) + " observed negative — "
+        + (r.silence ? r.silence.silence_days.toFixed(2) : "0.00") + " days of verifiable silence.</span>";
+      renderSteps(steps, stepsEl);
+      return;
     }
 
     await verifyChain(seals, steps);
@@ -343,14 +224,59 @@ async function run() {
     verdict.className = "vf-verdict bad";
     verdict.innerHTML = "&#10007;&nbsp; INVALID <span class='sub'>" + (e.message || e) + "</span>";
   }
+  renderSteps(steps, stepsEl);
+}
+
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+function renderSteps(steps, stepsEl) {
   for (const s of steps) {
     const div = document.createElement("div");
     div.className = "vf-step " + (s.ok ? "ok" : "bad");
     if (s.hdr) div.style.borderColor = "var(--accent-line)";
-    div.innerHTML = "<span class='mark'>" + (s.ok ? "&#10003;" : "&#10007;") + "</span><span>" + s.label + "</span><span class='det'></span>";
+    if (s.soft) div.style.opacity = "0.75";
+    div.innerHTML = "<span class='mark'>" + (s.soft ? "&#8226;" : s.ok ? "&#10003;" : "&#10007;") + "</span><span></span><span class='det'></span>";
+    div.children[1].textContent = s.label;
     div.querySelector(".det").textContent = s.det || "";
     stepsEl.appendChild(div);
   }
+}
+
+/* Load a proof by URL: only from this site's public TACET directory (?url= or the button). */
+const PROOF_BASE = "/registry/data/tacet/";
+function proofUrlAllowed(u) {
+  try {
+    const url = new URL(u, location.origin);
+    return (url.origin === location.origin || url.origin === "https://croviatrust.com") && url.pathname.startsWith(PROOF_BASE) && url.pathname.endsWith(".json");
+  } catch (_) { return false; }
+}
+async function loadProof(u) {
+  const verdict = $("verdict"), report = $("report");
+  if (!proofUrlAllowed(u)) { report.style.display = "block"; verdict.className = "vf-verdict bad"; verdict.textContent = "refusing to load: only files under " + PROOF_BASE + " on this site can be loaded by URL"; return; }
+  try {
+    const r = await fetch(u, { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    $("sealInput").value = await r.text();
+    $("contentInput").value = "";
+    $("tacetSec").scrollIntoView({ block: "nearest" });
+    await run();
+  } catch (e) {
+    report.style.display = "block"; verdict.className = "vf-verdict bad"; verdict.textContent = "could not load " + u + " (" + e.message + ")";
+  }
+}
+$("btnTacet").addEventListener("click", async () => {
+  try {
+    const idx = await (await fetch(PROOF_BASE + "proofs/index.json", { cache: "no-store" })).json();
+    const list = (idx.proofs || []).slice().sort((a, b) => parseFloat(b.silence_days || 0) - parseFloat(a.silence_days || 0));
+    if (!list.length) throw new Error("no featured proofs published yet");
+    await loadProof(list[0].url || (PROOF_BASE + "proofs/" + list[0].slug + ".seal.json"));
+  } catch (e) {
+    $("report").style.display = "block"; $("verdict").className = "vf-verdict bad"; $("verdict").textContent = "could not list live proofs (" + e.message + ")";
+  }
+});
+{
+  const u = new URLSearchParams(location.search).get("url");
+  if (u) loadProof(u);
 }
 
 /* A real signed seal: normative genesis vector from croviatrust/crovia-seal. */

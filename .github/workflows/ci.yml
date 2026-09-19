@@ -33,6 +33,8 @@ jobs:
         run: |
           python tacet/conformance/generate_vectors.py
           git diff --exit-code -- tacet/conformance/vectors
+      - name: Browser verifier (second implementation) against the vectors
+        run: node tacet/conformance/run_conformance_js.cjs
       - name: Operator (predicate vectors, fake-network epoch, proof round-trip)
         run: |
           pip install -e "tacet/operator[test]"

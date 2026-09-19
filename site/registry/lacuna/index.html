@@ -164,7 +164,7 @@
     if(top){
       $('featured-body').innerHTML='<div class="lc-big">'+esc(top.silence_days)+'<small>days of anchored silence · '+n(top.observed_epochs)+' observed epochs · level '+top.strength+'</small></div>'+
         '<div class="lc-kv"><div>target</div><div><a href="https://huggingface.co/'+esc(top.target_id)+'" target="_blank" rel="noopener">'+esc(top.target_id)+'</a></div><div>observed_to</div><div>'+esc(top.observed_to||'—')+'</div><div>seal</div><div>'+esc(top.seal_id)+'</div><div>sha-256</div><div>'+esc(top.sha256)+'</div></div>'+
-        '<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap"><a class="lc-btn is-primary" href="'+esc(top.url)+'" download>Download the proof · '+Math.round(top.bytes/1024)+' KB</a><a class="lc-btn" href="/registry/tacet/#verify">How to verify</a></div>';
+        '<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap"><a class="lc-btn is-primary" href="/registry/seal/verify/?url='+encodeURIComponent(top.url)+'">Verify it in your browser</a><a class="lc-btn" href="'+esc(top.url)+'" download>Download the proof · '+Math.round(top.bytes/1024)+' KB</a><a class="lc-btn" href="/registry/tacet/#verify">Verify offline</a></div>';
     } else {
       var first=ROWS[0];
       $('featured-body').innerHTML='<div class="lc-big">'+n(L.negative_snapshots_total)+'<small>signed negative observations so far · '+n(L.anchored_epochs)+' epochs anchored</small></div>'+

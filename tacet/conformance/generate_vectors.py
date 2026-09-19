@@ -98,6 +98,18 @@ def main() -> None:
     invalid["key_target_mismatch"] = {"proof": bad, "expect_error_contains": "key does not match"}
     index["files"]["invalid_001.json"] = dump("invalid_001.json", invalid)
 
+    # 5b. The same invalid proofs under a *valid* outer Seal: a verifier that stops at the
+    # Seal signature would accept these; a conformant one must reject every case.
+    wrapped_invalid = {}
+    for i, (name, vec) in enumerate(sorted(invalid.items())):
+        p = vec["proof"]
+        qi = build_query(map_id=MAP_ID, target_id=p["target_id"], from_epoch=p["from_epoch"], to_epoch=p["to_epoch"],
+                         min_strength=p["strength"])
+        b = wrap_in_seal(issuer=sc.issuer, query=qi, proof=p, emitted_at="2026-09-19T12:00:00.000Z",
+                         nonce=f"TACETCONFORMANCEINVALID{'ABCDEFGH'[i]}AA", seal_id=f"cs_2026_TACETCONFORMANCEINVALID{'ABCDEFGH'[i]}AA")
+        wrapped_invalid[name] = {**b, "expect": {"ok": False, "seal_ok": True}, "expect_error_contains": vec["expect_error_contains"]}
+    index["files"]["wrapped_002_invalid.json"] = dump("wrapped_002_invalid.json", wrapped_invalid)
+
     # 6. Disclosed target: silence provable only before the disclosure epoch.
     pb = build_silence_proof(map_id=MAP_ID, target_id=DISCLOSED_TARGET, sheets=sc.sheets[:DISCLOSURE_EPOCH],
                              paths={e: sc.disclosed_paths[e] for e in range(DISCLOSURE_EPOCH)})

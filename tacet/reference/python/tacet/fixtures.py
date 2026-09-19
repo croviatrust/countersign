@@ -42,11 +42,22 @@ def _iso(dt: datetime) -> str:
     return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+DRAND_GENESIS_UNIX = 1595431050  # League of Entropy default chain, 30 s period
+DRAND_PERIOD = 30
+
+
 def _drand(epoch: int) -> Dict[str, Any]:
+    """Fixture beacon: real chain id and the round that actually opens the epoch's start second.
+
+    Randomness and signature are synthetic (SPEC verifiers may only check them against the
+    drand API); the round number is real so that a verifier enforcing §8.5 step 2 accepts
+    the vectors.
+    """
+    start = int((GENESIS + timedelta(hours=epoch)).timestamp())
     return {
         "kind": "drand",
         "chain_hash": "8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce",
-        "round": 1_000_000 + epoch * 1200,
+        "round": (start - DRAND_GENESIS_UNIX) // DRAND_PERIOD + 1,
         "randomness": hashlib.sha256(_seed(f"rand{epoch}")).hexdigest(),
         "signature": hashlib.sha512(_seed(f"bsig{epoch}")).hexdigest(),
     }

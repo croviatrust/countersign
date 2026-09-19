@@ -1,40 +1,40 @@
 {
   "epoch_snapshot_hashes": {
     "0": [
-      "08b2019bfc37e902abda63da94e1b0475c25ea07b28b215f1ce3cb2ee2567de5",
-      "3c0976327ed28d95cd4df92b46a54a9430fd3a2ad20d293de8b64643d49d3a29"
+      "979939c2e255c9c47f8057691915cd9d65cc7ccaf1ac89e337c1c2aef80c9035",
+      "9683e8dd52de40e5d2854e137c7ceaedff853b78e4bcafbd48de5323a1a9cd54"
     ],
     "1": [
-      "442232aa5687a027ab386255f8bea98c062d2c11f70a28f7341bb7f7592bf5e6",
-      "554fee679f16e9049ecb8add413fde146d762943219cccab4ebaa1755c1fe932"
+      "a398580cdf3567b69ac7013a586f4f2e41ac4beeb9b2caaaaf5ceb237afb58d2",
+      "af12c1cd3dea34088f9808c87709534401acd390bd7e58c8c19d7f4f264969c4"
     ],
     "10": [
-      "7f69daba5317b19a93705ef8689ded2f8886ae7a60647e80492c3a01b639a04a",
-      "0195319de04f51d522b977df9254a1a8fe9c8bb854f1d537f09473cf68a90b3b"
+      "cd1da90a99f5cb7d6ca9ee737725a914d776623d5d50006011cd32678d916f4e",
+      "f6a7ea749a3832f3a24b8044303bb2b425f8e17cdeeb9ccec64f55f6219079fd"
     ],
     "11": [
-      "de17b9769cf82fdea6f4dc90c7ed7364ee5fd55c1f91eba5aae66ac12cdce49f",
-      "23b0b3997d7f2a664bc34fee97c0629ac867df63ea15c2d12023f52288138c95"
+      "b1e52ff531e44dfd932fb6c3a00be4d058037699e6cbcfb8ba95150c7908610b",
+      "fea047a3701db00f206f21723fd990862e43d0e25f7e3517cdf1bd0b9d775c51"
     ],
     "2": [
-      "3d918b768e7913da5f9e42590440c5f7669ca699bdd9c5adcec2c07eacf86c1d",
-      "f0eb08a3ae49e445c0f852d451c312a1d39d283f7cb19fac12656240359a37e6"
+      "efd607a1f691a1ebaa49ba4ab521efac218d5c3f03b40d826083412cc728f8e3",
+      "30116f88da740ed461162493a58b6c63833150161faa1458e9e55e2bf6ac9376"
     ],
     "3": [
-      "5ff5d8a0af1a3352c2ff773842a180bcc30bdc19352e60ece376d279a94226c4",
-      "0524906a877c871c35ab22c75700db21315d7b232761d4b81d37654a09c3614a"
+      "6c266378af4173e2077c2e3388f16a9d78bd09828361fbc280545c73b55066e4",
+      "f51424d0e65f83ddab4e04543800349ebe36baa0e0b8cf32f3378b98186e7d79"
     ],
     "4": [
-      "139f4a89d5c601fe6de9b6b1a985a045df8e7eb4b27b257824ac3dda86d8a9c5",
-      "d5c36dca761ab4592f210054df23998bd10131cc9b8f6b1d7bc5a64f83526aab"
+      "f8acbea98d4961f7c03e1fefcb9ed9a3b977ea5f34c89800056db1ab6fe7016f",
+      "8aefd510cae8fc5bc5e9680f850d3084b8644e015cec8d7bc1d10037e1c2f861"
     ],
     "5": [
-      "f3872a0bf4e0ded9f4facab1fb5fa1730917ba53562dcb2a356ea926e057c7ec",
-      "c3e26f26b4848bdc0775bd733c292880fa3550396f77a15509b3317d08d27441"
+      "98ae8c761d9f61d2d7368866872a1ec8eeecc60d9af620fea174feb46722e77d",
+      "82af55306585580525e0c206fcb66885f03d262d3dc085a81a29d1fddfd920f1"
     ],
     "6": [
-      "70f19be5a38de099ba7381edc62298967653705bd539c4a1f5757af7c7d8f7ea",
-      "77cee3d91d91cc38f583e607ef2df2e6a00b36919f5a960ebbf8719c0efab3d9"
+      "5940c142c846166bfbb6421238660ebc7e265b7a24e54777acfd3af6562f18a8",
+      "30ebc43d7894536188067480b1303f3306d7dca230efa5357a151acc1305cea7"
     ],
     "7": [],
     "8": [],
@@ -42,7 +42,7 @@
   },
   "negative_snapshots": [
     {
-      "beacon_round": 1000000,
+      "beacon_round": 6478166,
       "body_len": 25,
       "body_sha256": "sha256:83fcf56d3aa2b2d33d7fce819f6086ce7012dc66ca011d10e4ccf5b2292b980e",
       "epoch": 0,
@@ -65,7 +65,7 @@
       "signature": {
         "alg": "ed25519",
         "domain": "TACET-SNAPSHOT-v1",
-        "sig_hex": "b2869c33bfea260c810a83333da2f5fc905ba5e2a3ff5c1cfc3ca079ee28cd9b26cf81982dde41b5c5198b1ee696a070378ce69912baf3d03b2acf16fb3e8907"
+        "sig_hex": "e4cddc8e4b054f21121a9d67923209ec7c46a88f94b59fba4bf1858d7edcf8b9ac8d06eaf2d4b2fe4d2ec2f68b3248f3d6b10a31b8ea080594768a5e1902c20c"
       },
       "snapshot_version": "crovia.tacet.snapshot.v1",
       "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
@@ -73,7 +73,7 @@
       "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
     },
     {
-      "beacon_round": 1001200,
+      "beacon_round": 6478286,
       "body_len": 25,
       "body_sha256": "sha256:46313eccab81df6e8121e8e2c7f2b03f76346b3318289fe5c1d0f38cc53efa34",
       "epoch": 1,
@@ -96,7 +96,7 @@
       "signature": {
         "alg": "ed25519",
         "domain": "TACET-SNAPSHOT-v1",
-        "sig_hex": "391c1c5803daf7dc68258118fdcf65152b2c1887f503eef68140f4c309b1a9160bfbe4a894310684cb8568970b13ea5161bcd7e426ce1650f2bcea2bde5f3900"
+        "sig_hex": "088123c644f143845251fe3717375ca1fea7c9fef3b6d430636410c5bc13e2765e621754af4e7c0d29079f5cf8809e20e57aa959373c92a153aaa1fd9336eb05"
       },
       "snapshot_version": "crovia.tacet.snapshot.v1",
       "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
@@ -104,7 +104,7 @@
       "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
     },
     {
-      "beacon_round": 1002400,
+      "beacon_round": 6478406,
       "body_len": 25,
       "body_sha256": "sha256:b9f6750a00c9a8e4d1a131eddf7b0bb5157c30145a0f57b02636885272f4afdf",
       "epoch": 2,
@@ -127,7 +127,7 @@
       "signature": {
         "alg": "ed25519",
         "domain": "TACET-SNAPSHOT-v1",
-        "sig_hex": "1a4dcd2476639719faef6c6753300099ec52ee26760bf7117ad9f9ca473260c78ad13a18453bf6d78d7a3df6d10fcfb4bd310fe8d686b7926a9dbf5f942ad308"
+        "sig_hex": "aa518839b0a671d69672ef6df7b88cfa070b4eeb6e704851ff0e423661fa187f2a0c9e2487285889e63e0d103da23a9948efa0c073d1257340b023ed0cf30608"
       },
       "snapshot_version": "crovia.tacet.snapshot.v1",
       "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
@@ -135,7 +135,7 @@
       "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
     },
     {
-      "beacon_round": 1003600,
+      "beacon_round": 6478526,
       "body_len": 25,
       "body_sha256": "sha256:51a7ae16f9adaa1a28e07c3b2b048ceb76d09655888013c53c454ce3163a2b98",
       "epoch": 3,
@@ -158,7 +158,7 @@
       "signature": {
         "alg": "ed25519",
         "domain": "TACET-SNAPSHOT-v1",
-        "sig_hex": "347d68df268efb95059f7e1ef1d259f44e385a7395f12c7a4e9aed25dec794de996f85c71e9caece2a305a0b5cfd2751df4fd8219f1c435ca4a0a2fc60e06b02"
+        "sig_hex": "cdbfb2432095eaa807db391877b55c45078f1737f2c739a3577638b876d7077f38eb2198ff0f4ab6251ca47e31ac37bb27dfa673d176f97b68dcc09e15262408"
       },
       "snapshot_version": "crovia.tacet.snapshot.v1",
       "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
@@ -166,7 +166,7 @@
       "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
     },
     {
-      "beacon_round": 1004800,
+      "beacon_round": 6478646,
       "body_len": 25,
       "body_sha256": "sha256:5e8b80e51a6e7f6a68972966cd598a9848bfeb718d260e5227a7f01f9e3a74e9",
       "epoch": 4,
@@ -189,7 +189,7 @@
       "signature": {
         "alg": "ed25519",
         "domain": "TACET-SNAPSHOT-v1",
-        "sig_hex": "55140aa16092ccc108501494d0626d33c8fa6fe0231765a60523fc04e8445660c03870296999debde69706e92559788757f0e9377329f61248136d5275d8ba0d"
+        "sig_hex": "9793b68bc79e5b5c3cd8f5d49a0dea8b044aa36ed9d2e8c595814c239cc052601d6a97c55d1ccfc838b5d0a99a27a9ed9281118177bfa7b4dffc8e3c15981d01"
       },
       "snapshot_version": "crovia.tacet.snapshot.v1",
       "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
@@ -197,7 +197,7 @@
       "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
     },
     {
-      "beacon_round": 1006000,
+      "beacon_round": 6478766,
       "body_len": 25,
       "body_sha256": "sha256:ea6bc9c28bb8940d67605c932ff8365bd103f7709010002e875abe6601741215",
       "epoch": 5,
@@ -220,7 +220,7 @@
       "signature": {
         "alg": "ed25519",
         "domain": "TACET-SNAPSHOT-v1",
-        "sig_hex": "93167f8eec72a92dd6fdf83cdb36fb19c96c554548ad84d0fa5465fbd723c3764c6ce48d412f325f1bc66a6f5ab87be2549ccaa1529820a00baa09b67430450a"
+        "sig_hex": "62954542d24220413bd0b522452cab3c48013d9bb0371a76d2aaaf3140506ffff033bbb210f0bdd58ed39753792be782e6a256055efd6f60b4e44c954e43aa0f"
       },
       "snapshot_version": "crovia.tacet.snapshot.v1",
       "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
@@ -228,7 +228,7 @@
       "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
     },
     {
-      "beacon_round": 1007200,
+      "beacon_round": 6478886,
       "body_len": 25,
       "body_sha256": "sha256:bbf993f8f0343afee44d34227be102b6dd0776abda1392e42bd423bd5698cf74",
       "epoch": 6,
@@ -251,7 +251,7 @@
       "signature": {
         "alg": "ed25519",
         "domain": "TACET-SNAPSHOT-v1",
-        "sig_hex": "fdc4806b00b514601c659e4769fcdfedc5e1cc2928530874f5c8a1e44f8823b92de105ff2210474df2523d3a25e9033814bf6bfe3776ae71dc9e61dd41f2b50f"
+        "sig_hex": "af7e3a5f8ab5901c9b8c0801ab71ce710174ab3ca9d33e5fbeefa1734e81ed6264de60a89afb879d051bd48b3c6ccd3dbe72434b5bb011f3b3b6248b501f7b0f"
       },
       "snapshot_version": "crovia.tacet.snapshot.v1",
       "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
@@ -259,7 +259,7 @@
       "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
     },
     {
-      "beacon_round": 1012000,
+      "beacon_round": 6479366,
       "body_len": 26,
       "body_sha256": "sha256:87226847a4d5fcc78d4d74b3237c25cadcf4c78474fe73f1f8e9dc407849b6e5",
       "epoch": 10,
@@ -282,7 +282,7 @@
       "signature": {
         "alg": "ed25519",
         "domain": "TACET-SNAPSHOT-v1",
-        "sig_hex": "685cf2acca538116e6727ae334891bb27a396e6547ac39c4e94d09adafc42698284658517a474bee675c2e4bd0e40cf9048f41ff2df7b0d0b0b6e4b1ae23f50d"
+        "sig_hex": "59057d43d90c911912afa7178075b186f7da825676c3de9e5ee156e7ea455a2c84ee51f0ea1c9a2e90183423b4e00ca4ccbb592059385b488a9437799074c90c"
       },
       "snapshot_version": "crovia.tacet.snapshot.v1",
       "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
@@ -290,7 +290,7 @@
       "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
     },
     {
-      "beacon_round": 1013200,
+      "beacon_round": 6479486,
       "body_len": 26,
       "body_sha256": "sha256:bff0daefeb929931ee944a1bb9bffec961471e24749e43abd29f1a97279f00be",
       "epoch": 11,
@@ -313,7 +313,7 @@
       "signature": {
         "alg": "ed25519",
         "domain": "TACET-SNAPSHOT-v1",
-        "sig_hex": "ddd525dee821d30c8f0b0bfe2c9a784a9d0d3849fb05878411df7d9e023e09ff3495bc3e351fb13327db382cf697ef45663a39e551183df1ce450e7857f2600f"
+        "sig_hex": "96dc909f0be0a01b5e68e54e79b6b6d566415ad08077ccb68d12f8b2282548b7134787201d87b143b19941905e4e619b8ffc15c58032185007495f57ef943608"
       },
       "snapshot_version": "crovia.tacet.snapshot.v1",
       "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
