@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://croviatrust.com/logo.png" width="72" alt="">
+  <a href="https://croviatrust.com/registry/tacet/"><img src=".github/social-preview.png" width="720" alt="TACET — verifiable silence. Hourly, signed, Bitcoin-anchored proofs that an AI model published no training-data disclosure."></a>
 </p>
 
 <h1 align="center">TACET — verifiable silence for AI training disclosure</h1>
