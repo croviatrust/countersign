@@ -51,7 +51,8 @@ jobs:
       - name: Install TACET reference
         run: pip install -e "tacet/reference/python[test]"
       - name: Unit tests
-        run: python -m pytest tacet/reference/python -q
+        working-directory: tacet/reference/python
+        run: python -m pytest -q
       - name: Conformance
         run: python tacet/conformance/run_conformance.py
       - name: Vectors are deterministic
