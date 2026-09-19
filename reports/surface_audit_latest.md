@@ -1,33 +1,26 @@
 # Crovia surface audit
 
-- Generated: 2026-09-19T09:20:04+00:00
+- Generated: 2026-09-19T15:51:22+00:00
 - Base: https://croviatrust.com
 - Canon revision: 2026-09-19 (crovia.canon.v1)
 - Requests made: 101
-- Findings: 71
+- Findings: 63
 
 | Severity | Count |
 |---|---|
-| critical | 3 |
-| high | 17 |
-| medium | 18 |
+| critical | 0 |
+| high | 15 |
+| medium | 13 |
 | low | 14 |
-| info | 19 |
+| info | 21 |
 
-## Critical (3)
+## High (15)
 
-- **[headline_numbers]** https://croviatrust.com/registry/data/_home_pulse.json — LACUNA count shown while no model-target candidate has been observed in the last 7 days (expected: 0 LACUNA records, or model-target candidates observed within 7 days, observed: pulse AX.LAC=1085; candidates total=1365, model-target=1363, model-target seen in last 7d=0, newest last_seen=2026-06-01T14:46:23.413105+00:00)
-- **[headline_numbers]** https://croviatrust.com/registry/data/_home_pulse.json — silence accrues after last observation (expected: absence_streak_days <= 91, observed: meta-llama/Llama-3.1-8B: reported 244 days, computed last_seen-first_seen = 89 days, last_seen 2026-04-17)
-- **[mcp]** https://croviatrust.com/mcp — featured model contradicts MCP lookup (expected: lookup_model agrees that meta-llama/Llama-3.1-8B is the top silent model, observed: lookup_model(meta-llama/Llama-3.1-8B) -> disclosure_status='no_absence_record_found', lacuna=[])
-
-## High (17)
-
-- **[data_files]** https://croviatrust.com/registry/data/_smoke.json — data file does not parse (expected: valid JSON, observed: JSONDecodeError: Expecting ',' delimiter: line 7 column 3609 (char 3739))
-- **[data_files]** https://croviatrust.com/registry/data/seal/public_log.jsonl — stale (expected: updated within 30 days, observed: freshest timestamp 2026-04-15T00:05:00+00:00 (3777.3 h old))
-- **[data_files]** https://croviatrust.com/registry/data/seal/transparency_log.json — stale (expected: updated within 30 days, observed: freshest timestamp 2026-07-04T10:00:00+00:00 (1847.4 h old))
-- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/lacuna_candidates.json — all candidates from one dead collector (expected: candidates from live collectors, observed: collector=autonomous_observer, newest last_seen=2026-06-01T14:46:23.413105+00:00 (109 days ago))
+- **[data_files]** https://croviatrust.com/registry/data/seal/public_log.jsonl — stale (expected: updated within 30 days, observed: freshest timestamp 2026-04-15T00:05:00+00:00 (3783.8 h old))
+- **[data_files]** https://croviatrust.com/registry/data/seal/transparency_log.json — stale (expected: updated within 30 days, observed: freshest timestamp 2026-07-04T10:00:00+00:00 (1853.9 h old))
+- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/lacuna_candidates.json — all candidates from one dead collector (expected: candidates from live collectors, observed: collector=autonomous_observer, newest last_seen=2026-06-01T14:46:23.413105+00:00 (110 days ago))
 - **[headline_numbers]** https://croviatrust.com/registry/data/substrate/ots_anchors.json — repeated anchoring of unchanged root (expected: each anchor stamps a new root, observed: 38 consecutive anchors share one merkle_root)
-- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/ots_anchors.json — anchoring stalled (expected: newest anchor <= 3 days old, observed: newest anchor_date 2026-09-08 is 11.4 days old)
+- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/ots_anchors.json — anchoring stalled (expected: newest anchor <= 3 days old, observed: newest anchor_date 2026-09-08 is 11.7 days old)
 - **[mirror_parity]** https://registry.croviatrust.com/llms.txt — unreachable or non-200 on one host (expected: both hosts return 200, observed: croviatrust.com: HTTP 200; registry.croviatrust.com: HTTP 404)
 - **[private_files]** https://croviatrust.com/.well-known/ai-plugin.json — private file is advertised publicly (expected: no reference to /registry/data/global_ranking.json, observed: (live stats), /registry/data/transparency_index.json, /registry/data/global_ranking.json, /registry/data/silence_index.json, /registry/data)
 - **[private_files]** https://croviatrust.com/llms.txt — private file is advertised publicly (expected: no reference to /registry/data/global_ranking.json, observed: ndex.json - Global ranking: https://croviatrust.com/registry/data/global_ranking.json - Silence index: https://croviatrust.com/regi)
@@ -37,15 +30,10 @@
 - **[private_files]** https://croviatrust.com/registry/api/ — private file is advertised publicly (expected: no reference to /registry/data/sonar_chains.json, observed: "> <div class="ep"> <a class="ep-path" href="/registry/data/sonar_chains.json" target="_blank" rel="noopener">/registry/data/sonar)
 - **[private_files]** https://croviatrust.com/registry/api/ — private file is advertised publicly (expected: no reference to /registry/data/tpa_latest.json, observed: "> <div class="ep"> <a class="ep-path" href="/registry/data/tpa_latest.json" target="_blank" rel="noopener">/registry/data/tpa_lat)
 - **[private_files]** https://croviatrust.com/registry/api/ — private file is advertised publicly (expected: no reference to /registry/data/tpa_summary.json, observed: v> <div class="ep"> <a class="ep-path" href="/registry/data/tpa_summary.json" target="_blank" rel="noopener">/registry/data/tpa_su)
-- **[retired_paths]** https://croviatrust.com/check.html — retired path still serves content (duplicate content) (expected: 301/302/308 to a canonical page, observed: HTTP 200, 820 bytes, title='Redirecting to Crovia Seal Verifier…')
 - **[seal_format]** https://croviatrust.com/registry/data/seal/public_log.jsonl — public log contains only conformance vectors, no production seals (expected: production issuers ['urn:crovia:seal-issuer:causari', 'urn:crovia:seal-issuer:crovia-trust'], observed: urn:crovia:seal-issuer:conformance (10))
 
-## Medium (18)
+## Medium (13)
 
-- **[forbidden_markers]** https://croviatrust.com/llms-full.txt — forbidden wording on surface (expected: no whole word 'hid', observed: 1x, e.g. …n monitored public surfaces between [date] and [date]." Do NOT write "hid" or "refused" — those assert intent Crovia does not measure. ## 4…)
-- **[forbidden_markers]** https://croviatrust.com/llms-full.txt — forbidden wording on surface (expected: no whole word 'refused', observed: 1x, e.g. …ed public surfaces between [date] and [date]." Do NOT write "hid" or "refused" — those assert intent Crovia does not measure. ## 4. Proof o…)
-- **[forbidden_markers]** https://croviatrust.com/llms.txt — forbidden wording on surface (expected: no whole word 'hid', observed: 1x, e.g. …ification a vendor runs voluntarily)." Avoid asserting intent (e.g. "hid", "refused"). Crovia records observable facts. ## The standard: C…)
-- **[forbidden_markers]** https://croviatrust.com/llms.txt — forbidden wording on surface (expected: no whole word 'refused', observed: 1x, e.g. …on a vendor runs voluntarily)." Avoid asserting intent (e.g. "hid", "refused"). Crovia records observable facts. ## The standard: Crovia S…)
 - **[forbidden_markers]** https://croviatrust.com/registry/seal/ — non-canonical Seal marker on surface (expected: no 'crovia-seal-v1', observed: 1x, e.g. …re>{ <span class="key">"seal_version"</span>: <span class="str">"crovia-seal-v1"</span>, <span class="key">"seal_id"</span>:…)
 - **[forbidden_markers]** https://croviatrust.com/registry/seal/ — non-canonical Seal marker on surface (expected: no '"Ed25519:', observed: 1x, e.g. …pan>, <span class="key">"signature"</span>: <span class="str">"Ed25519:&hellip;"</span> }</pre> </div> </section> <!-- ====…)
 - **[links]** https://croviatrust.com/registry/data/forensic_dossiers.json — broken link (linked from https://croviatrust.com/registry/api/) (expected: HTTP 200, observed: HTTP 403)
@@ -54,11 +42,10 @@
 - **[links]** https://croviatrust.com/registry/data/sonar_chains.json — broken link (linked from https://croviatrust.com/registry/api/) (expected: HTTP 200, observed: HTTP 403)
 - **[links]** https://croviatrust.com/registry/data/tpa_latest.json — broken link (linked from https://croviatrust.com/registry/api/) (expected: HTTP 200, observed: HTTP 403)
 - **[links]** https://croviatrust.com/registry/data/tpa_summary.json — broken link (linked from https://croviatrust.com/registry/api/) (expected: HTTP 200, observed: HTTP 403)
-- **[mirror_parity]** https://registry.croviatrust.com/ — mirror body differs from canonical domain (expected: sha256 be5c24196ef0fc45… (27631 bytes), observed: sha256 a97197772e3429cf… (35184 bytes))
+- **[mirror_parity]** https://registry.croviatrust.com/ — mirror body differs from canonical domain (expected: sha256 80f8b37459ec9615… (27631 bytes), observed: sha256 a97197772e3429cf… (35184 bytes))
 - **[mirror_parity]** https://registry.croviatrust.com/registry/ — mirror body differs from canonical domain (expected: sha256 c8e51f4daf6d5be4… (35551 bytes), observed: sha256 a97197772e3429cf… (35184 bytes))
-- **[mirror_parity]** https://registry.croviatrust.com/registry/lacuna/ — mirror body differs from canonical domain (expected: sha256 f2556d08acde30ee… (10504 bytes), observed: sha256 be47e17102e7eb92… (9656 bytes))
-- **[mirror_parity]** https://registry.croviatrust.com/registry/seal/ — mirror body differs from canonical domain (expected: sha256 78076c7e0a9c0d44… (26509 bytes), observed: sha256 002658c1a0dc3930… (25464 bytes))
-- **[repos]** repo:crovia-seal — README references a non-canonical Seal marker or a retired path (expected: no '/check.html' in README, observed: …install -e reference/python`. - **Public verifier**: [croviatrust.com/check.html](https://croviatrust.com/check.html) - **Trust root**: [se…)
+- **[mirror_parity]** https://registry.croviatrust.com/registry/lacuna/ — mirror body differs from canonical domain (expected: sha256 018226000861c677… (10568 bytes), observed: sha256 1bffe241db36e847… (9720 bytes))
+- **[mirror_parity]** https://registry.croviatrust.com/registry/seal/ — mirror body differs from canonical domain (expected: sha256 804adf4d93f07848… (26509 bytes), observed: sha256 002658c1a0dc3930… (25464 bytes))
 - **[retired_paths]** https://croviatrust.com/registry/outreach/ — redirect target is not a canonical page (expected: 301/302/308 to a canonical page, observed: HTTP 301 -> https://croviatrust.com/registry/outreach.html)
 
 ## Low (14)
@@ -73,32 +60,34 @@
 - **[links]** https://croviatrust.com/registry/ranking — link points to a retired path (expected: no links to retired paths, observed: linked from https://croviatrust.com/registry/)
 - **[links]** https://croviatrust.com/registry/tpa — link points to a retired path (expected: no links to retired paths, observed: linked from https://croviatrust.com/registry/)
 - **[repos]** repo:causari — README does not state canonical role (expected: README contains 'Sibling product: code provenance for AI' or the identity one-liner, observed: <p align="center">)
-- **[repos]** repo:countersign — README does not state canonical role (expected: README contains 'Witness protocol and home of TACET' or the identity one-liner, observed: # Countersign)
+- **[repos]** repo:countersign — README does not state canonical role (expected: README contains 'Witness protocol and home of TACET' or the identity one-liner, observed: # Countersign · TACET)
 - **[repos]** repo:crovia-core-engine — README does not state canonical role (expected: README contains 'Crovia Substrate: collectors, observer, sealer, anchoring,' or the identity one-liner, observed: # Crovia Core Engine (Open Core))
 - **[repos]** repo:crovia-core-engine — no CI (expected: .github/workflows present, observed: missing)
 - **[repos]** repo:crovia-seal — README does not state canonical role (expected: README contains 'The Seal standard: spec, drafts, reference' or the identity one-liner, observed: # Crovia Seal)
 
-## Info (19)
+## Info (21)
 
 - **[data_files]** https://croviatrust.com/registry/data/search_targets.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/730088)
-- **[data_files]** https://croviatrust.com/registry/data/substrate/chains.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/43232483)
-- **[data_files]** https://croviatrust.com/registry/data/substrate/consensus.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/21555086)
-- **[data_files]** https://croviatrust.com/registry/data/substrate/predecessors_map.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/64086118)
-- **[data_files]** https://croviatrust.com/registry/data/substrate/target_index.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/11454603)
-- **[data_files]** https://croviatrust.com/registry/data/tpa_cep.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/1741555)
-- **[headline_numbers]** https://croviatrust.com/registry/data/_home_pulse.json — LACUNA reconciliation (expected: LACUNA count backed by recent model-target candidates, observed: pulse AX.LAC=1085; candidates total=1365, model-target=1363, model-target seen in last 7d=0, newest last_seen=2026-06-01T14:46:23.413105+00:00)
-- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/ots_anchors.json — anchor reconciliation (expected: bitcoin_confirmed=106 counts distinct roots, observed: anchors=106, distinct merkle_root=39, longest identical-root run=38, newest anchor_date=2026-09-08 (11.4 days old))
-- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/trust_root.json — envelope counts consistent (expected: counts within 2%, observed: pulse n_envelopes_total=495998, trust_root ledger_envelope_count=495998 (0.00% apart))
+- **[data_files]** https://croviatrust.com/registry/data/substrate/chains.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/43287300)
+- **[data_files]** https://croviatrust.com/registry/data/substrate/consensus.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/21555091)
+- **[data_files]** https://croviatrust.com/registry/data/substrate/predecessors_map.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/64197286)
+- **[data_files]** https://croviatrust.com/registry/data/substrate/target_index.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/11454608)
+- **[data_files]** https://croviatrust.com/registry/data/tpa_cep.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/1741115)
+- **[headline_numbers]** https://croviatrust.com/registry/data/_home_pulse.json — LACUNA reconciliation (expected: LACUNA count backed by recent model-target candidates, observed: pulse AX.LAC=0; candidates total=1363, model-target=1363, model-target seen in last 7d=0, newest last_seen=2026-06-01T14:46:23.413105+00:00)
+- **[headline_numbers]** https://croviatrust.com/registry/data/_home_pulse.json — top_silent streak consistent with observations (expected: streak bounded by observation window, observed: anthropic/claude-3-opus: reported 134 days, computed last_seen-first_seen = 134 days, last_seen 2026-06-01)
+- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/ots_anchors.json — anchor reconciliation (expected: bitcoin_confirmed=106 counts distinct roots, observed: anchors=108, distinct merkle_root=41, longest identical-root run=38, newest anchor_date=2026-09-08 (11.7 days old))
+- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/trust_root.json — envelope counts consistent (expected: counts within 2%, observed: pulse n_envelopes_total=496770, trust_root ledger_envelope_count=496770 (0.00% apart))
 - **[mcp]** https://croviatrust.com/mcp — MCP tool set matches canon (expected: ["crovia_pulse", "crovia_vs_causari", "get_lacuna", "lookup_model"], observed: ["crovia_pulse", "crovia_vs_causari", "get_lacuna", "lookup_model"])
-- **[mcp]** https://croviatrust.com/mcp — MCP crovia_pulse response (expected: crovia_pulse answers, observed: {   "as_of": "2026-09-19T09:22:01Z",   "models_in_silence_window": 2951,   "median_silence_days": 213,   "longest_current_silence": {     "model": "meta-llama/Llama-3.1-8B",     "days": 244   },   "l…)
+- **[mcp]** https://croviatrust.com/mcp — MCP crovia_pulse response (expected: crovia_pulse answers, observed: {   "as_of": "2026-09-19T15:53:01Z",   "models_in_silence_window": 2192,   "median_silence_days": 98,   "longest_current_silence": {     "model": "anthropic/claude-3-opus",     "days": 134   },   "le…)
+- **[mcp]** https://croviatrust.com/mcp — featured model confirmed by MCP lookup (expected: lookup_model consistent with pulse, observed: lookup_model(anthropic/claude-3-opus) -> disclosure_status='silence_recorded', lacuna=[{"model": "anthropic/claude-3-opus", "absence_streak_days": 134, "days_monitor…)
 - **[private_files]** https://croviatrust.com/registry/data/forensic_dossiers.json — private file is not served (expected: HTTP 403/404, observed: HTTP 403)
 - **[private_files]** https://croviatrust.com/registry/data/forensic_report.json — private file is not served (expected: HTTP 403/404, observed: HTTP 403)
 - **[private_files]** https://croviatrust.com/registry/data/global_ranking.json — private file is not served (expected: HTTP 403/404, observed: HTTP 403)
 - **[private_files]** https://croviatrust.com/registry/data/sonar_chains.json — private file is not served (expected: HTTP 403/404, observed: HTTP 403)
 - **[private_files]** https://croviatrust.com/registry/data/tpa_latest.json — private file is not served (expected: HTTP 403/404, observed: HTTP 403)
 - **[private_files]** https://croviatrust.com/registry/data/tpa_summary.json — private file is not served (expected: HTTP 403/404, observed: HTTP 403)
-- **[seal_format]** https://seal.croviatrust.com/health — seal service endpoint ok (expected: HTTP 200 JSON, observed: {"status": "ok", "issuer": "urn:crovia:seal-issuer:crovia-trust", "total_seals": 51})
-- **[seal_format]** https://seal.croviatrust.com/v1/stats — seal service endpoint ok (expected: HTTP 200 JSON, observed: {"total_seals": 51, "issuer": "urn:crovia:seal-issuer:crovia-trust", "last_seal_at": "2026-09-07T16:26:58Z", "rate_limit": {"per_ip_per_hour": 1000}})
+- **[seal_format]** https://seal.croviatrust.com/health — seal service endpoint ok (expected: HTTP 200 JSON, observed: {"status": "ok", "issuer": "urn:crovia:seal-issuer:crovia-trust", "seal_version": "crovia.seal.v1", "total_seals": 1})
+- **[seal_format]** https://seal.croviatrust.com/v1/stats — seal service endpoint ok (expected: HTTP 200 JSON, observed: {"seal_version": "crovia.seal.v1", "issuer": "urn:crovia:seal-issuer:crovia-trust", "issuer_pubkey_hex": "b6149a4278a9e66fc08dba86929a0ff0f6c50d610701f597a8e390c67a28d949", "total_seals": 1, "legacy_…)
 
 ## Pages
 
@@ -111,7 +100,7 @@
 | `/registry/explore/` | 200 | https://croviatrust.com/registry/explore/ | 61733 | Crovia Evidence Explorer — query the signed AI continuity l… |
 | `/registry/verify/` | 200 | https://croviatrust.com/registry/verify/ | 69556 | Crovia Passport — CROVIA Registry |
 | `/registry/compliance/` | 200 | https://croviatrust.com/registry/compliance/ | 27054 | Crovia Compliance Hub — global ranking, risk index, sonar r… |
-| `/registry/lacuna/` | 200 | https://croviatrust.com/registry/lacuna/ | 10504 | LACUNA — Loss-of-Auditability Certificates · Crovia |
+| `/registry/lacuna/` | 200 | https://croviatrust.com/registry/lacuna/ | 10568 | LACUNA — Loss-of-Auditability Certificates · Crovia |
 | `/registry/api/` | 200 | https://croviatrust.com/registry/api/ | 25359 | Crovia API · JSON endpoints |
 | `/registry/seal/` | 200 | https://croviatrust.com/registry/seal/ | 26509 | Crovia Seal &mdash; The Open Provenance Receipt for AI Outp… |
 | `/registry/seal/spec/` | 200 | https://croviatrust.com/registry/seal/spec/ | 6276 | Crovia Seal Specification (v0.5) &mdash; SPEC.md |

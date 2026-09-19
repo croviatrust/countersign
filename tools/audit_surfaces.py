@@ -60,12 +60,24 @@ ASSET_EXTENSIONS = (
     ".woff", ".woff2", ".ttf", ".otf", ".eot", ".map",
 )
 LINK_CAP = 60
-MIRROR_PATHS = ("/", "/registry/", "/registry/seal/", "/registry/lacuna/", "/llms.txt")
+# registry.croviatrust.com serves /var/www/registry as its root, so
+# registry.croviatrust.com/<p> must equal croviatrust.com/registry/<p>.
+MIRROR_PATHS = ("/registry/", "/registry/seal/", "/registry/lacuna/", "/registry/data/_home_pulse.json")
 ADVERTISING_DOCS = ("/registry/api/", "/llms.txt", "/.well-known/openapi.yaml", "/.well-known/ai-plugin.json")
 LINK_SOURCE_DOCS = ADVERTISING_DOCS + ("/registry/", "/registry/seal/")
 TEXT_DOC_SUFFIXES = ("/llms.txt", "/llms-full.txt")
 DATA_PREFIX = "/registry/data/"
 REPO_ROOT = Path("/tmp/crovia")
+
+_CDN_EMAIL_RE = re.compile(
+    rb'<a href="/cdn-cgi/l/email-protection[^"]*"[^>]*>.*?</a>|<a href="mailto:[^"]*"[^>]*>.*?</a>'
+    rb'|<span class="__cf_email__"[^>]*>.*?</span>|<script data-cfasync="false" src="/cdn-cgi/scripts/[^"]*"></script>'
+    rb'|info@croviatrust\.com|\s+', re.S)
+
+
+def _strip_cdn_email(body: bytes) -> bytes:
+    """croviatrust.com sits behind Cloudflare, which rewrites e-mail addresses; the mirror does not."""
+    return _CDN_EMAIL_RE.sub(b"", body)
 
 T = TypeVar("T")
 U = TypeVar("U")
@@ -499,15 +511,19 @@ class Audit:
 
     def check_mirror(self) -> None:
         def fetch_pair(path: str) -> tuple[str, FetchResult, FetchResult]:
-            return path, self.fetcher.get(self.url(path, self.domain)), self.fetcher.get(self.url(path, self.mirror))
+            mirror_path = path[len("/registry"):] if path.startswith("/registry") else path
+            return path, self.fetcher.get(self.url(path, self.domain)), self.fetcher.get(self.url(mirror_path, self.mirror))
 
         for path, primary, mirrored in self.pmap(fetch_pair, MIRROR_PATHS):
-            surface = self.url(path, self.mirror)
+            surface = self.url(path[len("/registry"):] if path.startswith("/registry") else path, self.mirror)
             if not primary.ok or not mirrored.ok:
                 self.add("mirror_parity", surface, "high", "both hosts return 200", f"{self.domain}: {primary.describe()}; {self.mirror}: {mirrored.describe()}", "unreachable or non-200 on one host")
                 continue
             digest_primary = hashlib.sha256(primary.body).hexdigest()
             digest_mirror = hashlib.sha256(mirrored.body).hexdigest()
+            if digest_primary != digest_mirror and _strip_cdn_email(primary.body) == _strip_cdn_email(mirrored.body):
+                self.add("mirror_parity", surface, "info", "same origin body", "identical after removing Cloudflare email obfuscation", "mirror serves the same origin file")
+                continue
             if digest_primary != digest_mirror:
                 self.add("mirror_parity", surface, "medium", f"sha256 {digest_primary[:16]}… ({len(primary.body)} bytes)", f"sha256 {digest_mirror[:16]}… ({len(mirrored.body)} bytes)", "mirror body differs from canonical domain")
 
@@ -893,8 +909,9 @@ class Audit:
 
     def _assess_readme(self, surface: str, spec: dict[str, Any], text: str) -> None:
         role_head = " ".join(str(spec.get("role", "")).split()[:6])
-        one_liner = self.canon["identity"]["one_liner"]
-        if (role_head and role_head in text) or one_liner in text:
+        one_liner = " ".join(self.canon["identity"]["one_liner"].split())
+        flat = " ".join(text.replace("*", "").split())  # README prose is hard-wrapped and may be bold
+        if (role_head and role_head in flat) or one_liner in flat:
             self.add("repos", surface, "info", "README states canonical role or one-liner", "present", "README states canonical role")
         else:
             self.add("repos", surface, "low", f"README contains {role_head!r} or the identity one-liner", clip(text.strip().splitlines()[0] if text.strip() else ""), "README does not state canonical role")
