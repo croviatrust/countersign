@@ -53,6 +53,7 @@ def main(argv=None) -> int:
     vf.add_argument("file")
     vf.add_argument("--operator-pubkey", help="expected operator key_hex (from trust_root.json)")
     vf.add_argument("--no-beacon", action="store_true")
+    vf.add_argument("--no-ots", action="store_true")
 
     bt = sub.add_parser("build-targets", help="derive the target list from public registry files")
     bt.add_argument("--candidates", required=True)
@@ -111,7 +112,8 @@ def main(argv=None) -> int:
 
     if args.cmd == "verify":
         from .prove import verify_file
-        res = verify_file(Path(args.file), expected_operator_pubkey_hex=args.operator_pubkey, check_beacon=not args.no_beacon)
+        res = verify_file(Path(args.file), expected_operator_pubkey_hex=args.operator_pubkey,
+                          check_beacon=not args.no_beacon, check_ots=not args.no_ots)
         print(json.dumps(res, indent=1))
         return 0 if res["ok"] else 1
 

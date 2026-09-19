@@ -53,12 +53,49 @@ def build(settings: Settings, issuer: SigningKey, target_id: str, *, from_epoch:
     return wrap_in_seal(issuer=issuer, query=query, proof=proof)
 
 
+def _ots_available() -> bool:
+    import shutil
+    return shutil.which("ots") is not None
+
+
+def ots_check(closed: Dict[str, Any], sheet_hash_bytes: bytes) -> bool:
+    """SPEC §8.5 step 2: fetch the .ots named by `proof_ref` and verify it attests `sheet_hash`."""
+    import tempfile
+    import urllib.request
+
+    from . import ots as ots_mod
+    from .config import USER_AGENT
+    if closed.get("anchored_digest") != "sha256:" + sheet_hash_bytes.hex():
+        return False
+    ref = closed.get("proof_ref")
+    if not ref:
+        return False
+    try:
+        req = urllib.request.Request(ref, headers={"User-Agent": USER_AGENT})
+        with urllib.request.urlopen(req, timeout=30) as r:
+            data = r.read()
+    except Exception:  # noqa: BLE001
+        return False
+    with tempfile.TemporaryDirectory() as td:
+        p = Path(td) / "sheet.ots"
+        p.write_bytes(data)
+        height = ots_mod.upgrade(p)
+        if height is None or height != int(closed.get("block_height", -1)):
+            return False
+        return ots_mod.verify_digest(p, sheet_hash_bytes)
+
+
 def verify_file(path: Path, *, expected_operator_pubkey_hex: Optional[str] = None,
-                check_beacon: bool = True) -> Dict[str, Any]:
+                check_beacon: bool = True, check_ots: bool = True) -> Dict[str, Any]:
     bundle = json.loads(Path(path).read_text(encoding="utf-8"))
     kwargs: Dict[str, Any] = {}
     if check_beacon:
         kwargs["beacon_check"] = drand_mod.beacon_check
+    if check_ots and _ots_available():
+        kwargs["ots_check"] = ots_check
     if expected_operator_pubkey_hex:
         kwargs["expected_operator_pubkey_hex"] = expected_operator_pubkey_hex
-    return verify_wrapped(bundle, **kwargs)
+    res = verify_wrapped(bundle, **kwargs)
+    if check_ots and not _ots_available():
+        res.setdefault("warnings", []).append("ots client not installed: pip install opentimestamps-client")
+    return res
