@@ -1,91 +1,76 @@
-# Countersign · TACET
-
-[![CI](https://github.com/croviatrust/countersign/actions/workflows/ci.yml/badge.svg)](https://github.com/croviatrust/countersign/actions/workflows/ci.yml)
-[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
-[![Spec: CC0](https://img.shields.io/badge/Spec-CC0-lightgrey.svg?style=flat-square)](https://creativecommons.org/publicdomain/zero/1.0/)
+# Crovia — canon, TACET, and the path back to consistency
 
 **Crovia records what AI providers disclose about training data, and the
-absence of it, as signed, Bitcoin-anchored facts.** This repository is the
-witness protocol and the home of **TACET**, the transparency log in which
-*non-inclusion* (silence) is a first-class, portable, offline-verifiable
-proof.
+absence of it, as signed, Bitcoin-anchored facts.**
 
-## Two things live here
+This workspace holds the material that brings every Crovia surface back into
+agreement and gives the project its new core protocol. It is laid out to be
+moved into `croviatrust/countersign` with a copy; no new repository is needed.
 
-### Countersign — independent witnessing
+```
+CANON.md                 Single source of truth: names, the one Seal format, headline-number
+canon/canon.json         definitions, complete endpoint list, retired paths, repo roles, wording
+tacet/                   TACET: verifiable silence proofs — SPEC.md, Python reference, conformance
+tools/audit_surfaces.py  Audits the LIVE surfaces against the canon and writes a report
+reports/                 Audits of 2026-09-19: baseline 3 critical / 17 high → latest 0 critical / 3 high
+ops/phase0/              Server-side post-processors that make the live numbers true today
+drafts/                  Mirrored READMEs for the four active repos, llms.txt, apply plan
+.github/workflows/       Tests, conformance, vector determinism, canon checks, weekly audit
+```
 
-Self-signed evidence proves nothing in a dispute. Countersign is the missing
-party: an independent witness that countersigns and timestamps evidence
-digests in an append-only Merkle log (RFC 6962 construction) and lets anyone
-verify a single entry offline. Certificate Transparency, for what AI systems
-did and for what Crovia observed.
+## Why
+
+An audit of the live surfaces on 2026-09-07 found three incompatible objects
+all called "Crovia Seal", a home page counting collector heartbeats as LACUNA
+certificates, a silence figure that kept growing five months after the last
+observation, a Bitcoin anchoring job stamping the same July root 38 times,
+and a mirror serving different HTML. Each is fixed here in the order that
+keeps every surface consistent at every step (`drafts/README.md`).
+
+## What TACET adds
+
+Transparency logs prove presence. TACET is a transparency log whose product
+is a portable, offline-verifiable proof of **absence over time**: the slot of
+a model in a sparse Merkle map was empty across a contiguous range of
+epochs, each bounded below by a drand round and above by a Bitcoin block,
+with a negative surface snapshot bound to every counted epoch and k-of-n
+witness countersignatures on every epoch head. Silence never accrues without
+an anchored negative observation. The proof is delivered as an unmodified
+`crovia.seal.v1`. See `tacet/SPEC.md` and `tacet/README.md`.
+
+## Run
 
 ```bash
-pip install -e ".[dev]"
-python examples/demo.py            # append, countersign, export a proof, verify it offline
-countersign --help
+git clone --depth 1 https://github.com/croviatrust/crovia-seal /tmp/crovia-seal
+pip install -e /tmp/crovia-seal/reference/python -e "tacet/reference/python[test]"
+(cd tacet/reference/python && python3 -m pytest -q)  # 28 passed
+python3 tacet/conformance/run_conformance.py         # 28 passed, 0 failed
+python3 tools/audit_surfaces.py                      # ~4 min, writes reports/
 ```
 
-Protocol: `SPEC.md`. Roadmap: `ROADMAP.md`. Security policy: `SECURITY.md`.
+## Status 2026-09-19
 
-### TACET — verifiable silence
+Applied and pushed as Crovia Trust: `countersign` (canon, TACET, audit tool), `crovia-seal`
+(one Seal format, conformant `seal-svc` in production, draft-01 profile classifier merged),
+`crovia-core-engine` (README, CI, `ops/phase0`, indeterminate-acquisition fix merged),
+`crovia-evidence-lab` (README; hourly sync repaired after a four-month stall). Live
+surfaces: LACUNA 0, silence observation-bounded, anchors counted as distinct roots,
+retired paths redirect, mirror normalised. Remaining high findings are time-bound: the two
+OTS items clear after the 04:30 refresh promotes today's stamped roots; the LACUNA-candidates
+item clears only when observation resumes (TACET observers).
 
-Existing transparency logs prove presence. TACET proves **absence over
-time**: that for a given AI model no training-data disclosure existed in the
-log, and none was found on the model's monitored public surfaces, across a
-contiguous range of epochs each bounded below by a drand randomness round and
-above by a Bitcoin block.
+Open decisions for the maintainer:
 
-- `tacet/SPEC.md` — the protocol (v0.1-draft, CC0)
-- `tacet/reference/python` — reference implementation
-- `tacet/conformance/` — deterministic vectors and a 28-case runner
+- `crovia-core-engine` branches `public/evidence-first-surface` (a parallel `public-site/`
+  claims surface), `site/webroot-mirror`, `feat/claim-evaluation-spec`: not merged; they
+  would add a second source of truth next to the canon.
+- `snapshots/global_ranking.json` is published hourly in `crovia-evidence-lab` (CC-BY-4.0)
+  while `/registry/data/global_ranking.json` is labelled professional-tier and returns 403.
+  Either stop syncing it or make it public; the canon must say which.
+- Old backups on the data volume (`safety_backups` 4.5 GB, pre-retrofit ledger copy,
+  `evidence-lab-pre-filter-*.tar.gz`) still await a keep/delete decision.
 
-A TACET silence proof is delivered as an unmodified `crovia.seal.v1` object:
-the query is the Seal's input, the proof its output, the drand round its
-anchor, the witnesses its countersignatures. Any Seal verifier can check the
-outer layer; a TACET verifier checks the rest, offline.
+## Identity
 
-```python
-from tacet import verify_wrapped
-import json
-print(verify_wrapped(json.load(open("llama-3.1-8b.silence.json")))["silence"])
-# {'observed_epochs': 2117, 'silence_seconds': 7621200, 'silence_days': '88.21', 'observed_to': '…'}
-```
-
-Silence never accrues without an anchored negative observation (SPEC §8.4).
-Three strength levels: map-silence, surface-silence, witnessed-silence (k/n).
-
-## Relationship to LACUNA
-
-LACUNA on `croviatrust.com` is the human-readable view of absence records.
-TACET is the protocol that makes each of those records a verifiable object
-with a defined unit, an explicit scope (surfaces + predicate) and a temporal
-sandwich. Countersign witnesses provide the k/n countersignatures.
-
-## Status
-
-- Countersign: v0.1, single-operator log.
-- TACET: v0.1-draft; reference passes conformance and round-trips through the
-  Crovia Seal reference verifier; first anchored epoch pending on the
-  substrate integration in `crovia-core-engine`.
-
-## Crovia surfaces
-
-| Surface | URL |
-|---|---|
-| Ledger and registry | https://croviatrust.com/registry/ |
-| LACUNA (absence records) | https://croviatrust.com/registry/lacuna/ |
-| Crovia Seal: spec, verifier, log | https://croviatrust.com/registry/seal/ |
-| Issuer trust root | https://seal.croviatrust.com/trust-root.json |
-| Machine-readable index | https://croviatrust.com/llms.txt |
-| MCP server | https://croviatrust.com/mcp |
-| Canon (source of truth for all of the above) | https://github.com/croviatrust/countersign/blob/main/CANON.md |
-
-Repositories: [crovia-seal](https://github.com/croviatrust/crovia-seal) (the standard) ·
-[crovia-core-engine](https://github.com/croviatrust/crovia-core-engine) (the substrate) ·
-[countersign](https://github.com/croviatrust/countersign) (witnessing and TACET) ·
-[crovia-evidence-lab](https://github.com/croviatrust/crovia-evidence-lab) (public data) ·
-[causari](https://github.com/croviatrust/causari) (sibling product: code provenance).
-
-Crovia records facts about public surfaces. It does not infer intent, allege
-wrongdoing or enforce compliance. Contact: info@croviatrust.com.
+All commits are authored by `Crovia Trust <info@croviatrust.com>`.
+Specification texts are CC0; code is Apache-2.0.

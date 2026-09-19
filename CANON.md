@@ -101,9 +101,9 @@ Large files (`substrate/chains.json`, `consensus.json`, `predecessors_map.json`,
 | Repo | Role | State |
 |---|---|---|
 | `crovia-seal` | The Seal standard: spec, drafts, reference impls, conformance, verifier, proxy/tlog integrations. | active |
-| `crovia-core-engine` | Crovia Substrate: collectors, observer, sealer, anchoring, public index builders, ops. The 2025 royalty/payout engine moves to `legacy/`. | active, needs CI |
+| `crovia-core-engine` | Crovia Substrate: collectors, observer, sealer, anchoring, public index builders, ops (`ops/phase0`). The 2025 royalty/payout engine moves to `legacy/`. | active, CI on push |
 | `countersign` | Witness protocol and home of TACET (verifiable map, epoch sheets, silence proofs). | active |
-| `crovia-evidence-lab` | Public data plane: datasets, leaderboards, reproducible capsules. | active |
+| `crovia-evidence-lab` | Public data plane: hourly exports (`open/`, `snapshots/`), weekly leaderboard, frozen 2026-H1 experiments. | active, hourly sync |
 | `causari` | Sibling product. | active |
 | `crovia-core`, `crovia-wedge`, `awesome-*` forks, `causari-audit-demo` | archived (read-only, README pointer to the canon). | to archive |
 
