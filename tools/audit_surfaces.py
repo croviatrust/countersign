@@ -582,8 +582,16 @@ class Audit:
             if not result.ok:
                 continue
             position = result.text.find(needle)
-            if position >= 0:
-                self.add("private_files", self.url(doc_path), "high", f"no reference to {private}", snippet(result.text, position), "private file is advertised publicly")
+            if position < 0:
+                continue
+            # In HTML, a professional-tier entry may name the file without linking to it (label
+            # "professional"); only a live link or a copy-paste URL counts as advertising.
+            is_html = "<html" in result.text[:2000].lower() or doc_path.endswith("/")
+            linked = re.search(r'href="[^"]*' + re.escape(needle), result.text) or ("croviatrust.com/registry/data/" + needle) in result.text
+            if is_html and not linked and "professional" in result.text[max(0, position - 600):position + 600].lower():
+                self.add("private_files", self.url(doc_path), "info", f"{needle} not linked", "named as a professional-tier product, no link", "private file listed as professional, not linked")
+                continue
+            self.add("private_files", self.url(doc_path), "high", f"no reference to {private}", snippet(result.text, position), "private file is advertised publicly")
 
     def _assess_private_status(self, private: str, result: FetchResult) -> None:
         surface = self.url(private)
