@@ -32,3 +32,51 @@ jobs:
         run: pytest -q
       - name: Demo smoke test
         run: python examples/demo.py
+
+  tacet:
+    name: TACET reference, tests and conformance
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Crovia Seal reference (for the Seal wrapper)
+        run: |
+          git clone --depth 1 https://github.com/croviatrust/crovia-seal /tmp/crovia-seal
+          pip install -e /tmp/crovia-seal/reference/python
+      - name: Install TACET reference
+        run: pip install -e "tacet/reference/python[test]"
+      - name: Unit tests
+        run: python -m pytest tacet/reference/python -q
+      - name: Conformance
+        run: python tacet/conformance/run_conformance.py
+      - name: Vectors are deterministic
+        run: |
+          python tacet/conformance/generate_vectors.py
+          git diff --exit-code -- tacet/conformance/vectors
+
+  canon:
+    name: Canon integrity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: canon.json is valid and free of duplicates
+        run: |
+          python - <<'PY'
+          import json
+          c = json.load(open("canon/canon.json"))
+          assert c["schema"] == "crovia.canon.v1"
+          for key in ("pages", "retired_paths", "data_files", "private_files", "heavy_files"):
+              assert len(c[key]) == len(set(c[key])), f"duplicates in {key}"
+          assert not set(c["pages"]) & set(c["retired_paths"])
+          assert not set(c["data_files"]) & set(c["private_files"])
+          print("canon ok")
+          PY
+      - run: python -m py_compile tools/audit_surfaces.py
