@@ -33,6 +33,15 @@ epoch in Bitcoin. When a lab stays silent, the silence stops being an opinion.
 
 ## Verify a live proof in 30 seconds
 
+**In the browser, nothing to install:**
+[croviatrust.com/registry/seal/verify/?url=…mistralai__Mistral-7B-v0.1.seal.json](https://croviatrust.com/registry/seal/verify/?url=https%3A%2F%2Fcroviatrust.com%2Fregistry%2Fdata%2Ftacet%2Fproofs%2Fmistralai__Mistral-7B-v0.1.seal.json)
+— `site/registry/seal/verify/tacet-verify.js` is a second, independent implementation of
+SPEC §8.5 (under 300 lines of plain JS on WebCrypto) and runs against the same
+conformance vectors in CI. The only step it leaves to the command line is the
+OpenTimestamps attestation.
+
+**On the command line, everything including the Bitcoin anchors:**
+
 ```bash
 git clone https://github.com/croviatrust/countersign
 git clone https://github.com/croviatrust/crovia-seal
@@ -109,19 +118,20 @@ summary (SPEC §11). A committed slot can never yield a silence proof.
 ```
 tacet/SPEC.md                    The protocol, v0.1-draft (CC0)
 tacet/reference/python/          Reference implementation: SMT, epoch sheets, snapshots, proofs, Seal wrapping
-tacet/conformance/               Deterministic vectors + 28-case runner — port this to other languages
+tacet/conformance/               Deterministic vectors + 34-case runner (Python) + Node runner for the browser verifier — port this to other languages
 tacet/operator/                  Production operator: run-epoch, refresh-anchors, publish, prove, verify
 tacet/operator/tacet_operator/predicates/   Public predicates with real-card vectors
 CANON.md, canon/canon.json       Single source of truth for every Crovia surface: names, formats, numbers, endpoints
 tools/audit_surfaces.py          Audits the live site against the canon
-site/                            Sources of croviatrust.com
+site/                            Sources of croviatrust.com; site/registry/seal/verify/tacet-verify.js is the browser verifier
 src/countersign/                 Original countersign: CT-style Merkle log + signed tree heads (witness role)
 ```
 
 ```bash
 cd tacet/reference/python && python -m pytest -q      # reference: 28 passed
 cd tacet/operator          && python -m pytest -q      # operator: predicate vectors, fake-network epochs, proof round-trip
-python tacet/conformance/run_conformance.py            # 28 passed, 0 failed
+python tacet/conformance/run_conformance.py            # 34 passed, 0 failed
+node   tacet/conformance/run_conformance_js.cjs        # browser verifier against the same vectors: 10 passed
 ```
 
 ## Public data
