@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crovia-tacet"
+version = "0.1.0"
+description = "Reference implementation of TACET: verifiable silence proofs for AI training disclosure (Crovia Trust)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Crovia Trust", email = "info@croviatrust.com" }]
+keywords = ["ai", "transparency", "eu-ai-act", "merkle", "non-inclusion", "provenance", "crovia"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Legal Industry",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Security :: Cryptography",
+]
+dependencies = ["cryptography>=41.0.0"]
+
+[project.optional-dependencies]
+seal = ["crovia-seal>=0.5.0"]
+test = ["pytest>=7.0"]
+
+[project.urls]
+Homepage = "https://croviatrust.com"
+Specification = "https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tacet*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q"
