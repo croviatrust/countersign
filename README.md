@@ -14,6 +14,11 @@
 
 <p align="center">
   <a href="https://github.com/croviatrust/countersign/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/croviatrust/countersign/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://croviatrust.com/registry/tacet/"><img alt="TACET epochs (live)" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fcroviatrust.com%2Fregistry%2Fdata%2Ftacet%2Fbadges%2Fepochs.json"></a>
+  <a href="https://croviatrust.com/registry/data/tacet/targets.json"><img alt="models observed (live)" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fcroviatrust.com%2Fregistry%2Fdata%2Ftacet%2Fbadges%2Fmodels.json"></a>
+  <a href="https://croviatrust.com/registry/data/tacet/latest.json"><img alt="signed observations of absence (live)" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fcroviatrust.com%2Fregistry%2Fdata%2Ftacet%2Fbadges%2Fnegative.json"></a>
+</p>
+<p align="center">
   <img alt="Spec" src="https://img.shields.io/badge/TACET-v0.1--draft-1ec5ff">
   <img alt="Seal" src="https://img.shields.io/badge/wraps-crovia.seal.v1-1ec5ff">
   <img alt="License" src="https://img.shields.io/badge/code-Apache--2.0-lightgrey">
