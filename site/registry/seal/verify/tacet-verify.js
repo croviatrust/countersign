@@ -147,13 +147,14 @@
     for (const e of observed) { const s = by.get(e); if (s) total += ts(s.epoch_end) - ts(s.epoch_start); }
     const obs = Array.from(observed).sort((a, b) => a - b);
     return { map_epochs: sheets.length, observed_epochs: observed.size, observed_from: obs.length ? by.get(obs[0]).epoch_start : null,
-             observed_to: obs.length ? by.get(obs[obs.length - 1]).epoch_end : null, silence_seconds: total, silence_days: total / 86400 };
+             observed_to: obs.length ? by.get(obs[obs.length - 1]).epoch_end : null, silence_seconds: total, silence_days: formatSilenceDays(total) };
   }
+  // SPEC §9: two decimals, truncated, integer arithmetic — byte-identical to the Python reference.
+  function formatSilenceDays(seconds) { const cents = Math.floor((seconds * 100) / 86400); return Math.floor(cents / 100) + "." + String(cents % 100).padStart(2, "0"); }
   function silenceMatches(claimed, expected) {
     if (!claimed || typeof claimed !== "object") return false;
     for (const k of ["map_epochs", "observed_epochs", "observed_from", "observed_to", "silence_seconds"]) if (claimed[k] !== expected[k]) return false;
-    // silence_days is a 2-decimal string in the proof; the Python verifier compares it byte-for-byte.
-    return typeof claimed.silence_days === "string" && Math.abs(parseFloat(claimed.silence_days) - expected.silence_days) <= 0.005 + 1e-9;
+    return claimed.silence_days === expected.silence_days;
   }
 
   async function fetchJson(url) { const r = await fetch(url, { cache: "no-store" }); if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }
@@ -237,7 +238,7 @@
       step(true, good + " negative snapshot(s) signed by the observer and included in their epoch", preds.join(", "));
       expected = computeSilence(sheets, observed);
       err(silenceMatches(proof.silence, expected), "silence block matches recomputation under the monotonicity rule",
-          expected.observed_epochs + " anchored observed epoch(s) = " + expected.silence_days.toFixed(2) + " days; unanchored or unobserved hours count zero");
+          expected.observed_epochs + " anchored observed epoch(s) = " + expected.silence_days + " days; unanchored or unobserved hours count zero");
       if (!errors.length) verified = 2;
     } else {
       expected = computeSilence(sheets, new Set());

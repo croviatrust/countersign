@@ -205,7 +205,7 @@ async function run() {
       verdict.className = "vf-verdict ok";
       verdict.innerHTML = "&#10003;&nbsp; VALID <span class='sub'>TACET level-" + r.verified + " silence proof for <b>" + escapeHtml(r.target) + "</b>: "
         + r.sheets + " epoch(s), " + r.anchored + " Bitcoin-attested, " + (r.silence ? r.silence.observed_epochs : 0) + " observed negative — "
-        + (r.silence ? r.silence.silence_days.toFixed(2) : "0.00") + " days of verifiable silence.</span>";
+        + (r.silence ? r.silence.silence_days : "0.00") + " days of verifiable silence.</span>";
       renderSteps(steps, stepsEl);
       return;
     }

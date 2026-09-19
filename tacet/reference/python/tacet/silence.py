@@ -92,8 +92,14 @@ def compute_silence(sheets: Sequence[Dict[str, Any]], observed_epochs: set) -> D
         "observed_from": by_epoch[obs_sorted[0]]["epoch_start"] if obs_sorted else None,
         "observed_to": by_epoch[obs_sorted[-1]]["epoch_end"] if obs_sorted else None,
         "silence_seconds": total_seconds,
-        "silence_days": f"{total_seconds / 86400:.2f}",
+        "silence_days": format_silence_days(total_seconds),
     }
+
+
+def format_silence_days(silence_seconds: int) -> str:
+    """SPEC §9: two decimals, truncated (never rounded up), integer arithmetic only."""
+    cents = (int(silence_seconds) * 100) // 86400
+    return f"{cents // 100}.{cents % 100:02d}"
 
 
 # ---------------------------------------------------------------------------

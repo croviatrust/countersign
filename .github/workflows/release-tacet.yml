@@ -8,7 +8,8 @@ name: release-tacet
 # One-time setup by a maintainer on pypi.org, for each of the two projects:
 #   Publishing -> add GitHub publisher: owner croviatrust, repository countersign,
 #   workflow release-tacet.yml, environment pypi.
-# And on GitHub: Settings -> Environments -> "pypi".
+# And on GitHub: Settings -> Environments -> "pypi"; then set the repository variable
+#   PYPI_TRUSTED_PUBLISHER=configured   (until then the publish job is skipped, not failed).
 #
 # Cut a release: bump both pyproject.toml files, tacet/__init__.py and wrap.py TACET_VERSION,
 # regenerate vectors, then  git tag -a tacet-vX.Y.Z && git push origin main --tags
@@ -48,6 +49,7 @@ jobs:
 
   publish:
     needs: check
+    if: vars.PYPI_TRUSTED_PUBLISHER == 'configured'
     runs-on: ubuntu-latest
     environment: pypi
     permissions:

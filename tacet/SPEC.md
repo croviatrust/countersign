@@ -316,8 +316,13 @@ is the minimum for any public statement about a target's disclosure.
 observed_epochs      = #{ e ∈ [from, to] : sheet(e).closed.status == "bitcoin"
                            ∧ ∃ negative snapshot s for target with s.epoch == e }
 silence_seconds      = Σ over observed epochs e of (epoch_end(e) − epoch_start(e))
-silence_days         = silence_seconds / 86400, rendered as a decimal string
+silence_days         = floor(silence_seconds * 100 / 86400) / 100,
+                       rendered with exactly two decimals ("0.12", "86.96")
 ```
+
+`silence_days` is **truncated**, never rounded: a verifier that recomputes it
+MUST produce the same string byte-for-byte, and a proof MUST NOT display more
+silence than its anchored seconds support (10 800 s is `"0.12"`, not `"0.13"`).
 
 Epochs without a negative snapshot (observer down, surface unreachable,
 predicate error) contribute **nothing**. Unanchored epochs contribute nothing.

@@ -221,3 +221,11 @@ def test_wrapped_proof_is_a_valid_seal(proof3, sc):
     weak = copy.deepcopy(bundle)
     weak["query"]["min_strength"] = 3
     assert verify_wrapped(weak)["errors"] == ["seal.subject.input_hash does not bind the query"]
+
+
+@pytest.mark.parametrize("seconds,expected", [
+    (0, "0.00"), (3600, "0.04"), (10800, "0.12"), (86400, "1.00"), (86399, "0.99"), (7_513_344, "86.96"), (129_600, "1.50"),
+])
+def test_silence_days_is_truncated_two_decimals(seconds, expected):
+    from tacet.silence import format_silence_days
+    assert format_silence_days(seconds) == expected
