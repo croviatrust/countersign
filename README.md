@@ -124,10 +124,39 @@ witnesses) is the next milestone.
 Providers are protected too: a model can **commit-then-reveal** its training-data
 summary (SPEC §11). A committed slot can never yield a silence proof.
 
+## PNX — the same machine, pointed at agents (draft)
+
+TACET proves what a public surface did not contain. **PNX — Proof of
+Non-Exfiltration** (`tacet/PNX.md`, profile `crovia.pnx.v1`) proves what an AI
+agent did not send out. An egress witness fingerprints every outbound body
+(salted 32-byte k-grams, winnowed with window 16), commits the fingerprints to
+the same sparse Merkle map and signs a run sheet; the operator then proves, per
+protected asset, non-inclusion against the run root. Any shared substring of
+47 bytes or more is always detected; shorter assets are reported as `partial`
+or `undetectable` and never counted as clean. The run root is committed into a
+TACET epoch, so it inherits the drand opening and the Bitcoin closing.
+
+The auditor sees neither the traffic nor the secrets and verifies offline:
+
+```python
+from tacet import egress
+from tacet.keys import SigningKey
+
+w = egress.EgressWitness(run_id="ci-4711/agent-review")
+w.ingest(request_body, "2026-09-19T22:00:03Z")            # for every outbound body
+sheet = w.sheet(SigningKey.generate("witness-ci"), "2026-09-19T22:59:59Z")
+proof = w.prove(sheet, [("openai_key", b"sk-live-..."), ("customers.csv", open("customers.csv","rb").read())])
+egress.verify_pnx(proof, {"openai_key": b"sk-live-...", "customers.csv": ...}).verdict   # 'absent' | 'present' | 'mixed'
+```
+
+Status: reference + tests shipped; conformance vectors, browser verifier and a
+one-command `tacet-egress` proxy are next (see `GROWTH.md`).
+
 ## Repository
 
 ```
 tacet/SPEC.md                    The protocol, v0.1-draft (CC0)
+tacet/PNX.md                     Proof of Non-Exfiltration profile for agent egress, draft 0.1
 tacet/reference/python/          Reference implementation: SMT, epoch sheets, snapshots, proofs, Seal wrapping
 tacet/conformance/               Deterministic vectors + real Bitcoin-anchored .ots vectors; 47-case runner (Python) + 20-case Node runner for the browser verifier — port this to other languages
 tacet/operator/                  Production operator: run-epoch, refresh-anchors, publish, prove, verify
@@ -139,7 +168,7 @@ src/countersign/                 Original countersign: CT-style Merkle log + sig
 ```
 
 ```bash
-cd tacet/reference/python && python -m pytest -q      # reference: 28 passed
+cd tacet/reference/python && python -m pytest -q      # reference: 43 passed (incl. PNX)
 cd tacet/operator          && python -m pytest -q      # operator: predicate vectors, fake-network epochs, proof round-trip
 python tacet/conformance/run_conformance.py            # 47 passed, 0 failed
 node   tacet/conformance/run_conformance_js.cjs        # browser verifier against the same vectors: 20 passed
