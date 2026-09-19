@@ -65,6 +65,15 @@ def main(argv=None) -> int:
     args = p.parse_args(argv)
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
                         format="%(asctime)s %(levelname)s %(message)s", stream=sys.stderr)
+
+    if args.cmd == "verify":
+        # Third parties run this on any machine: it must not touch operator state or keys.
+        from .prove import verify_file
+        res = verify_file(Path(args.file), expected_operator_pubkey_hex=args.operator_pubkey,
+                          check_beacon=not args.no_beacon, check_ots=not args.no_ots)
+        print(json.dumps(res, indent=1))
+        return 0 if res["ok"] else 1
+
     s = _settings(args)
 
     if args.cmd == "keys":
@@ -109,13 +118,6 @@ def main(argv=None) -> int:
         else:
             print(text)
         return 0
-
-    if args.cmd == "verify":
-        from .prove import verify_file
-        res = verify_file(Path(args.file), expected_operator_pubkey_hex=args.operator_pubkey,
-                          check_beacon=not args.no_beacon, check_ots=not args.no_ots)
-        print(json.dumps(res, indent=1))
-        return 0 if res["ok"] else 1
 
     if args.cmd == "build-targets":
         from .targets import build_from_public
