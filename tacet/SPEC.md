@@ -239,6 +239,13 @@ Internet Archive), so that a negative snapshot can be independently re-derived
 from public data. The operator MUST NOT change a predicate's behaviour without
 incrementing its version.
 
+A predicate's documentation MUST state what it does not recognise. The
+reference predicate `crovia.pred.hf-card-training-data` 1.0.0 recognises a
+YAML `datasets:` block and English lead phrases only; a disclosure written
+solely in another language is not recognised and yields a negative snapshot.
+Verifiers weighing a proof SHOULD read the predicate's stated limits alongside
+the surfaces it was run on.
+
 ## 8. Silence proofs
 
 ### 8.1 Object

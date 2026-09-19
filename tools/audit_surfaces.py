@@ -71,7 +71,7 @@ REPO_ROOT = Path("/tmp/crovia")
 
 _CDN_EMAIL_RE = re.compile(
     rb'<a href="/cdn-cgi/l/email-protection[^"]*"[^>]*>.*?</a>|<a href="mailto:[^"]*"[^>]*>.*?</a>'
-    rb'|<span class="__cf_email__"[^>]*>.*?</span>|<script data-cfasync="false" src="/cdn-cgi/scripts/[^"]*"></script>'
+    rb'|<span class="__cf_email__"[^>]*>.*?</span>|<script data-cfasync="false" src="/cdn-cgi/scripts/[^"]*">\s*</script>'
     rb'|info@croviatrust\.com|\s+', re.S)
 
 
@@ -777,7 +777,10 @@ class Audit:
         if isinstance(pulse_count, (int, float)) and pulse_count > 0 and not recent_models:
             self.add("headline_numbers", surface, "critical", "0 LACUNA records, or model-target candidates observed within 7 days", observed, "LACUNA count shown while no model-target candidate has been observed in the last 7 days")
         collectors = {str(c.get("source_collector")) for c in candidates}
-        if candidates and len(collectors) == 1 and newest is not None and now - newest > week:
+        live = [c for c in candidates if not c.get("stale")]
+        if live:
+            self.add("headline_numbers", self.url("/registry/data/substrate/lacuna_candidates.json"), "info", "live candidates present", f"{len(live)} non-stale candidates from {sorted({str(c.get('source_collector')) for c in live})}", "LACUNA candidates are live")
+        elif candidates and len(collectors) == 1 and newest is not None and now - newest > week:
             self.add("headline_numbers", self.url("/registry/data/substrate/lacuna_candidates.json"), "high", "candidates from live collectors", f"collector={next(iter(collectors))}, newest last_seen={newest.isoformat()} ({(now - newest).days} days ago)", "all candidates from one dead collector")
 
     def _assess_silence(self, pulse: dict[str, Any], silence: Optional[dict[str, Any]]) -> None:
@@ -802,7 +805,10 @@ class Audit:
 
     def _assess_anchors(self, anchors_doc: dict[str, Any]) -> None:
         surface = self.url("/registry/data/substrate/ots_anchors.json")
-        anchors = sorted(anchors_doc.get("anchors") or [], key=lambda a: str(a.get("anchor_date", "")))
+        def _anchor_ts(a: dict[str, Any]) -> datetime | None:
+            return parse_ts(a.get("stamped_at")) or parse_ts(a.get("anchor_date"))
+
+        anchors = sorted(anchors_doc.get("anchors") or [], key=lambda a: (_anchor_ts(a) or datetime.min.replace(tzinfo=timezone.utc)).isoformat())
         roots = [str(a.get("merkle_root")) for a in anchors]
         longest = run = 0
         for index, root in enumerate(roots):
@@ -817,8 +823,20 @@ class Audit:
             f"newest anchor_date={newest_label}{age_label}"
         )
         self.add("headline_numbers", surface, "info", f"bitcoin_confirmed={anchors_doc.get('bitcoin_confirmed')} counts distinct roots", observed, "anchor reconciliation")
-        if longest >= 3:
-            self.add("headline_numbers", surface, "high", "each anchor stamps a new root", f"{longest} consecutive anchors share one merkle_root", "repeated anchoring of unchanged root")
+        # History before the 2026-09-19 fix legitimately holds a 38-long identical-root run. Re-anchoring is a live
+        # problem only when the newest anchor repeats the one before it, or when a run of 3 forms inside the last 14 days.
+        fortnight = utcnow() - timedelta(days=14)
+        recent_roots = [str(a.get("merkle_root")) for a in anchors if (ts := _anchor_ts(a)) and ts >= fortnight]
+        recent_run = run = 0
+        for index, root in enumerate(recent_roots):
+            run = run + 1 if index and root == recent_roots[index - 1] else 1
+            recent_run = max(recent_run, run)
+        if len(roots) >= 2 and roots[-1] == roots[-2]:
+            self.add("headline_numbers", surface, "high", "each new anchor stamps a new root", f"newest anchor ({newest_label}) repeats the previous merkle_root {roots[-1][:16]}…", "repeated anchoring of unchanged root")
+        elif recent_run >= 3:
+            self.add("headline_numbers", surface, "medium", "each new anchor stamps a new root", f"{recent_run} anchors of the last 14 days share one merkle_root (historical longest run {longest})", "repeated anchoring of unchanged root")
+        elif longest >= 3:
+            self.add("headline_numbers", surface, "info", "history acknowledged", f"historical identical-root run of {longest} before 2026-09-19; last 14 days: {len(recent_roots)} anchors, {len(set(recent_roots))} distinct roots", "legacy re-anchoring visible in history only")
         if age_days is not None and age_days > 3:
             self.add("headline_numbers", surface, "high", "newest anchor <= 3 days old", f"newest anchor_date {newest_label} is {age_days:.1f} days old", "anchoring stalled")
 
