@@ -18,7 +18,7 @@ from tacet_operator.config import GENESIS, EPOCH_SECONDS, Paths, Settings
 from tacet_operator.fetch import Fetched
 from tacet_operator.keys import load_all
 from tacet_operator.prove import build as build_proof, verify_file
-from tacet_operator.publish import featured_proofs, index, observed_targets, trust_root
+from tacet_operator.publish import badges, featured_proofs, index, observed_targets, trust_root
 from tacet_operator.runner import EpochRunner, refresh_anchors
 from tacet_operator.state import State
 
@@ -154,6 +154,10 @@ def test_three_epochs_then_proof(env):
     assert by[SILENT]["negative"] == 3 and by[SILENT]["negative_anchored_epochs"] == 2
     assert by[GATED]["last_result"] is True and by[GATED]["last_surface"].endswith(GATED)
     assert DOWN not in by
+    b = badges(s, latest, tg)
+    assert b["epochs"]["message"] == "3 (2 in Bitcoin)" and b["models"]["message"] == str(tg["count"])
+    shield = json.loads((s.paths.public / "badges" / "negative.json").read_text())
+    assert shield["schemaVersion"] == 1 and shield["message"] == str(latest["negative_snapshots_total"])
 
 
 def test_backfill_after_downtime(env):

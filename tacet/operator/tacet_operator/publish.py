@@ -141,6 +141,26 @@ def observed_targets(settings: Settings) -> Dict[str, Any]:
     return out
 
 
+def badges(settings: Settings, latest: Dict[str, Any], targets: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    """shields.io endpoint badges (https://shields.io/badges/endpoint-badge) under public/badges/.
+
+    Figures follow CANON §4: epochs and anchored epochs from latest.json, models from
+    targets.json, negative snapshots from latest.json. Colour never encodes a judgement.
+    """
+    blue = "1ec5ff"
+    epochs, anchored = latest.get("epochs", 0), latest.get("anchored_epochs", 0)
+    out = {
+        "epochs": {"label": "TACET epochs", "message": f"{epochs:,} ({anchored:,} in Bitcoin)", "color": blue},
+        "models": {"label": "models observed", "message": f"{targets.get('count', 0):,}", "color": blue},
+        "negative": {"label": "signed observations of absence", "message": f"{latest.get('negative_snapshots_total', 0):,}", "color": blue},
+        "latest": {"label": "latest epoch", "message": (latest.get("latest_sheet") or {}).get("epoch_end", "none")[:16] + "Z", "color": blue},
+    }
+    (settings.paths.public / "badges").mkdir(parents=True, exist_ok=True)
+    for name, badge in out.items():
+        _write_json(settings.paths.public / "badges" / f"{name}.json", {"schemaVersion": 1, "cacheSeconds": 300, **badge})
+    return out
+
+
 def publish_all(settings: Settings, keys: Dict[str, SigningKey], *, with_proofs: bool = False) -> Dict[str, Any]:
     try:
         info = drand_mod.fetch_info()
@@ -148,7 +168,8 @@ def publish_all(settings: Settings, keys: Dict[str, SigningKey], *, with_proofs:
         info = None
     trust_root(settings, keys, info)
     latest = index(settings)
-    observed_targets(settings)
+    targets = observed_targets(settings)
+    badges(settings, latest, targets)
     if with_proofs:
         featured_proofs(settings, keys)
     return latest
