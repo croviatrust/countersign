@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Verify a Crovia Seal &mdash; in your browser, offline</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Paste any Crovia Seal (crovia.seal.v1) and verify it right here: CSC-1 canonicalization, Ed25519 signature, hash chain. No server, no account — the page works offline.">
+<meta property="og:title" content="Verify a Crovia Seal — in your browser, offline">
+<meta property="og:description" content="Cryptographic verification of AI-output receipts, entirely client-side.">
+<meta property="og:image" content="https://croviatrust.com/logo.png">
+<link rel="icon" type="image/png" href="https://croviatrust.com/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<style>
+  .vf-wrap { max-width: 900px; margin: 0 auto; padding: 48px 20px 96px; }
+  .vf-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px;
+    border: 1px solid var(--accent-line);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font: 600 11px var(--mono);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    margin-bottom: 20px;
+  }
+  .vf-wrap h1 { font: 700 34px var(--sans); color: #fff; margin: 0 0 12px; letter-spacing: -0.02em; }
+  .vf-lede { color: var(--text-soft); font: 400 15px var(--sans); line-height: 1.65; max-width: 640px; margin-bottom: 34px; }
+  .vf-lede .mono { font-family: var(--mono); font-size: 13px; color: var(--accent); }
+
+  textarea {
+    width: 100%; min-height: 220px; resize: vertical;
+    background: var(--bg-card); color: #e8e8e8;
+    border: 1px solid var(--border); border-radius: 10px;
+    font: 400 12px/1.55 var(--mono);
+    padding: 14px; box-sizing: border-box;
+  }
+  textarea:focus { outline: none; border-color: var(--accent-line); }
+  textarea.small { min-height: 90px; }
+
+  .vf-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0 30px; }
+  .vf-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 20px; border-radius: 9px; cursor: pointer;
+    border: 1px solid var(--border); background: var(--bg-card);
+    color: #fff; font: 600 13px var(--sans); text-decoration: none;
+  }
+  .vf-btn:hover { border-color: var(--accent-line); }
+  .vf-btn.primary { background: var(--accent); color: #000; border-color: var(--accent); }
+  .vf-btn.danger:hover { border-color: #b3453f; color: #ff8a80; }
+
+  .vf-report { display: none; margin-top: 8px; }
+  .vf-verdict {
+    border-radius: 12px; padding: 22px 24px; margin-bottom: 18px;
+    font: 700 18px var(--sans); display: flex; align-items: center; gap: 12px;
+  }
+  .vf-verdict.ok  { background: rgba(46,160,67,.12);  border: 1px solid rgba(46,160,67,.45);  color: #4ade80; }
+  .vf-verdict.bad { background: rgba(248,81,73,.10);  border: 1px solid rgba(248,81,73,.45);  color: #ff8a80; }
+  .vf-verdict .sub { font: 400 12px var(--mono); opacity: .85; display: block; margin-top: 4px; }
+
+  .vf-steps { display: flex; flex-direction: column; gap: 6px; }
+  .vf-step {
+    display: flex; gap: 12px; align-items: baseline;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 14px;
+    font: 400 12.5px var(--mono); color: var(--text-soft);
+  }
+  .vf-step .mark { font-weight: 700; width: 14px; flex: none; }
+  .vf-step.ok  .mark { color: #4ade80; }
+  .vf-step.bad .mark { color: #ff8a80; }
+  .vf-step.bad { border-color: rgba(248,81,73,.45); }
+  .vf-step .det { color: var(--text-faint); margin-left: auto; text-align: right; word-break: break-all; max-width: 55%; }
+
+  .vf-sec { margin-top: 44px; }
+  .vf-sec h2 { font: 600 15px var(--sans); color: #fff; margin: 0 0 8px; }
+  .vf-sec p  { color: var(--text-faint); font: 400 12.5px var(--sans); line-height: 1.6; max-width: 640px; margin: 0 0 12px; }
+
+  .vf-foot { margin-top: 72px; padding-top: 24px; border-top: 1px solid var(--border);
+             font: 400 12px var(--mono); color: var(--text-faint); }
+  .vf-foot a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="https://croviatrust.com/" class="cv-brand-link" aria-label="Crovia home">
+      <img src="https://croviatrust.com/logo.png" alt="" class="cv-brand-mark">
+      <span class="cv-brand-name">CROVIA</span>
+    </a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Toggle menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+    <div class="cv-nav-status" id="cv-nav-status" title="Live system status">
+      <span class="dot"></span>
+      <span data-cv-status>connecting</span>
+    </div>
+  </div>
+</nav>
+
+<main class="vf-wrap">
+  <span class="vf-pill">crovia.seal.v1 &middot; client-side &middot; zero network</span>
+  <h1>Verify a Crovia Seal.<br>Right here. Right now.</h1>
+  <p class="vf-lede">
+    Paste a seal below — or a whole <span class="mono">seals.jsonl</span> chain,
+    one seal per line. Everything runs in your browser:
+    <span class="mono">CSC-1</span> canonicalization, the
+    <span class="mono">CROVIA-SEAL-v1</span> domain prefix, SHA-256 chain links,
+    Ed25519 signatures. Nothing is uploaded anywhere. Save this page to disk
+    and it still works, forever.
+  </p>
+
+  <textarea id="sealInput" spellcheck="false" placeholder='{"seal_version":"crovia.seal.v1", ...}   — or several seals, one per line'></textarea>
+
+  <div class="vf-row">
+    <button class="vf-btn primary" id="btnVerify">Verify</button>
+    <button class="vf-btn" id="btnExample">Load a real signed seal</button>
+    <button class="vf-btn danger" id="btnTamper">Tamper with one byte</button>
+  </div>
+
+  <div class="vf-report" id="report">
+    <div class="vf-verdict" id="verdict"></div>
+    <div class="vf-steps" id="steps"></div>
+  </div>
+
+  <div class="vf-sec">
+    <h2>Have the original AI output?</h2>
+    <p>A seal never carries content — only hash commitments. Paste the exact output
+       text below and Verify again: the tool re-hashes it and checks it against
+       <span style="font-family:var(--mono)">subject.output_hash</span> of the (first) seal.</p>
+    <textarea id="contentInput" class="small" spellcheck="false" placeholder="exact AI output text (optional)"></textarea>
+  </div>
+
+  <div class="vf-sec">
+    <h2>What a green verdict means</h2>
+    <p>The seal was signed by the private key matching the embedded public key, and not a
+       single byte of it changed since — algorithm, timestamps, hashes, chain position: all
+       covered by the signature. What it does <em>not</em> mean: that the issuer is honest.
+       Pin the issuer key you trust (<a href="https://seal.croviatrust.com/trust-root.json" style="color:var(--accent)">Crovia's trust root</a>,
+       or the <span style="font-family:var(--mono)">re seal issuer</span> pubkey of a Causari repo) and check it matches.</p>
+  </div>
+
+  <div class="vf-foot">
+    <a href="/registry/seal/">&larr; Crovia Seal standard</a> &middot;
+    <a href="https://datatracker.ietf.org/doc/draft-crovia-seal/" target="_blank" rel="noopener">IETF draft-crovia-seal-01</a> &middot;
+    <a href="https://github.com/croviatrust/crovia-seal" target="_blank" rel="noopener">reference implementation</a> &middot;
+    <a href="https://github.com/croviatrust/causari" target="_blank" rel="noopener">Causari — first production issuer</a>
+  </div>
+</main>
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------ *
+ *  CSC-1 canonicalization (strict subset of RFC 8785; floats forbidden)
+ * ------------------------------------------------------------------ */
+function csc1(value) {
+  if (value === null) return "null";
+  const t = typeof value;
+  if (t === "boolean") return value ? "true" : "false";
+  if (t === "number") {
+    if (!Number.isInteger(value)) throw new Error("NonCanonicalNumber: floats are forbidden in signed payloads");
+    if (Math.abs(value) > Number.MAX_SAFE_INTEGER) throw new Error("NonCanonicalNumber: outside ±(2^53-1)");
+    if (Object.is(value, -0)) throw new Error("NonCanonicalNumber: -0");
+    return String(value);
+  }
+  if (t === "string") return canonString(value);
+  if (Array.isArray(value)) return "[" + value.map(csc1).join(",") + "]";
+  if (t === "object") {
+    const keys = Object.keys(value).sort(); // default sort = UTF-16 code units
+    return "{" + keys.map(k => canonString(k) + ":" + csc1(value[k])).join(",") + "}";
+  }
+  throw new Error("unsupported type " + t);
+}
+function canonString(s) {
+  let out = '"';
+  for (const ch of s) {
+    const c = ch.codePointAt(0);
+    if (ch === '"') out += '\\"';
+    else if (ch === "\\") out += "\\\\";
+    else if (c === 8) out += "\\b";
+    else if (c === 12) out += "\\f";
+    else if (c === 10) out += "\\n";
+    else if (c === 13) out += "\\r";
+    else if (c === 9) out += "\\t";
+    else if (c < 0x20) out += "\\u" + c.toString(16).padStart(4, "0");
+    else out += ch;
+  }
+  return out + '"';
+}
+
+/* ------------------------------------------------------------------ *
+ *  Crypto helpers: WebCrypto Ed25519, noble-ed25519 fallback
+ * ------------------------------------------------------------------ */
+const enc = new TextEncoder();
+function hexToBytes(hex) {
+  if (!/^[0-9a-f]*$/.test(hex) || hex.length % 2) throw new Error("invalid hex");
+  const out = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
+  return out;
+}
+async function sha256hex(bytes) {
+  const d = await crypto.subtle.digest("SHA-256", bytes);
+  return [...new Uint8Array(d)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+let _noble = null;
+async function ed25519Verify(sigBytes, msgBytes, pubBytes) {
+  try {
+    const key = await crypto.subtle.importKey("raw", pubBytes, { name: "Ed25519" }, false, ["verify"]);
+    return await crypto.subtle.verify("Ed25519", key, sigBytes, msgBytes);
+  } catch (_) {
+    if (!_noble) _noble = await import("./noble-ed25519.js");
+    return await _noble.verifyAsync(sigBytes, msgBytes, pubBytes);
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ *  Seal verification (fail-closed, per SPEC v0.5 / draft-crovia-seal-01)
+ * ------------------------------------------------------------------ */
+const KNOWN = ["seal_version","seal_id","issuer","subject","generator","timestamp","chain","checks","anchor","signature","witnesses"];
+const ID_RE = /^cs_[0-9]{4}_[A-Z2-7]{26}$/;
+
+async function payloadOf(seal) {
+  const stripped = {};
+  for (const k of Object.keys(seal)) if (k !== "signature" && k !== "witnesses") stripped[k] = seal[k];
+  const canon = csc1(stripped);
+  const canonBytes = enc.encode(canon);
+  const payload = new Uint8Array(15 + canonBytes.length);
+  payload.set(enc.encode("CROVIA-SEAL-v1"), 0);
+  payload[14] = 0x0A;
+  payload.set(canonBytes, 15);
+  return payload;
+}
+
+async function verifySeal(seal, steps) {
+  const step = (ok, label, det) => { steps.push({ ok, label, det }); if (!ok) throw new Error(label); };
+
+  const unknown = Object.keys(seal).filter(k => !KNOWN.includes(k));
+  step(unknown.length === 0, "no unknown top-level fields (fail-closed)", unknown.join(", "));
+  for (const req of ["seal_version","seal_id","issuer","subject","generator","timestamp","chain","signature"])
+    step(req in seal, "required field: " + req, "");
+  step(seal.seal_version === "crovia.seal.v1", "seal_version is crovia.seal.v1", String(seal.seal_version));
+  step(ID_RE.test(seal.seal_id || ""), "seal_id well-formed (cs_YYYY_ + 26×base32)", seal.seal_id || "");
+
+  const sig = seal.signature || {};
+  step(sig.alg === "ed25519", "signature.alg is ed25519", String(sig.alg));
+  step(sig.canon === "csc-1", "signature.canon is csc-1", String(sig.canon));
+  step(sig.domain === "CROVIA-SEAL-v1", "signature.domain is CROVIA-SEAL-v1", String(sig.domain));
+
+  let payload;
+  try { payload = await payloadOf(seal); } catch (e) { step(false, "CSC-1 canonicalization", e.message); }
+  step(true, "CSC-1 canonical payload built", payload.length + " bytes, domain-prefixed");
+  const phash = await sha256hex(payload);
+  step(true, "payload SHA-256 (chains to the next seal)", "sha256:" + phash.slice(0, 24) + "…");
+
+  const pub = hexToBytes((((seal.issuer || {}).pubkey) || {}).key_hex || "");
+  step(pub.length === 32, "issuer pubkey is 32 bytes", "");
+  const sigBytes = hexToBytes(sig.sig_hex || "");
+  step(sigBytes.length === 64, "signature is 64 bytes", "");
+  const okSig = await ed25519Verify(sigBytes, payload, pub);
+  step(okSig, "Ed25519 issuer signature", okSig ? "valid over P(S)" : "INVALID");
+
+  if (Array.isArray(seal.witnesses)) {
+    for (let i = 0; i < seal.witnesses.length; i++) {
+      const w = seal.witnesses[i];
+      const okW = await ed25519Verify(hexToBytes(w.sig_hex || ""), payload, hexToBytes(((w.pubkey||{}).key_hex) || ""));
+      step(okW, "witness " + (i + 1) + " signature (" + (w.id || "unnamed") + ")", okW ? "valid" : "INVALID");
+    }
+  }
+  return phash;
+}
+
+async function verifyChain(seals, steps) {
+  let expectedSeq = null, expectedPrev = null;
+  for (let i = 0; i < seals.length; i++) {
+    const s = seals[i];
+    steps.push({ ok: true, label: "— seal " + (i + 1) + "/" + seals.length + ": " + (s.seal_id || "?"), det: "sequence " + (s.chain||{}).sequence, hdr: true });
+    const phash = await verifySeal(s, steps);
+    const seq = (s.chain || {}).sequence;
+    const prev = (s.chain || {}).prev_seal_hash ?? null;
+    if (i === 0) {
+      // First seal: a genesis must have prev=null; a fragment start is accepted as-is.
+      if (seq === 0) {
+        const okGen = prev === null;
+        steps.push({ ok: okGen, label: "genesis seal has prev_seal_hash null", det: okGen ? "" : String(prev) });
+        if (!okGen) throw new Error("genesis with non-null prev_seal_hash");
+      } else {
+        steps.push({ ok: true, label: "chain fragment starts at sequence " + seq, det: "prev link not checkable without the preceding seal" });
+      }
+    } else {
+      const okSeq = seq === expectedSeq;
+      steps.push({ ok: okSeq, label: "chain sequence contiguous", det: okSeq ? "" : "expected " + expectedSeq + ", found " + seq });
+      if (!okSeq) throw new Error("chain gap or fork");
+      const okLink = prev === expectedPrev;
+      steps.push({ ok: okLink, label: "chain link (prev_seal_hash)", det: okLink ? "matches previous payload hash" : "MISMATCH — fork or tamper" });
+      if (!okLink) throw new Error("chain link broken");
+    }
+    expectedPrev = "sha256:" + phash;
+    expectedSeq = seq + 1;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ *  UI
+ * ------------------------------------------------------------------ */
+const $ = id => document.getElementById(id);
+
+async function run() {
+  const raw = $("sealInput").value.trim();
+  const report = $("report"), verdict = $("verdict"), stepsEl = $("steps");
+  report.style.display = "block"; stepsEl.innerHTML = "";
+  const steps = [];
+  try {
+    if (!raw) throw new Error("paste a seal first");
+    // Accept a single seal in any formatting (incl. pretty-printed JSON)
+    // first; fall back to JSONL (one seal per line) for chains.
+    let seals;
+    try { seals = [JSON.parse(raw)]; }
+    catch (_) {
+      const lines = raw.split("\n").map(l => l.trim()).filter(Boolean);
+      try { seals = lines.map(l => JSON.parse(l)); }
+      catch (_) { throw new Error("input is not valid JSON (one seal, or one seal per line)"); }
+    }
+
+    await verifyChain(seals, steps);
+
+    const content = $("contentInput").value;
+    if (content) {
+      const h = "sha256:" + await sha256hex(enc.encode(content));
+      const want = ((seals[0].subject) || {}).output_hash;
+      steps.push({ ok: h === want, label: "content matches subject.output_hash", det: h === want ? "the pasted text is byte-identical to what was sealed" : "hash differs — different content (or different whitespace)" });
+      if (h !== want) throw new Error("content hash mismatch");
+    }
+
+    verdict.className = "vf-verdict ok";
+    verdict.innerHTML = "&#10003;&nbsp; VALID <span class='sub'>" + seals.length + " seal(s) verified — signature(s) intact, chain consistent. Untampered since issuance.</span>";
+  } catch (e) {
+    verdict.className = "vf-verdict bad";
+    verdict.innerHTML = "&#10007;&nbsp; INVALID <span class='sub'>" + (e.message || e) + "</span>";
+  }
+  for (const s of steps) {
+    const div = document.createElement("div");
+    div.className = "vf-step " + (s.ok ? "ok" : "bad");
+    if (s.hdr) div.style.borderColor = "var(--accent-line)";
+    div.innerHTML = "<span class='mark'>" + (s.ok ? "&#10003;" : "&#10007;") + "</span><span>" + s.label + "</span><span class='det'></span>";
+    div.querySelector(".det").textContent = s.det || "";
+    stepsEl.appendChild(div);
+  }
+}
+
+/* A real signed seal: normative genesis vector from croviatrust/crovia-seal. */
+const EXAMPLE = {"seal_version":"crovia.seal.v1","seal_id":"cs_2026_AAAAAAAAAAAAAAAAAAAAAAAAAA","issuer":{"id":"urn:crovia:seal-issuer:conformance","pubkey":{"alg":"ed25519","key_hex":"ff57575dc7af8bfc4d0837cc1ce2017b686a88145dc5579a958e3462fe9a908e"}},"subject":{"input_hash":"sha256:115049a298532be2f181edb03f766770c0db84c22aff39003fec340deaec7545","output_hash":"sha256:a1b7eb2ee7a6aded8dda4e6cf30826f5afffb28a5597ee9389e91eb326d4e319","input_len":30,"output_len":31,"modality":"text"},"generator":{"id":"openai/gpt-4o","version":"2024-08-06","weights_hash":null,"params":{"temperature":"0.7","top_p":"1.0"}},"timestamp":{"emitted_at":"2026-04-15T00:00:00.000Z","nonce":"BBBBBBBBBBBBBBBBBBBBBBBBBB"},"chain":{"prev_seal_hash":null,"sequence":0},"signature":{"alg":"ed25519","canon":"csc-1","domain":"CROVIA-SEAL-v1","payload_hash_alg":"sha256","sig_hex":"6e7a125cb49721a85370129263df646fdf29aad96f384395a1f3541759e9f4b43f193022cdc63b8d30c3b87e401521a24608e1264c1e98722c63306ada53b409"}};
+
+$("btnVerify").addEventListener("click", run);
+$("btnExample").addEventListener("click", () => {
+  $("sealInput").value = JSON.stringify(EXAMPLE, null, 2);
+  $("contentInput").value = "";
+  run();
+});
+$("btnTamper").addEventListener("click", () => {
+  try {
+    const s = JSON.parse($("sealInput").value || JSON.stringify(EXAMPLE));
+    if (s.subject && typeof s.subject.output_len === "number") s.subject.output_len += 1;
+    else s.seal_id = "cs_2026_ZZZZZZZZZZZZZZZZZZZZZZZZZZ";
+    $("sealInput").value = JSON.stringify(s, null, 2);
+    run();
+  } catch (_) { $("btnExample").click(); }
+});
+</script>
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c"></script>
+</body>
+</html>

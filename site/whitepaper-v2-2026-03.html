@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crovia Whitepaper — Evidence Infrastructure for AI Training Transparency</title>
+    <meta name="description" content="Technical whitepaper v2: From cryptographic observation to behavioral attribution. A six-layer evidence stack for AI training data transparency. Ed25519, Merkle trees, Bitcoin timestamping, game-theoretic incentives.">
+    <link rel="icon" type="image/png" href="/logo.png">
+    <link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #000000;
+            --bg2: #0c1018;
+            --text: #e4e8ee;
+            --muted: #71717a;
+            --accent: #1ec5ff;
+            --cyan: #1ec5ff;
+            --green: #1ec5ff;
+            --yellow: #f59e0b;
+            --red: #ef4444;
+            --border: #1a212d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.85;
+            font-size: 15px;
+        }
+
+        /* === NAV === */
+        .crovia-nav{position:sticky;top:0;z-index:1000;background:rgba(6,6,11,.94);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.06);padding:0 24px;font-family:'Inter',system-ui,sans-serif}
+        .crovia-nav-inner{max-width:1400px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:52px}
+        .crovia-nav .cn-logo{font-size:18px;font-weight:800;letter-spacing:-.5px;color:#1ec5ff;text-decoration:none}
+        .crovia-nav .cn-links{display:flex;align-items:center;gap:2px}
+        .crovia-nav .cn-links a{color:#888;text-decoration:none;font-size:12.5px;font-weight:500;padding:6px 11px;border-radius:6px;transition:color .15s,background .15s;white-space:nowrap}
+        .crovia-nav .cn-links a:hover{color:#fff;background:rgba(255,255,255,.05)}
+        .crovia-nav .cn-links a.cn-active{color:#1ec5ff;font-weight:600}
+        .cn-more{position:relative}
+        .cn-more-btn{color:#888;font-size:12.5px;font-weight:500;padding:6px 11px;border-radius:6px;cursor:pointer;border:none;background:none;font-family:inherit;display:flex;align-items:center;gap:4px;transition:color .15s}
+        .cn-more-btn:hover,.cn-more.open .cn-more-btn{color:#fff;background:rgba(255,255,255,.05)}
+        .cn-more-btn svg{width:10px;height:10px;transition:transform .2s}
+        .cn-more.open .cn-more-btn svg{transform:rotate(180deg)}
+        .cn-dropdown{display:none;position:absolute;right:0;top:calc(100% + 6px);background:#141419;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:6px;min-width:170px;box-shadow:0 12px 32px rgba(0,0,0,.5)}
+        .cn-more.open .cn-dropdown{display:block}
+        .cn-dropdown a{display:block;color:#999;text-decoration:none;font-size:12.5px;padding:8px 14px;border-radius:6px;transition:color .12s,background .12s;white-space:nowrap}
+        .cn-dropdown a:hover{color:#fff;background:rgba(30,197,255,.13)}
+        .cn-dropdown .cn-sep{height:1px;background:rgba(255,255,255,.06);margin:4px 8px}
+        .cn-burger{display:none;background:none;border:none;color:#888;cursor:pointer;padding:8px}
+        .cn-burger svg{width:20px;height:20px}
+        @media(max-width:820px){
+          .crovia-nav .cn-links{display:none;position:absolute;top:52px;left:0;right:0;background:#0a0a0f;border-bottom:1px solid rgba(255,255,255,.06);flex-direction:column;padding:12px 16px;gap:0}
+          .crovia-nav .cn-links.cn-open{display:flex}
+          .crovia-nav .cn-links a,.cn-dropdown a{padding:10px 14px}
+          .cn-more{width:100%}
+          .cn-more-btn{width:100%;padding:10px 14px}
+          .cn-dropdown{position:static;border:none;box-shadow:none;background:transparent;padding:0 0 0 12px;display:none}
+          .cn-more.open .cn-dropdown{display:block}
+          .cn-burger{display:block}
+        }
+
+        /* === CONTENT === */
+        .wp { max-width: 780px; margin: 0 auto; padding: 48px 24px 80px; }
+
+        .wp-header { text-align: center; margin-bottom: 56px; padding-bottom: 40px; border-bottom: 1px solid var(--border); }
+        .wp-header h1 { font-size: 34px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 6px; }
+        .wp-header .sub { font-size: 17px; color: var(--muted); margin-bottom: 16px; }
+        .wp-header .meta { font-size: 13px; color: var(--muted); }
+        .wp-header .meta span { margin: 0 8px; }
+
+        h2 { font-size: 24px; font-weight: 700; color: var(--accent); margin: 52px 0 18px; }
+        h3 { font-size: 18px; font-weight: 600; margin: 32px 0 12px; color: var(--text); }
+        p { color: var(--muted); margin-bottom: 14px; }
+        strong, b { color: var(--text); }
+
+        ul, ol { margin: 12px 0 16px 22px; color: var(--muted); }
+        li { margin-bottom: 6px; }
+
+        .callout { background: var(--bg2); border: 1px solid var(--border); border-left: 3px solid var(--accent); padding: 18px 22px; margin: 24px 0; border-radius: 0 10px 10px 0; }
+        .callout p { margin: 0; color: var(--text); font-size: 14px; line-height: 1.7; }
+
+        .stack-block { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 24px 0; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; line-height: 1.9; overflow-x: auto; color: var(--muted); }
+        .stack-block .live { color: var(--green); }
+        .stack-block .prog { color: var(--yellow); }
+        .stack-block .plan { color: var(--muted); }
+        .stack-block .label { color: var(--text); display: inline-block; min-width: 160px; }
+
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+        th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+        th { color: var(--text); font-weight: 600; background: var(--bg2); font-size: 12px; text-transform: uppercase; letter-spacing: .4px; }
+        td { color: var(--muted); }
+
+        .badge { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
+        .badge-live { background: rgba(16,185,129,.12); color: var(--green); }
+        .badge-prog { background: rgba(245,158,11,.12); color: var(--yellow); }
+        .badge-plan { background: rgba(113,113,122,.12); color: var(--muted); }
+
+        code { font-family: 'JetBrains Mono', monospace; background: var(--bg2); padding: 2px 6px; border-radius: 4px; font-size: 13px; color: var(--cyan); }
+
+        .toc { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 22px 28px; margin-bottom: 48px; }
+        .toc h3 { margin: 0 0 14px; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+        .toc ol { margin: 0; padding-left: 18px; }
+        .toc li { margin-bottom: 4px; }
+        .toc a { color: var(--muted); text-decoration: none; font-size: 14px; }
+        .toc a:hover { color: var(--accent); }
+
+        .footer { margin-top: 72px; padding-top: 32px; border-top: 1px solid var(--border); text-align: center; }
+        .footer p { font-size: 13px; }
+
+        @media (max-width: 768px) {
+            .wp-header h1 { font-size: 26px; }
+            h2 { font-size: 20px; }
+            .stack-block { font-size: 11px; }
+        }
+    </style>
+    <meta property="og:title" content="Crovia Whitepaper: Evidence Infrastructure for AI Transparency">
+    <meta property="og:description" content="Six-layer cryptographic evidence stack: observation, canonicalization, signing, Merkle aggregation, Bitcoin anchoring, behavioral attribution.">
+    <meta property="og:image" content="https://croviatrust.com/og-card.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Crovia Whitepaper — Cryptographic AI Accountability">
+    <meta name="twitter:description" content="A six-layer evidence stack turning AI silence into irrefutable, timestamped, Bitcoin-anchored proof. Open protocol. IETF Internet-Draft.">
+    <meta name="twitter:image" content="https://croviatrust.com/og-card.png">
+    <meta name="twitter:site" content="@croviatrust">
+    <meta property="og:url" content="https://croviatrust.com/whitepaper.html">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Crovia Trust">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <link rel="canonical" href="https://croviatrust.com/whitepaper-v2-2026-03.html">
+<meta name="robots" content="noindex,follow">
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+    <meta name="author" content="Crovia Trust">
+    <meta name="theme-color" content="#1ec5ff">
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Crovia: Evidence Infrastructure for AI Training Transparency","author":{"@type":"Organization","name":"Crovia Trust"},"url":"https://croviatrust.com/whitepaper.html","datePublished":"2026-01-01","description":"Technical whitepaper on cryptographic evidence infrastructure for AI training data transparency."}</script>
+</head>
+<body>
+
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="/" class="cv-brand-link" aria-label="Crovia home">
+      <img src="/logo.png" alt="" class="cv-brand-mark">
+      <span class="cv-brand-name">CROVIA</span>
+    </a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Toggle menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+          <a href="/registry/">Registry overview</a>
+          <a href="https://github.com/croviatrust/crovia-seal" target="_blank" rel="noopener">GitHub: crovia-seal &#8599;</a>
+        </div>
+      </div>
+    </div>
+    <div class="cv-nav-status" id="cv-nav-status" title="Live system status">
+      <span class="dot"></span>
+      <span data-cv-status>connecting</span>
+    </div>
+  </div>
+</nav>
+<div class="wp">
+
+    <div class="wp-header">
+        <h1>Crovia</h1>
+        <div class="sub">Evidence Infrastructure for AI Training Transparency</div>
+        <div class="meta">
+            v2.0 — March 2026 · <strong style="color:var(--warn,#f5c451)">superseded by <a href="/whitepaper.html" style="color:inherit">v3.0 (September 2026)</a></strong><span>·</span>CroviaTrust<span>·</span><a href="mailto:info@croviatrust.com" style="color:var(--accent);text-decoration:none">info@croviatrust.com</a>
+        </div>
+    </div>
+
+    <div class="toc">
+        <h3>Contents</h3>
+        <ol>
+            <li><a href="#abstract">Abstract</a></li>
+            <li><a href="#problem">The Problem</a></li>
+            <li><a href="#stack">The Crovia Stack</a></li>
+            <li><a href="#observation">Layer 0 — Observation</a></li>
+            <li><a href="#evidence">Layer 1 — Cryptographic Evidence</a></li>
+            <li><a href="#intelligence">Layer 2 — Intelligence</a></li>
+            <li><a href="#forensics">Layer 3 — Forensic Analysis</a></li>
+            <li><a href="#attribution">Layer 4 — Behavioral Attribution</a></li>
+            <li><a href="#settlement">Layer 5 — Settlement</a></li>
+            <li><a href="#metrics">Operational Metrics</a></li>
+            <li><a href="#usecases">Use Cases</a></li>
+            <li><a href="#comparison">Competitive Analysis</a></li>
+            <li><a href="#business">Business Model</a></li>
+            <li><a href="#roadmap">Roadmap</a></li>
+        </ol>
+    </div>
+
+    <!-- ============================================================ -->
+    <h2 id="abstract">1. Abstract</h2>
+
+    <p>AI models are trained on vast amounts of data. The creators of that data have no reliable way to know if their work was used, how it was used, or whether they are owed compensation. Regulators lack the infrastructure to audit compliance at scale. AI companies themselves have no verifiable way to <em>prove</em> their training practices.</p>
+
+    <p>Crovia is a <strong>six-layer evidence stack</strong> that addresses this gap — not by judging, but by building verifiable records at every stage of the problem: from continuous observation of what models disclose, through cryptographic proof of what they do not, to behavioral analysis of what their weights reveal.</p>
+
+    <p>Layers 0 through 3 are operational. Layer 4 is in advanced development. Layer 5 is planned.</p>
+
+    <div class="callout">
+        <p><strong>Crovia records what exists and what is absent.</strong> Every score, every grade, every classification is derived from observable, verifiable signals — never from opinion. The system observes. It does not judge.</p>
+    </div>
+
+    <!-- ============================================================ -->
+    <h2 id="problem">2. The Problem</h2>
+
+    <p>AI training today happens without verifiable records. There is no standard infrastructure to:</p>
+
+    <ul>
+        <li>Prove which data was used to train a model</li>
+        <li>Verify that opt-out requests were honored</li>
+        <li>Detect undisclosed training data from behavioral evidence</li>
+        <li>Distribute royalties fairly to data contributors</li>
+        <li>Audit training compliance across jurisdictions at scale</li>
+    </ul>
+
+    <h3>The Regulatory Moment</h3>
+
+    <p>The EU AI Act mandates training data transparency starting 2026. The US has proposed similar legislation. Japan, Canada, Australia, and others are drafting frameworks. But <strong>no infrastructure exists</strong> to verify compliance with any of them.</p>
+
+    <table>
+        <tr><th>Challenge</th><th>Impact</th></tr>
+        <tr><td>No training receipts</td><td>$50B+ content at risk of unauthorized use</td></tr>
+        <tr><td>Unverifiable opt-outs</td><td>GDPR fines up to 4% of global revenue</td></tr>
+        <tr><td>No settlement mechanism</td><td>Creators receive $0 from AI training</td></tr>
+        <tr><td>Undetectable data usage</td><td>No forensic tools for regulators or rights holders</td></tr>
+    </table>
+
+    <p>The gap is not political will. The gap is <strong>infrastructure</strong>. Crovia builds that infrastructure.</p>
+
+    <!-- ============================================================ -->
+    <h2 id="stack">3. The Crovia Stack</h2>
+
+    <p>Crovia is organized as a six-layer stack. Each layer produces verifiable artifacts that feed the layers above it. Lower layers are simpler and more mature. Higher layers are more powerful and build on the evidence produced below.</p>
+
+    <div class="stack-block">
+<span class="label">Layer 5: Settlement</span>    CPCS Seal, CFIC Certificates, DPI Engine           <span class="plan">[PLANNED]</span>
+<span class="label">Layer 4: Attribution</span>    CDS v3, DPI Bridge, NEC#1 Integration               <span class="prog">[IN PROGRESS]</span>
+<span class="label">Layer 3: Forensics</span>      GDNA Fingerprinting, Model Sonar, Agent System      <span class="live">[LIVE]</span>
+<span class="label">Layer 2: Intelligence</span>    Risk Index, Exposure Score, Org Grade, Gating        <span class="live">[LIVE]</span>
+<span class="label">Layer 1: Evidence</span>        TPA, Merkle Trees, DDF Hashing, CEP Capsules        <span class="live">[LIVE]</span>
+<span class="label">Layer 0: Observation</span>     Observer, Oracle, NEC# Canon, Compliance Mapping    <span class="live">[LIVE]</span>
+    </div>
+
+    <p>The critical insight: each layer is <strong>independently verifiable</strong>. A TPA proof is valid whether or not GDNA confirms it. A CDS score is meaningful whether or not a settlement follows. The layers compose, but they do not depend.</p>
+
+    <!-- ============================================================ -->
+    <h2 id="observation">4. Layer 0 — Observation</h2>
+
+    <p>The foundation. An autonomous observer continuously monitors AI model documentation across thousands of targets, recording what each model discloses and what it does not.</p>
+
+    <h3>Observer</h3>
+    <p>Runs hourly. Examines model cards, README files, and associated documentation for 3,500+ models. Each observation is timestamped, hashed, and committed to an append-only ledger.</p>
+
+    <h3>NEC# Canon</h3>
+    <p>A structured framework of 20 Necessary Elements of Compliance — the disclosure requirements that any AI model should satisfy. Each NEC# maps to specific articles in the EU AI Act, GDPR, CCPA, and 8 other regulatory frameworks across 11 jurisdictions.</p>
+
+    <h3>Compliance Mapping</h3>
+    <p>For every observed model, automated regulatory gap analysis produces a per-element, per-jurisdiction compliance map. Over <strong>6,800 models</strong> have compliance reports with gap identification.</p>
+
+    <h3>Outreach Pipeline</h3>
+    <p>When documentation gaps are identified, the system contacts model maintainers directly — via GitHub issues and HuggingFace discussions — documenting the disclosure state before and after contact.</p>
+
+    <!-- ============================================================ -->
+    <h2 id="evidence">5. Layer 1 — Cryptographic Evidence</h2>
+
+    <p>Raw observations become cryptographic evidence: immutable, timestamped, verifiable by anyone.</p>
+
+    <h3>Temporal Proof of Absence (TPA) <span class="badge badge-live">LIVE</span></h3>
+
+    <p>The signature innovation. A TPA is a cryptographic proof that training data disclosure was <strong>NOT found</strong> at a specific point in time. Each proof includes:</p>
+
+    <ul>
+        <li><strong>Pedersen commitment</strong> — ZK-compatible binding to the observation</li>
+        <li><strong>Merkle anchor</strong> — position in the global evidence tree</li>
+        <li><strong>Ed25519 signature</strong> — non-repudiable issuer attestation</li>
+        <li><strong>SHA-256 chain link</strong> — temporal ordering within the proof chain</li>
+    </ul>
+
+    <p>This creates a body of temporal evidence that no party can retroactively alter. If a model adds disclosure next month, the TPA proves it was absent last month.</p>
+
+    <h3>Disclosure Data Fingerprint (DDF)</h3>
+    <p>Every observation includes a hash of the model's documentation state. When documentation changes — especially after outreach contact — the DDF records the exact transition with cryptographic timestamps. This is the basis of the Impact Observatory: verifiable evidence that Crovia's outreach caused documentation improvements.</p>
+
+    <h3>Crovia Evidence Protocol (CEP) <span class="badge badge-live">LIVE</span></h3>
+    <p>Evidence capsules that package multiple proof types into a single, verifiable bundle. A CEP capsule can contain TPA proofs, DDF fingerprints, compliance maps, and forensic results — all anchored to a common Merkle root.</p>
+
+    <table>
+        <tr><th>Cryptographic Primitive</th><th>Algorithm</th><th>Standard</th></tr>
+        <tr><td>Hashing</td><td>SHA-256, BLAKE3</td><td>FIPS 180-4</td></tr>
+        <tr><td>Signatures</td><td>Ed25519</td><td>RFC 8032</td></tr>
+        <tr><td>Timestamps</td><td>RFC 3161</td><td>ITU-T X.509</td></tr>
+        <tr><td>Merkle Trees</td><td>SHA-256</td><td>Bitcoin standard</td></tr>
+        <tr><td>Commitments</td><td>Pedersen (BN254)</td><td>zkSNARK-compatible</td></tr>
+    </table>
+
+    <!-- ============================================================ -->
+    <h2 id="intelligence">6. Layer 2 — Intelligence</h2>
+
+    <p>Evidence becomes intelligence. Layer 2 aggregates signals from Layer 0 and Layer 1 into actionable metrics — not opinions, but <strong>quantified absence</strong>.</p>
+
+    <h3>Dataset Risk Index <span class="badge badge-live">LIVE</span></h3>
+    <p>A per-model risk score aggregated from seven independent signals:</p>
+    <ol>
+        <li><strong>TPA absence</strong> — no temporal proof exists</li>
+        <li><strong>Organization grade</strong> — systematic non-disclosure at org level</li>
+        <li><strong>Temporal pressure</strong> — increasing urgency patterns</li>
+        <li><strong>Gating status</strong> — access restrictions detected</li>
+        <li><strong>Download exposure</strong> — high usage amplifies risk</li>
+        <li><strong>Provenance gaps</strong> — missing lineage chain</li>
+        <li><strong>Outreach non-response</strong> — maintainer silence after contact</li>
+    </ol>
+    <p>Each signal is observable and verifiable. The index does not say a model <em>is</em> bad — it says the <em>evidence gap</em> is large.</p>
+
+    <h3>Exposure Score <span class="badge badge-live">LIVE</span></h3>
+    <p>Combines download volume with risk tier. A high-risk model with 10 million downloads represents greater exposure than the same risk at 100 downloads. This drives prioritization for outreach, forensic analysis, and regulatory attention.</p>
+
+    <h3>Organization Transparency Score <span class="badge badge-live">LIVE</span></h3>
+    <p>Per-organization grading (A through F) based on the aggregate transparency of all models under that organization. Factors include TPA coverage, compliance score, response rate to outreach, and severity distribution. Over <strong>2,300 organizations</strong> are graded.</p>
+
+    <h3>Response Classifier <span class="badge badge-live">LIVE</span></h3>
+    <p>Classifies outreach responses into categories: engaged, acknowledged, deflected, non-responsive, improved. Cross-references GitHub issue states, gating events, TPA additions, and documentation changes to determine the <em>actual</em> organizational response — not just the words.</p>
+
+    <h3>Gating Detector <span class="badge badge-live">LIVE</span></h3>
+    <p>Monitors access restrictions on models. When a model becomes gated after outreach contact, this is recorded as a potential indicator of documentation avoidance. Temporal evidence establishes whether gating correlated with Crovia observation.</p>
+
+    <!-- ============================================================ -->
+    <h2 id="forensics">7. Layer 3 — Forensic Analysis</h2>
+
+    <p>Layers 0–2 examine what models <em>say</em>. Layer 3 examines what models <em>are</em>. This is where Crovia moves from documentation analysis to behavioral and structural forensics.</p>
+
+    <h3>Geometric DNA (GDNA) <span class="badge badge-live">LIVE</span></h3>
+
+    <p>Weight-level statistical fingerprinting. The GDNA system downloads model weights — shard by shard, streaming — and extracts per-layer statistical signatures without storing the full weights. The resulting fingerprint enables:</p>
+
+    <ul>
+        <li><strong>Model-to-model provenance</strong> — Mantel correlation detects structural ancestry</li>
+        <li><strong>Fine-tune detection</strong> — statistical drift between base and derivative models</li>
+        <li><strong>Undisclosed lineage</strong> — when a model's weights reveal a parent it does not credit</li>
+    </ul>
+
+    <p>An autonomous agent system manages the download queue, rate limiting, and storage box archival for 10 model families across 5 organizations. Processing runs continuously within configured schedule windows.</p>
+
+    <h3>Model Sonar — Latent Comparison (LC) <span class="badge badge-live">LIVE</span></h3>
+
+    <p>Behavioral fingerprinting across five knowledge domains: <strong>medical</strong>, <strong>legal</strong>, <strong>code</strong>, <strong>scientific</strong>, and <strong>news</strong>. For each domain, curated probe pairs measure whether a model exhibits domain-specific knowledge that its documentation does not account for.</p>
+
+    <p>Sonar produces per-domain decisions (<code>PRESENT</code>, <code>NEUTRAL</code>, <code>ABSENT</code>) with z-scores calibrated against a global baseline. If a model shows strong medical knowledge but declares no medical training data, the signal is evidence — not proof, but forensically meaningful evidence.</p>
+
+    <h3>Forensic Correlator <span class="badge badge-live">LIVE</span></h3>
+    <p>Cross-references signals from GDNA, Sonar, TPA, compliance maps, and outreach responses to identify patterns. Convergent signals — structural ancestry <em>and</em> behavioral advantage <em>and</em> documentation absence — produce stronger evidence than any single signal alone.</p>
+
+    <!-- ============================================================ -->
+    <h2 id="attribution">8. Layer 4 — Behavioral Attribution (CDS)</h2>
+
+    <p>This is the layer that changes everything. Comparative Domain Sensitivity (CDS) answers the question Layer 3 cannot: <strong>was this specific dataset used to train this specific model?</strong></p>
+
+    <h3>CDS v3 Engine <span class="badge badge-prog">IN PROGRESS</span></h3>
+
+    <p>CDS measures a model's <em>behavioral advantage</em> on a dataset compared to a reference pool of models. The key insight: if model M performs disproportionately better on dataset D than reference models do — after controlling for model capacity — this is evidence that M was trained on D.</p>
+
+    <p>The method:</p>
+
+    <ol>
+        <li><strong>BPC computation</strong> — Bits-per-character loss on the target dataset, normalized to eliminate tokenizer confounds</li>
+        <li><strong>Reference pool comparison</strong> — Median BPC across a pool of reference models establishes the baseline</li>
+        <li><strong>Capacity calibration</strong> — The same measurement on neutral text removes the effect of model size (a larger model is better at everything, not just the target dataset)</li>
+        <li><strong>CDS v3 score</strong> — <code>CDS_v3 = CDS_raw − CDS_neutral</code></li>
+        <li><strong>Bootstrap CI</strong> — 1,000-iteration bootstrap produces a 95% confidence interval</li>
+    </ol>
+
+    <p>A positive CDS v3 score means the model shows dataset-specific advantage beyond what capacity alone explains. The score is accompanied by a signal label: <code>STRONG_POSITIVE</code>, <code>WEAK_POSITIVE</code>, <code>NEUTRAL</code>, <code>WEAK_NEGATIVE</code>, or <code>STRONG_NEGATIVE</code>.</p>
+
+    <h3>CDS Artifacts</h3>
+
+    <p>Every CDS computation produces a <strong>verifiable artifact</strong>: a self-contained evidence object with SHA-256 commitment hash, BPC vector hashes for reproducibility, optional Pedersen commitment for ZK compatibility, and an anchor digest for external timestamping (OpenTimestamps, RFC 3161).</p>
+
+    <p>Artifacts are compatible with the Evidence Envelope V1 schema, the ForwardChain anchoring protocol, and CRC-1 capsule packaging.</p>
+
+    <h3>GDNA + CDS: Converging Evidence</h3>
+
+    <p>When both GDNA (structural ancestry) and CDS (behavioral advantage) point to the same conclusion, the combined evidence is substantially stronger than either alone:</p>
+
+    <table>
+        <tr><th>GDNA</th><th>CDS</th><th>Combined Verdict</th><th>Strength</th></tr>
+        <tr><td style="color:var(--green)">Positive</td><td style="color:var(--green)">Positive</td><td>Converging Evidence</td><td style="color:var(--green)">Strong</td></tr>
+        <tr><td style="color:var(--green)">Positive</td><td>Negative</td><td>Structural Only</td><td style="color:var(--yellow)">Moderate</td></tr>
+        <tr><td>Negative</td><td style="color:var(--green)">Positive</td><td>Behavioral Only</td><td style="color:var(--yellow)">Moderate</td></tr>
+        <tr><td>Negative</td><td>Negative</td><td>No Evidence</td><td style="color:var(--muted)">None</td></tr>
+    </table>
+
+    <h3>NEC#1 Integration</h3>
+    <p>CDS scores feed directly into NEC#1 (data provenance) compliance assessment. A strong CDS signal on an undisclosed dataset increases the NEC#1 severity modifier — the compliance gap becomes not just "they didn't say" but "we have behavioral evidence they should have said."</p>
+
+    <!-- ============================================================ -->
+    <h2 id="settlement">9. Layer 5 — Settlement</h2>
+
+    <p>The final layer: evidence becomes compensation. This is <strong>planned</strong>, not yet operational.</p>
+
+    <h3>DPI Bridge <span class="badge badge-prog">IN PROGRESS</span></h3>
+
+    <p>The Data Provider Impact engine converts CDS detection into provider compensation. When CDS detects behavioral advantage on dataset D, the provider of D receives a coverage boost in the settlement estimation. The feedback loop:</p>
+
+    <div class="callout">
+        <p>CDS detects advantage on dataset D → Provider D gets coverage_boost → Settlement weight increases → Provider D receives higher payout → CFIC certificate includes CDS artifact hash as evidence</p>
+    </div>
+
+    <p>The bridge is conservative by design: only strong CDS signals produce boosts, boosts are capped to prevent gaming, and every boost carries an evidence hash traceable to the original CDS artifact.</p>
+
+    <h3>CPCS Seal <span class="badge badge-plan">PLANNED</span></h3>
+    <p>The Crovia Production Commit Seal: a Merkle-anchored payout record with an immutable audit trail. Every settlement is verifiable, every payout is traceable.</p>
+
+    <h3>CFIC Certificates <span class="badge badge-plan">PLANNED</span></h3>
+    <p>Crovia Fair Impact Certificates: cryptographic receipts that prove a data provider received compensation, with embedded references to the evidence (CDS artifacts, TPA proofs, compliance gaps) that justified the payout.</p>
+
+    <!-- ============================================================ -->
+    <h2 id="metrics">10. Operational Metrics</h2>
+
+    <p>Current system state as of March 2026:</p>
+
+    <table>
+        <tr><th>Component</th><th>Status</th><th>Volume</th></tr>
+        <tr><td>Observer</td><td><span class="badge badge-live">LIVE</span></td><td>3,500+ unique targets, 500 observations/day</td></tr>
+        <tr><td>TPA Chain</td><td><span class="badge badge-live">LIVE</span></td><td>6,800+ models, chain height 12,500+</td></tr>
+        <tr><td>Compliance Reports</td><td><span class="badge badge-live">LIVE</span></td><td>6,800+ models × 20 NEC# × 11 jurisdictions</td></tr>
+        <tr><td>Outreach Pipeline</td><td><span class="badge badge-live">LIVE</span></td><td>180+ issues classified</td></tr>
+        <tr><td>Org Transparency</td><td><span class="badge badge-live">LIVE</span></td><td>2,300+ organizations graded A–F</td></tr>
+        <tr><td>Dataset Risk Index</td><td><span class="badge badge-live">LIVE</span></td><td>5,900+ models scored across 7 signals</td></tr>
+        <tr><td>Provenance Graph</td><td><span class="badge badge-live">LIVE</span></td><td>10,500+ nodes, 25,900+ edges</td></tr>
+        <tr><td>Model Sonar</td><td><span class="badge badge-live">LIVE</span></td><td>16+ models × 5 domains</td></tr>
+        <tr><td>GDNA Agent</td><td><span class="badge badge-live">LIVE</span></td><td>10 model families, streaming shard analysis</td></tr>
+        <tr><td>CDS v3 Engine</td><td><span class="badge badge-prog">IN PROGRESS</span></td><td>Batch scanner operational</td></tr>
+    </table>
+
+    <!-- ============================================================ -->
+    <h2 id="usecases">11. Use Cases</h2>
+
+    <h3>For Regulators</h3>
+    <p><strong>Problem:</strong> No infrastructure to audit AI training compliance at scale.</p>
+    <p><strong>Crovia provides:</strong> Immutable observation ledger with temporal proofs. Compliance mapping across 11 jurisdictions. Behavioral forensics (GDNA + Sonar + CDS) that go beyond what companies self-report. Risk index that prioritizes the largest evidence gaps.</p>
+
+    <h3>For Content Creators &amp; Rights Holders</h3>
+    <p><strong>Problem:</strong> No way to know if your data was used, and no mechanism to be compensated.</p>
+    <p><strong>Crovia provides:</strong> CDS can detect behavioral evidence of training on specific datasets. The DPI Bridge converts detection into provider impact weight. Exposure scoring prioritizes high-download models where the impact is largest. Every step is backed by cryptographic evidence suitable for legal proceedings.</p>
+
+    <h3>For AI Companies</h3>
+    <p><strong>Problem:</strong> No verifiable way to prove training data compliance.</p>
+    <p><strong>Crovia provides:</strong> If your model genuinely complies, the evidence shows it. TPA records demonstrate disclosure. Compliance mapping confirms regulatory coverage. CDS analysis that shows <code>NO_DATASET_SIGNAL</code> is exculpatory evidence. Transparency is a competitive advantage when evidence exists to back it.</p>
+
+    <!-- ============================================================ -->
+    <h2 id="comparison">12. Competitive Analysis</h2>
+
+    <table>
+        <tr>
+            <th>Capability</th>
+            <th>Crovia</th>
+            <th>C2PA</th>
+            <th>Spawning</th>
+            <th>Fairly Trained</th>
+        </tr>
+        <tr>
+            <td>Temporal Absence Proofs</td>
+            <td style="color:var(--green)">Live</td><td>No</td><td>No</td><td>No</td>
+        </tr>
+        <tr>
+            <td>Disclosure Monitoring</td>
+            <td style="color:var(--green)">Live</td><td>No</td><td>No</td><td>No</td>
+        </tr>
+        <tr>
+            <td>Regulatory Gap Analysis</td>
+            <td style="color:var(--green)">Live</td><td>No</td><td>No</td><td>No</td>
+        </tr>
+        <tr>
+            <td>Behavioral Fingerprinting</td>
+            <td style="color:var(--green)">Live</td><td>No</td><td>No</td><td>No</td>
+        </tr>
+        <tr>
+            <td>Weight-Level Forensics</td>
+            <td style="color:var(--green)">Live</td><td>No</td><td>No</td><td>No</td>
+        </tr>
+        <tr>
+            <td>Dataset Attribution</td>
+            <td style="color:var(--yellow)">In Progress</td><td>No</td><td>No</td><td>No</td>
+        </tr>
+        <tr>
+            <td>Risk Intelligence</td>
+            <td style="color:var(--green)">Live</td><td>No</td><td>No</td><td>No</td>
+        </tr>
+        <tr>
+            <td>Content Provenance</td>
+            <td>No</td><td style="color:var(--green)">Yes</td><td>No</td><td>No</td>
+        </tr>
+        <tr>
+            <td>Opt-out Registry</td>
+            <td>No</td><td>No</td><td style="color:var(--green)">Yes</td><td>No</td>
+        </tr>
+        <tr>
+            <td>Training Certification</td>
+            <td>No</td><td>No</td><td>No</td><td style="color:var(--green)">Yes</td>
+        </tr>
+        <tr>
+            <td>Settlement Engine</td>
+            <td style="color:var(--muted)">Planned</td><td>No</td><td>No</td><td>No</td>
+        </tr>
+    </table>
+
+    <p style="color:var(--muted);font-size:13px;">Crovia addresses a different problem space than C2PA (content provenance), Spawning (opt-out), or Fairly Trained (ethical certification). These approaches are complementary. Crovia is the only system that combines observation, cryptographic evidence, behavioral forensics, and dataset attribution in a single stack.</p>
+
+    <!-- ============================================================ -->
+    <h2 id="business">13. Business Model</h2>
+
+    <table>
+        <tr><th>Tier</th><th>Status</th><th>Includes</th></tr>
+        <tr>
+            <td><strong>Open</strong></td>
+            <td><span class="badge badge-live">Available</span></td>
+            <td>Public registry, observation ledger, TPA data, compliance reports, risk index, org scores, outreach status, public API</td>
+        </tr>
+        <tr>
+            <td><strong>Pro</strong></td>
+            <td><span class="badge badge-prog">In Development</span></td>
+            <td>CDS v3 scanner, GDNA analysis, Model Sonar reports, full NEC# canon (20/20), forensic correlator, CEP capsule builder</td>
+        </tr>
+        <tr>
+            <td><strong>Enterprise</strong></td>
+            <td><span class="badge badge-plan">Planned</span></td>
+            <td>On-premise deployment, custom model family monitoring, DPI integration, settlement engine, dedicated support</td>
+        </tr>
+    </table>
+
+    <!-- ============================================================ -->
+    <h2 id="roadmap">14. Roadmap</h2>
+
+    <table>
+        <tr><th>Phase</th><th>Timeline</th><th>Status</th><th>Milestones</th></tr>
+        <tr>
+            <td>Foundation</td><td>Q4 2025 – Q1 2026</td>
+            <td><span class="badge badge-live">Complete</span></td>
+            <td>Observer, TPA, NEC# canon, public registry, outreach pipeline, compliance mapping</td>
+        </tr>
+        <tr>
+            <td>Evidence &amp; Intelligence</td><td>Q1 2026</td>
+            <td><span class="badge badge-live">Complete</span></td>
+            <td>Risk Index, Exposure Score, Org Grade, Response Classifier, Gating Detector, CEP capsules, provenance graph</td>
+        </tr>
+        <tr>
+            <td>Forensics</td><td>Q1 – Q2 2026</td>
+            <td><span class="badge badge-live">Live</span></td>
+            <td>GDNA fingerprinting, Model Sonar, Agent system, Forensic Correlator</td>
+        </tr>
+        <tr>
+            <td>Attribution</td><td>Q2 2026</td>
+            <td><span class="badge badge-prog">In Progress</span></td>
+            <td>CDS v3 engine, DPI Bridge, GDNA+CDS converging evidence, NEC#1 integration</td>
+        </tr>
+        <tr>
+            <td>Settlement</td><td>Q3 – Q4 2026</td>
+            <td><span class="badge badge-plan">Planned</span></td>
+            <td>CPCS seals, CFIC certificates, royalty distribution, enterprise integrations</td>
+        </tr>
+    </table>
+
+<footer class="cv-foot">
+  <div class="cv-foot-inner">
+    <div>
+      <div class="cv-foot-links">
+        <a href="/">Home</a>
+        <a href="/registry/tacet/">TACET</a>
+        <a href="/registry/lacuna/">LACUNA</a>
+        <a href="/registry/verify/">Verify</a>
+        <a href="/registry/seal/">Seal</a>
+        <a href="/registry/explore/">Explore</a>
+        <a href="/registry/compliance/">Compliance</a>
+        
+        <a href="https://github.com/croviatrust/crovia-seal" target="_blank" rel="noopener">GitHub: crovia-seal &#8599;</a>
+      </div>
+      <div class="cv-foot-meta">
+        &copy; 2026 Crovia Trust &middot; Independent &middot; Forensic &middot; Public &middot; Continuously signed Ed25519 against the substrate trust root &middot; Bitcoin-anchored.
+      </div>
+    </div>
+    <div class="cv-foot-tag">
+      Lex temporum<em>time is the law</em>
+    </div>
+  </div>
+</footer>
+
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c"></script>
+</body>
+</html>

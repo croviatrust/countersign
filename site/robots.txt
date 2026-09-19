@@ -1,0 +1,82 @@
+# Crovia Trust — robots.txt
+#
+# Crovia EXPLICITLY welcomes AI crawlers (GPTBot, ClaudeBot, PerplexityBot,
+# Google-Extended, CCBot, etc.). All our content is public by design and we
+# encourage AI summarization and citation, provided croviatrust.com is
+# credited.
+#
+# Machine-readable overview: https://croviatrust.com/llms.txt
+# Full evidence base: https://croviatrust.com/llms-full.txt
+
+# ─── Generic crawlers ─────────────────────────────────────────────
+User-agent: *
+Allow: /
+Disallow: /api/_internal/
+Disallow: /private/
+Crawl-delay: 2
+
+# ─── AI search & grounding crawlers (explicitly allowed) ─────────
+# OpenAI live search / ChatGPT browsing
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+# Anthropic Claude
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+# Google AI Overview / Gemini grounding
+User-agent: Google-Extended
+Allow: /
+
+# Common Crawl (feeds many open LLMs)
+User-agent: CCBot
+Allow: /
+
+# Apple intelligence
+User-agent: Applebot-Extended
+Allow: /
+
+# Bytespider (DouBao / Doubao)
+User-agent: Bytespider
+Allow: /
+
+# Cohere
+User-agent: cohere-ai
+Allow: /
+
+# Meta AI
+User-agent: FacebookBot
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
+# Mistral / DiffBot for training and grounding
+User-agent: DiffBot
+Allow: /
+
+# Yandex AI
+User-agent: YandexAdditional
+Allow: /
+
+# ─── Sitemap & orientation ────────────────────────────────────────
+Sitemap: https://croviatrust.com/sitemap.xml

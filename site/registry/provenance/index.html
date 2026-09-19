@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Provenance Graph — CROVIA Registry</title>
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<style>
+    :root{--bg:#030305;--card:#0d0d14;--border:#1a1a2e;--text:#e5e5e5;--muted:#71717a;--accent:#1ec5ff;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+    .nav{background:var(--card);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;position:sticky;top:0;z-index:100;}
+    .nav a{color:var(--muted);text-decoration:none;font-size:13px;transition:color .2s;}
+    .nav a:hover,.nav a.active{color:var(--accent);}
+    .nav .brand{color:var(--text);font-weight:700;font-size:14px;margin-right:10px;}
+    .stats-bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;padding:12px 24px;background:var(--card);border-bottom:1px solid var(--border);}
+    .stat-card{text-align:center;}
+    .stat-card .value{font-size:20px;font-weight:800;}
+    .stat-card .label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px;}
+    
+    #main-workspace { display:flex; flex:1; position:relative; overflow:hidden; }
+    #graphContainer{flex:1; position:relative; background:radial-gradient(circle at center, #0a0a10 0%, #030305 100%); overflow:hidden;}
+    .loading{text-align:center;padding:60px;color:var(--muted);}
+@keyframes blink-p{0%,100%{opacity:1;box-shadow:0 0 6px #1ec5ff}50%{opacity:.3;box-shadow:0 0 2px #1ec5ff}}
+
+        /* TOPNAV */
+        .topnav { padding: 14px 24px; border-bottom: 1px solid #1a1a1a; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: rgba(0,0,0,.92); backdrop-filter: blur(12px); z-index: 100; }
+        .topnav .logo { font-size: 17px; font-weight: 800; color: #1ec5ff; text-decoration: none; letter-spacing: -0.5px; }
+        .topnav nav { display: flex; gap: 4px; flex-wrap: wrap; }
+        .topnav nav a { color: #666; text-decoration: none; font-size: 13px; padding: 5px 10px; border-radius: 6px; transition: color .2s; }
+        .topnav nav a:hover { color: #fff; }
+        .topnav nav a.active { color: #1ec5ff; font-weight: 600; }
+        @media (max-width: 768px) { .topnav nav { display: none; } }
+
+        /* OVERLAY SEARCH & FILTERS */
+        .overlay-tools { position:absolute; top:20px; left:20px; z-index:10; width:340px; pointer-events:none; }
+        .overlay-tools > * { pointer-events:auto; }
+        .search-box { background:rgba(13,13,20,0.85); backdrop-filter:blur(8px); border:1px solid var(--border); border-radius:10px; padding:12px 16px; width:100%; font-size:14px; color:#fff; outline:none; transition:border-color .2s; box-shadow:0 8px 32px rgba(0,0,0,.4); }
+        .search-box:focus { border-color:var(--accent); }
+        .search-dropdown { display:none; position:absolute; top:calc(100% + 8px); left:0; right:0; background:rgba(13,13,20,0.95); backdrop-filter:blur(12px); border:1px solid var(--border); border-radius:10px; max-height:400px; overflow-y:auto; box-shadow:0 12px 40px rgba(0,0,0,.6); z-index:50; }
+        
+        .filter-pills { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; position:relative; z-index:1; }
+        .filter-pill { background:rgba(13,13,20,0.8); border:1px solid #2a2a3e; padding:6px 12px; border-radius:20px; font-size:11px; font-weight:600; color:var(--muted); cursor:pointer; transition:all .2s; backdrop-filter:blur(4px); pointer-events:auto; }
+        .filter-pill:hover { border-color:#52525b; color:#e5e5e5; }
+        .filter-pill.active { background:rgba(124,58,237,.15); border-color:var(--accent); color:#5dd4ff; }
+
+        /* SIDE PANEL (SONAR) */
+        #sidePanel { width:420px; background:rgba(10,10,15,0.95); border-left:1px solid var(--border); backdrop-filter:blur(16px); display:flex; flex-direction:column; transform:translateX(100%); transition:transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index:100; box-shadow:-10px 0 40px rgba(0,0,0,0.5); position:absolute; right:0; top:0; bottom:0; }
+        #sidePanel.open { transform:translateX(0); }
+        .panel-header { padding:20px 24px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:flex-start; }
+        .panel-close { cursor:pointer; color:var(--muted); font-size:18px; line-height:1; padding:4px; border-radius:4px; }
+        .panel-close:hover { color:#fff; background:rgba(255,255,255,0.1); }
+        .panel-content { flex:1; overflow-y:auto; padding:24px; }
+        
+        .info-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; font-weight:700; display:flex; align-items:center; gap:8px; }
+        .lineage-item { display:flex; align-items:center; gap:12px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:8px; padding:10px 14px; margin-bottom:8px; }
+        </style>
+<script>console.log('Provenance App Cache Busted: v' + Date.now());</script></head>
+<body>
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="https://croviatrust.com/" class="cv-brand-link"><img src="https://croviatrust.com/logo.png" alt="" class="cv-brand-mark"><span class="cv-brand-name">CROVIA</span></a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+    <div class="cv-nav-status" id="cv-nav-status"><span class="dot"></span><span data-cv-status>connecting</span></div>
+  </div>
+</nav>
+<div class="stats-bar">
+  <div class="stat-card"><div class="value" style="color:#5dd4ff" id="s-models">—</div><div class="label">Models</div></div>
+  <div class="stat-card"><div class="value" style="color:#e2e8f0" id="s-orgs">—</div><div class="label">Organizations</div></div>
+  <div class="stat-card"><div class="value" style="color:#fb7185" id="s-critical">—</div><div class="label">Critical</div></div>
+  <div class="stat-card"><div class="value" style="color:#f97316" id="s-high">—</div><div class="label">High</div></div>
+  <div class="stat-card"><div class="value" style="color:#f59e0b" id="s-moderate">—</div><div class="label">Moderate</div></div>
+  <div class="stat-card"><div class="value" style="color:#06b6d4" id="s-low">—</div><div class="label">Low / OK</div></div>
+  <div class="stat-card"><div class="value" style="color:#fb7185" id="s-shadow">—</div><div class="label">Shadow Rate</div></div>
+</div>
+<div id="main-workspace">
+  <!-- OVERLAY TOOLS -->
+  <div class="overlay-tools">
+    <div style="position:relative;">
+      <input id="sonarInput" type="text" class="search-box" placeholder="Search any model or org..." autocomplete="off"
+             onkeydown="sonarKeydown(event)"
+             oninput="sonarAutocomplete(this.value)"
+             onfocus="sonarAutocomplete(this.value)" 
+             onblur="setTimeout(()=>document.getElementById('sonarDropdown').style.display='none',200)"/>
+      <div id="sonarDropdown" class="search-dropdown"></div>
+    </div>
+    
+    <div class="filter-pills">
+      <div class="filter-pill" id="filter-gdna" onclick="toggleFilter('gdna')">✨ GDNA Curated Only</div>
+      <div class="filter-pill" id="filter-critical" onclick="toggleFilter('critical')">🚨 Critical Shadow Risk</div>
+    </div>
+  </div>
+
+  <!-- FORCE GRAPH -->
+  <div id="graphContainer">
+    <div class="loading" id="graphLoading">Loading market topology...</div>
+    <svg id="graph" style="display:block;width:100%;height:100%"></svg>
+  </div>
+
+  <!-- SIDE PANEL (SONAR) -->
+  <aside id="sidePanel">
+    <div class="panel-header">
+      <div id="sonarHeader" style="flex:1;">
+        <div style="color:var(--muted); font-size:12px;">Select a node to inspect</div>
+      </div>
+      <div class="panel-close" onclick="closePanel()">✕</div>
+    </div>
+    <div class="panel-content">
+      <div id="sonarEmpty" style="text-align:center; padding:40px 20px; color:var(--muted); font-size:13px; line-height:1.6;">
+        Click any model in the graph or use the search bar to reveal training signals and dataset connections.
+      </div>
+      
+      <div id="sonarResult" style="display:none;">
+        <div class="info-label">
+          <span style="color:#10b981;">●</span> Declared Sources
+        </div>
+        <div id="sonarDeclared" style="margin-bottom:32px;"></div>
+
+        <div class="info-label">
+          <span style="color:#5dd4ff;">●</span> Unresolved Sonar Signals <span style="background:rgba(124,58,237,.1);color:#5dd4ff;padding:2px 6px;border-radius:4px;font-size:8px;">OBSERVED</span>
+        </div>
+        <div id="sonarUnresolved" style="margin-bottom:32px;"></div>
+
+        <div style="background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(124,58,237,.02)); border:1px solid rgba(124,58,237,.2); border-radius:10px; padding:16px; text-align:center; margin-top:20px;">
+          <div style="font-size:12px; font-weight:700; color:#5dd4ff; margin-bottom:6px;">Need full lineage proof?</div>
+          <div style="font-size:11px; color:var(--muted); margin-bottom:12px;">Go to the Passport view to see GDNA hashes and Temporal Proofs of Absence for this model.</div>
+          <a id="passportLink" href="#" style="display:inline-block; background:var(--accent); color:#fff; text-decoration:none; padding:8px 16px; border-radius:6px; font-size:11px; font-weight:700;">Open Passport →</a>
+        </div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="/registry/provenance/app.js?v=1772382870310"></script>
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c" defer></script>
+</body>
+</html>

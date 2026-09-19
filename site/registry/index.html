@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Crovia Registry — everything observed, signed and anchored</title>
+<meta name="description" content="The public Crovia Registry: the live TACET log of AI training-data disclosure, LACUNA candidates, the Crovia Seal standard, the 2026 AXIOM archive, compliance and provenance views, and every public data file. All observation data CC-BY-4.0.">
+<link rel="canonical" href="https://croviatrust.com/registry/">
+<link rel="icon" type="image/png" href="https://croviatrust.com/logo.png">
+<meta property="og:title" content="Crovia Registry">
+<meta property="og:description" content="Live TACET log, LACUNA candidates, Seal standard, 2026 archive, open data. Everything Crovia observed, signed and anchored.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://croviatrust.com/registry/">
+<meta property="og:image" content="https://croviatrust.com/og-card.png">
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  .rg-wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+  .rg-hero{padding:72px 0 30px}
+  .rg-eyebrow{font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  .rg-hero h1{font:700 clamp(34px,4.8vw,54px)/1.05 var(--sans);letter-spacing:-.03em;margin:14px 0 18px}
+  .rg-hero h1 em{font-style:normal;color:var(--accent)}
+  .rg-lead{font-size:16.5px;color:var(--text-soft);max-width:760px}
+  .rg-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:36px}
+  .rg-stat{background:var(--bg-card);padding:18px 20px}
+  .rg-stat a{display:block}
+  .rg-stat .n{font:600 26px var(--mono);color:#fff;line-height:1;letter-spacing:-.02em}
+  .rg-stat .l{font:400 11px var(--mono);color:var(--text-muted);margin-top:8px;letter-spacing:.04em}
+  .rg-stat .s{font:400 10px var(--mono);color:var(--text-faint);margin-top:6px}
+  .rg-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:14px;margin:60px 0 18px}
+  .rg-head h2{font:700 24px/1.15 var(--sans);letter-spacing:-.02em}
+  .rg-head .meta{font:400 11.5px var(--mono);color:var(--text-muted)}
+  .rg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}
+  .rg-card{display:block;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;transition:border-color .15s,background .15s}
+  .rg-card:hover{border-color:var(--accent-line);background:var(--bg-card-hi);color:var(--text)}
+  .rg-card .k{font:600 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;display:flex;justify-content:space-between;gap:8px}
+  .rg-card .k .st{color:var(--text-faint);letter-spacing:.06em}
+  .rg-card .k .st.live{color:#3ddc84}
+  .rg-card h3{font:600 17px/1.2 var(--sans);color:#fff;margin-bottom:8px}
+  .rg-card p{font-size:13.5px;color:var(--text-soft);line-height:1.55}
+  .rg-card .sub{margin-top:12px;display:flex;gap:6px;flex-wrap:wrap}
+  .rg-card .sub span{font:500 10.5px var(--mono);color:var(--text-muted);border:1px solid var(--border);border-radius:999px;padding:3px 9px}
+  .rg-files{width:100%;border-collapse:collapse;font-size:13px}
+  .rg-files th{text-align:left;font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);padding:8px 10px;border-bottom:1px solid var(--border)}
+  .rg-files td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top}
+  .rg-files td.f{font:500 12.5px var(--mono);white-space:nowrap}
+  .rg-files td.f a{color:var(--accent)}
+  .rg-files td.d{color:var(--text-soft)}
+  .rg-files td.t{font:500 10.5px var(--mono);color:var(--text-faint);white-space:nowrap}
+  .rg-files td.t.pro{color:var(--warn)}
+  .rg-note{font-size:12.5px;color:var(--text-faint);margin-top:12px;max-width:820px}
+  .rg-note a{color:var(--accent)}
+  .rg-end{margin:26px 0 72px}
+  @media (max-width:640px){.rg-files td.d{display:none}.rg-files th:nth-child(2){display:none}}
+</style>
+</head>
+<body>
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="https://croviatrust.com/" class="cv-brand-link"><img src="https://croviatrust.com/logo.png" alt="" class="cv-brand-mark"><span class="cv-brand-name">CROVIA</span></a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+    <div class="cv-nav-status" id="cv-nav-status"><span class="dot"></span><span data-cv-status>connecting</span></div>
+  </div>
+</nav>
+
+<main class="rg-wrap">
+  <section class="rg-hero">
+    <div class="rg-eyebrow">The Crovia Registry · public · CC-BY-4.0</div>
+    <h1>Everything observed, <em>signed and anchored.</em></h1>
+    <p class="rg-lead">One place for every public object Crovia produces: the live <a href="/registry/tacet/">TACET</a> log, the <a href="/registry/lacuna/">LACUNA</a> candidates it yields, the <a href="/registry/seal/">Crovia Seal</a> standard that wraps every proof, the read-only 2026 archive, and the raw files behind every number on this site.</p>
+    <div class="rg-strip">
+      <div class="rg-stat"><a href="/registry/tacet/"><div class="n" id="s-epochs">—</div><div class="l">TACET epochs</div><div class="s" id="s-epochs-sub">—</div></a></div>
+      <div class="rg-stat"><a href="/registry/tacet/#latest"><div class="n" id="s-models">—</div><div class="l">models in the map</div><div class="s">since 2026-09-19</div></a></div>
+      <div class="rg-stat"><a href="/registry/lacuna/"><div class="n" id="s-neg">—</div><div class="l">signed observations of absence</div><div class="s">TACET snapshots</div></a></div>
+      <div class="rg-stat"><a href="/registry/explore/"><div class="n" id="s-env">—</div><div class="l">archive observations</div><div class="s">AXIOM ledger · Jan–Jun 2026</div></a></div>
+      <div class="rg-stat"><a href="/registry/data/substrate/ots_anchors.json"><div class="n" id="s-btc">—</div><div class="l">Bitcoin-confirmed roots</div><div class="s">distinct · OpenTimestamps</div></a></div>
+    </div>
+  </section>
+
+  <div class="rg-head"><h2>Live</h2><span class="meta">updated every hour</span></div>
+  <div class="rg-grid">
+    <a class="rg-card" href="/registry/tacet/"><div class="k">TACET <span class="st live">● live</span></div><h3>The verifiable-silence log</h3><p>Hourly epochs opened by drand, closed by Bitcoin. Every model card fetched, every predicate verdict signed, every hour committed to one sparse Merkle map.</p><div class="sub"><span>latest epoch</span><span>snapshots</span><span>proofs</span><span>verify offline</span></div></a>
+    <a class="rg-card" href="/registry/lacuna/"><div class="k">LACUNA <span class="st live">● live</span></div><h3>Loss-of-auditability candidates</h3><p>Models whose cards have stayed silent, ranked by anchored hours of silence. A signed certificate is a TACET level-2 proof for a named window.</p><div class="sub"><span>candidates</span><span>featured proof</span><span>request certificate</span></div></a>
+    <a class="rg-card" href="/registry/embed/silence.html"><div class="k">Silence Index <span class="st live">● live</span></div><h3>One number per model</h3><p>Observation-bounded days of silence. Embed it on any page with one iframe; it reads the public file directly.</p><div class="sub"><span>embed</span><span>silence_index.json</span></div></a>
+  </div>
+
+  <div class="rg-head"><h2>The standard</h2><span class="meta">crovia.seal.v1 · IETF Internet-Draft</span></div>
+  <div class="rg-grid">
+    <a class="rg-card" href="/registry/seal/"><div class="k">Crovia Seal</div><h3>Tamper-evident receipts for AI outputs</h3><p>The object that wraps every TACET proof and every certificate. Ed25519, CSC-1 canonicalization, offline verification in three lines.</p><div class="sub"><span>overview</span><span>SDK</span></div></a>
+    <a class="rg-card" href="/registry/seal/spec/"><div class="k">Specification</div><h3>draft-crovia-seal</h3><p>Normative text, conformance vectors and the reference implementation. The draft is frozen; profiles extend it.</p><div class="sub"><span>spec</span><span>threat model</span></div></a>
+    <a class="rg-card" href="/registry/seal/verify/"><div class="k">Verifier</div><h3>Verify a Seal in your browser</h3><p>Paste any Seal. Canonicalization, hash chain and signature are checked locally — zero network calls.</p><div class="sub"><span>verify</span><span>transparency log</span></div></a>
+  </div>
+
+  <div class="rg-head"><h2>The 2026 archive</h2><span class="meta">AXIOM ledger · observation paused 2026-06-01 · read-only</span></div>
+  <div class="rg-grid">
+    <a class="rg-card" href="/registry/explore/"><div class="k">Explore</div><h3>Evidence Explorer</h3><p>Browse the signed observations of the first-generation collectors, per model and per source, with the lineage graph.</p><div class="sub"><span>observations</span><span>graph</span></div></a>
+    <a class="rg-card" href="/registry/verify/"><div class="k">Verify</div><h3>Provenance passport</h3><p>Per-model view of what was disclosed, when, and how the archive observed it. Includes the passport export.</p><div class="sub"><span>passport</span></div></a>
+    <a class="rg-card" href="/registry/compliance/"><div class="k">Compliance</div><h3>EU AI Act Art. 53 hub</h3><p>Transparency index and per-organisation disclosure timelines derived from the archive. Not a certification.</p><div class="sub"><span>transparency index</span></div></a>
+    <a class="rg-card" href="/registry/provenance/"><div class="k">Provenance</div><h3>Dataset → model graph</h3><p>Interactive graph of declared training sources across the archived cards.</p><div class="sub"><span>lineage_graph.json</span></div></a>
+  </div>
+
+  <div class="rg-head"><h2>Data files</h2><span class="meta">direct fetch · rate-limited · CORS on TACET</span></div>
+  <table class="rg-files">
+    <thead><tr><th>file</th><th>what it is</th><th>tier</th></tr></thead>
+    <tbody>
+      <tr><td class="f"><a href="/registry/data/tacet/latest.json">tacet/latest.json</a></td><td class="d">Latest epoch sheet summary, totals since genesis.</td><td class="t">public</td></tr>
+      <tr><td class="f"><a href="/registry/data/tacet/targets.json">tacet/targets.json</a></td><td class="d">Per-model summary: last verdict, negative and anchored counts.</td><td class="t">public</td></tr>
+      <tr><td class="f"><a href="/registry/data/tacet/trust_root.json">tacet/trust_root.json</a></td><td class="d">Operator, observer and issuer public keys; map id; genesis.</td><td class="t">public</td></tr>
+      <tr><td class="f"><a href="/registry/data/tacet/sheets/">tacet/sheets/</a> · <a href="/registry/data/tacet/snapshots/">snapshots/</a> · <a href="/registry/data/tacet/ots/">ots/</a></td><td class="d">Every signed epoch sheet, every signed snapshot, every OpenTimestamps proof. Browsable.</td><td class="t">public</td></tr>
+      <tr><td class="f"><a href="/registry/data/_home_pulse.json">_home_pulse.json</a></td><td class="d">Archive headline numbers with their validity flags.</td><td class="t">public</td></tr>
+      <tr><td class="f"><a href="/registry/data/silence_index.json">silence_index.json</a></td><td class="d">Observation-bounded silence per model (archive).</td><td class="t">public</td></tr>
+      <tr><td class="f"><a href="/registry/data/substrate/">substrate/</a></td><td class="d">AXIOM ledger: latest seal, anchors, collectors, recent envelopes. Browsable.</td><td class="t">public</td></tr>
+      <tr><td class="f"><a href="/registry/data/seal/transparency_log.json">seal/transparency_log.json</a></td><td class="d">Seals issued by seal.croviatrust.com, Merkle-logged.</td><td class="t">public</td></tr>
+      <tr><td class="f"><a href="/registry/data/transparency_index.json">transparency_index.json</a> · <a href="/registry/data/global_ranking.json">global_ranking.json</a></td><td class="d">Derived rankings from the archive.</td><td class="t">public</td></tr>
+      <tr><td class="f">forensic_dossiers.json · forensic_report.json</td><td class="d">Court-ready dossiers and memorization probes. Engagement letter first.</td><td class="t pro">professional</td></tr>
+    </tbody>
+  </table>
+  <p class="rg-note">Full endpoint list, rate limits and licences: <a href="/registry/api/">Data &amp; API</a>. Machine-readable: <a href="/.well-known/openapi.yaml">openapi.yaml</a> · <a href="/llms.txt">llms.txt</a>. Public/professional boundary is recorded in the project <a href="https://github.com/croviatrust/countersign/blob/main/CANON.md" target="_blank" rel="noopener">canon</a>.</p>
+  <div class="rg-end"></div>
+</main>
+
+<footer class="cv-foot">
+  <div class="cv-foot-inner">
+    <div class="cv-foot-links">
+      <a href="https://croviatrust.com/">Verify</a>
+      <a href="/registry/tacet/">TACET</a>
+      <a href="/registry/lacuna/">LACUNA</a>
+      <a href="/registry/seal/">Seal</a>
+      <a href="/registry/api/">Data &amp; API</a>
+      <a href="mailto:info@croviatrust.com">Contact</a>
+    </div>
+    <div class="cv-foot-meta">&copy; 2026 Crovia Trust · observation facts only · all observation data CC-BY-4.0</div>
+  </div>
+</footer>
+
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c" defer></script>
+<script>
+(function(){
+  function $(id){return document.getElementById(id)}
+  function n(x){return (x==null||typeof x!=='number')?'—':x.toLocaleString('en-US')}
+  function j(p){return fetch(p,{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json()})}
+  Promise.allSettled([j('/registry/data/tacet/latest.json'),j('/registry/data/tacet/targets.json'),j('/registry/data/_home_pulse.json')]).then(function(res){
+    var L=res[0].status==='fulfilled'?res[0].value:null, T=res[1].status==='fulfilled'?res[1].value:null, PU=res[2].status==='fulfilled'?res[2].value:null;
+    if(L){ $('s-epochs').textContent=n(L.epochs); $('s-epochs-sub').textContent=n(L.anchored_epochs)+' confirmed in Bitcoin'; $('s-neg').textContent=n(L.negative_snapshots_total); }
+    if(T){ $('s-models').textContent=n(T.count); }
+    if(PU){ $('s-env').textContent=n(PU.ledger&&PU.ledger.n_envelopes_total); $('s-btc').textContent=n(PU.anchors&&PU.anchors.distinct_roots); }
+  });
+})();
+</script>
+</body>
+</html>

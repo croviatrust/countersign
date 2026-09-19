@@ -56,11 +56,13 @@
   "pages": [
     "/",
     "/whitepaper.html",
+    "/whitepaper-v2-2026-03.html",
     "/proof.html",
     "/registry/",
     "/registry/explore/",
     "/registry/verify/",
     "/registry/compliance/",
+    "/registry/tacet/",
     "/registry/lacuna/",
     "/registry/api/",
     "/registry/seal/",
@@ -115,15 +117,16 @@
     "/registry/data/substrate/trust_root.json",
     "/registry/data/substrate/diamond.json",
     "/registry/data/substrate/lacuna_candidates.json",
-    "/registry/data/_smoke.json"
+    "/registry/data/_smoke.json",
+    "/registry/data/tacet/trust_root.json",
+    "/registry/data/tacet/latest.json",
+    "/registry/data/tacet/index.json",
+    "/registry/data/tacet/proofs/index.json",
+    "/registry/data/global_ranking.json"
   ],
   "private_files": [
-    "/registry/data/global_ranking.json",
     "/registry/data/forensic_dossiers.json",
-    "/registry/data/forensic_report.json",
-    "/registry/data/sonar_chains.json",
-    "/registry/data/tpa_latest.json",
-    "/registry/data/tpa_summary.json"
+    "/registry/data/forensic_report.json"
   ],
   "heavy_files": [
     "/registry/data/substrate/chains.json",
@@ -157,22 +160,40 @@
       "valid": true
     },
     "bitcoin_anchors": {
-      "source": "/registry/data/substrate/ots_anchors.json",
-      "path": "bitcoin_confirmed",
-      "valid": false,
-      "rule": "distinct merkle_root equal to substrate latest_seal root at stamping time"
+      "source": "/registry/data/_home_pulse.json",
+      "path": "anchors.distinct_roots",
+      "valid": true,
+      "rule": "distinct merkle_root with a confirmed Bitcoin timestamp; re-anchors of an unchanged root do not count"
     },
     "silence_days": {
       "source": "/registry/data/silence_index.json",
       "path": "total_silence_days",
-      "valid": false,
-      "rule": "accrues only between consecutive negative anchored observations"
+      "valid": true,
+      "rule": "observation-bounded: sum over targets of days between consecutive negative anchored observations; shown only in the 2026 archive section with 'observation paused 2026-06-01'"
     },
     "lacuna_records": {
       "source": "/registry/data/_home_pulse.json",
       "path": "ledger.by_axiom_type.AX.LAC",
       "valid": false,
-      "rule": "target_id must be an AI model id (org/model), not an internal collector, path or test id"
+      "rule": "target_id must be an AI model id (org/model), not an internal collector, path or test id; since 2026-09-19 the home page no longer shows this number — LACUNA candidates are read from TACET targets.json (negative_anchored_epochs)"
+    },
+    "tacet_epochs": {
+      "source": "/registry/data/tacet/latest.json",
+      "path": "epochs",
+      "valid": true,
+      "rule": "one signed epoch sheet per hour since genesis; anchored count shown alongside from anchored_epochs"
+    },
+    "tacet_models": {
+      "source": "/registry/data/tacet/targets.json",
+      "path": "count",
+      "valid": true,
+      "rule": "distinct target ids with at least one signed snapshot"
+    },
+    "tacet_negative_snapshots": {
+      "source": "/registry/data/tacet/latest.json",
+      "path": "negative_snapshots_total",
+      "valid": true,
+      "rule": "snapshots whose predicate result is false; counts toward silence only once the epoch is anchored"
     }
   },
   "internal_target_patterns": [
@@ -231,7 +252,7 @@
     "payout layer"
   ],
   "smoke_markers": {
-    "/": "We record what AI",
+    "/": "Silence you can",
     "/registry/": "Crovia Registry",
     "/registry/lacuna/": "LACUNA",
     "/registry/seal/": "Open Provenance Receipt",
@@ -239,7 +260,8 @@
     "/registry/explore/": "Evidence Explorer",
     "/registry/verify/": "Crovia Passport",
     "/registry/compliance/": "Compliance",
-    "/whitepaper.html": "Whitepaper"
+    "/whitepaper.html": "Verifiable Silence",
+    "/registry/tacet/": "TACET"
   },
   "retired_path_targets": {
     "/check.html": "/registry/verify/",
@@ -261,5 +283,42 @@
     "/registry/pont/": "/registry/explore/?type=pont",
     "/registry/v/": "/registry/verify/?mode=axiom",
     "/registry/cep/": "/registry/verify/?mode=lab"
+  },
+  "access_policy": {
+    "decided": "2026-09-19",
+    "public": "all /registry/data/ files, CC-BY-4.0, direct fetch, 15 req/min per IP",
+    "professional": [
+      "/registry/data/forensic_dossiers.json",
+      "/registry/data/forensic_report.json"
+    ],
+    "paid_services": [
+      "per-organisation forensic dossiers",
+      "TPA certification reports",
+      "witnessed TACET silence proofs (k/n)",
+      "hosted Seal issuance"
+    ]
+  },
+  "tacet": {
+    "base": "/registry/data/tacet/",
+    "map_id": "urn:crovia:tacet:map:disclosure",
+    "genesis": "2026-09-19T18:00:00Z",
+    "epoch_seconds": 3600,
+    "files": [
+      "trust_root.json",
+      "latest.json",
+      "index.json",
+      "targets.json",
+      "sheets/{epoch}.json",
+      "snapshots/{epoch}.jsonl",
+      "changes/{epoch}.json",
+      "values/{key_hex}.json",
+      "ots/{epoch}.ots",
+      "proofs/index.json",
+      "proofs/{slug}.seal.json"
+    ],
+    "operator_pubkey_hex": "28d7faeb726187b05dec60bc744f8b055c719ba294815050e8b6831da5889712",
+    "observer_pubkey_hex": "672c95c94ae6193d66d213611c98642443f0ac04c6f0e0fa2e52ba9dca55ea31",
+    "issuer_id": "urn:crovia:seal-issuer:tacet",
+    "issuer_pubkey_hex": "628c15f65550e527a50b85a17b502010bc6c18e7249254483454e884eada837c"
   }
 }

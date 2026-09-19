@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Crovia Seal &mdash; The Open Provenance Receipt for AI Outputs</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Crovia Seal: a tamper-evident, cryptographically signed receipt attachable to any AI output. Verifiable offline in 3 lines of Python. Apache-2.0 + CC0. The DKIM of the AI era.">
+<meta property="og:title" content="Crovia Seal &mdash; The Open Provenance Receipt for AI Outputs">
+<meta property="og:description" content="Tamper-evident receipts for AI outputs. Verifiable offline. Open standard.">
+<meta property="og:image" content="https://croviatrust.com/logo.png">
+<link rel="icon" type="image/png" href="https://croviatrust.com/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<style>
+  /* Seal-specific accents */
+  .seal-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px;
+    border: 1px solid var(--accent-line);
+    background: var(--accent-soft);
+    color: var(--accent);
+    font: 600 11px var(--mono);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    margin-bottom: 24px;
+  }
+  .seal-status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 56px;
+  }
+  .seal-stat {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .seal-stat .k {
+    font: 600 11px var(--mono);
+    color: var(--text-muted);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .seal-stat .v {
+    font: 600 22px var(--mono);
+    color: #fff;
+    line-height: 1.1;
+  }
+  .seal-stat .v.ok { color: var(--accent); }
+  .seal-stat .f {
+    font: 400 11px var(--mono);
+    color: var(--text-faint);
+    margin-top: 4px;
+  }
+
+  .paths-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    gap: 18px;
+  }
+  .path-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 26px;
+    display: flex; flex-direction: column;
+    gap: 14px;
+  }
+  .path-card h3 {
+    font: 600 16px var(--sans);
+    color: #fff;
+    line-height: 1.3;
+    margin: 0;
+  }
+  .path-card .who {
+    font: 600 11px var(--mono);
+    color: var(--accent);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .path-card p {
+    color: var(--text-soft);
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+  }
+  .path-card pre {
+    background: #060810;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    margin: 0;
+    font: 500 12px var(--mono);
+    color: var(--text);
+    overflow-x: auto;
+    line-height: 1.6;
+  }
+  .path-card pre .cmt { color: var(--text-faint); }
+  .path-card pre .vr  { color: var(--accent); }
+
+  .killer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+  }
+  .killer {
+    padding: 22px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+  }
+  .killer .name {
+    font: 600 11px var(--mono);
+    color: var(--accent);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .killer h3 {
+    font-size: 16px;
+    color: #fff;
+    margin: 0 0 8px;
+    line-height: 1.3;
+  }
+  .killer p {
+    color: var(--text-soft);
+    font-size: 13.5px;
+    line-height: 1.55;
+    margin: 0;
+  }
+
+  .schema-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    margin: 28px 0 0;
+  }
+  .schema-block pre {
+    margin: 0;
+    background: transparent;
+    padding: 0;
+    border: 0;
+    font: 500 13px var(--mono);
+    line-height: 1.65;
+    color: var(--text);
+    overflow-x: auto;
+  }
+  .schema-block .key { color: var(--accent); }
+  .schema-block .str { color: #ffd479; }
+  .schema-block .num { color: #ff8b8b; }
+  .schema-block .cmt { color: var(--text-faint); }
+</style>
+</head>
+<body>
+
+<div style="max-width:980px;margin:24px auto;padding:16px 20px;background:linear-gradient(135deg,rgba(30,197,255,0.08),transparent);border:1px solid rgba(30,197,255,0.36);border-radius:10px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+  <div><strong style="color:#fff">Verify any Crovia Seal &mdash; offline, in your browser</strong><br><span style="color:#6c7988;font:500 13px JetBrains Mono,monospace">Paste a seal JSON or a whole seals.jsonl chain. CSC-1 bytes, Ed25519 signature, hash links &mdash; checked client-side. Nothing uploaded.</span></div>
+  <a href="/registry/seal/verify/" style="background:#1ec5ff;color:#001b27;padding:12px 20px;border-radius:6px;text-decoration:none;font:600 12px JetBrains Mono,monospace;letter-spacing:.14em;text-transform:uppercase;white-space:nowrap">Verify a seal &rarr;</a>
+</div>
+
+
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="https://croviatrust.com/" class="cv-brand-link" aria-label="Crovia home">
+      <img src="https://croviatrust.com/logo.png" alt="" class="cv-brand-mark">
+      <span class="cv-brand-name">CROVIA</span>
+    </a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Toggle menu">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+    <div class="cv-nav-status" id="cv-nav-status" title="Live system status">
+      <span class="dot"></span>
+      <span data-cv-status>connecting</span>
+    </div>
+  </div>
+</nav>
+
+<main class="cv-main">
+
+  <!-- ============ HERO ============ -->
+  <section class="cv-hero" style="margin-bottom: 56px;">
+    <span class="seal-pill">Open Standard &middot; Apache 2.0 &middot; CC0 spec</span>
+    <h1>The DKIM of<br>the <em>AI era</em>.</h1>
+    <p class="cv-lede">
+      Crovia Seal is a tamper-evident, cryptographically signed receipt &mdash;
+      about 500 bytes of canonical JSON &mdash; attachable to any AI output:
+      text, code, image, audio. Anyone can issue. Anyone can verify, offline,
+      in three lines of Python. No vendor lock-in, no central server, no token,
+      no consensus protocol. Just signatures and hash chains, the way standards
+      should be.
+    </p>
+    <div class="cv-hero-cta">
+      <a class="cv-btn cv-btn-primary" href="https://datatracker.ietf.org/doc/draft-crovia-seal/" target="_blank" rel="noopener">
+        Read the IETF Internet-Draft
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8h10M9 4l4 4-4 4"/></svg>
+      </a>
+      <a class="cv-btn" href="/registry/seal/verify/">Verify a seal in your browser</a>
+      <a class="cv-btn" href="/registry/seal/log/">Transparency log</a>
+      <a class="cv-btn" href="/registry/seal/spec/">Spec &amp; reference impl</a>
+      <a class="cv-btn" href="#paths">Adopt in 60 seconds</a>
+      <a class="cv-btn" href="#schema">See a seal</a>
+    </div>
+  </section>
+
+  <!-- ============ STATUS STRIP ============ -->
+  <div class="seal-status-grid">
+    <div class="seal-stat">
+      <div class="k">Spec version</div>
+      <div class="v ok">v0.5</div>
+      <div class="f">draft &middot; impl-complete</div>
+    </div>
+    <div class="seal-stat">
+      <div class="k">Reference impls</div>
+      <div class="v">2</div>
+      <div class="f">Python &middot; TypeScript</div>
+    </div>
+    <div class="seal-stat">
+      <div class="k">Tests passing</div>
+      <div class="v ok">208 / 208</div>
+      <div class="f">across 4 packages</div>
+    </div>
+    <div class="seal-stat">
+      <div class="k">IETF Internet-Draft</div>
+      <div class="v ok">draft-01</div>
+      <div class="f"><a href="https://datatracker.ietf.org/doc/draft-crovia-seal/" target="_blank" rel="noopener" style="color:var(--accent);text-decoration:none">filed &middot; on datatracker &#8599;</a></div>
+    </div>
+  </div>
+
+  <!-- ============ EDITORIAL THESIS ============ -->
+  <section class="cv-thesis" id="why">
+    <p>
+      AI outputs are generated billions of times per day with <strong>zero
+      forensic trail</strong>. When one causes harm &mdash; a copyright claim,
+      a defamation lawsuit, a regulatory inquiry &mdash; the evidence needed
+      to reconstruct what happened has already evaporated. The logprobs are
+      gone. The model state is gone. The input&ndash;output link is unverifiable.
+    </p>
+    <p>
+      Crovia Seal fixes this, by design, <strong>without requiring cooperation
+      from model vendors</strong>. The seal can be emitted client-side &mdash;
+      by a proxy, by a browser extension, by an IDE plugin. It becomes the
+      <span class="mono">DKIM</span> of the AI era: silent, ubiquitous,
+      eventually mandatory.
+    </p>
+    <p>
+      What Seal is <em>not</em>: not a judge, not a detector, not a blockchain,
+      not surveillance. A seal commits to <strong>hashes of input/output</strong>,
+      not the content itself. Privacy-preserving checks via optional ZK proof
+      bundles are part of the extended spec. The seal records facts; courts judge.
+    </p>
+  </section>
+
+  <!-- ============ FIVE KILLERS ============ -->
+  <section style="margin-top: 96px;">
+    <div class="cv-sec-head">
+      <h2>Five things only Seal does</h2>
+      <span class="cv-sec-meta">that no other receipt format does</span>
+    </div>
+
+    <div class="killer-grid">
+      <div class="killer">
+        <div class="name">01 &middot; CSC-1</div>
+        <h3>Canonicalization that cannot ambiguate</h3>
+        <p>A strict subset of <span class="mono">RFC 8785</span> that forbids floating-point in signed payloads. The exact bytes that get signed are fully derivable from the seal &mdash; with one canonicalization algorithm and no edge cases.</p>
+      </div>
+      <div class="killer">
+        <div class="name">02 &middot; CIM</div>
+        <h3>Invisible mark that survives copy-paste</h3>
+        <p>Crovia Invisible Mark: zero-width Unicode steganography that embeds the <span class="mono">seal_id</span> directly inside the AI output. The text travels through Word, Telegram, court filings &mdash; the seal id rides along, invisible.</p>
+      </div>
+      <div class="killer">
+        <div class="name">03 &middot; drand anchor</div>
+        <h3>Cannot be back-dated, ever</h3>
+        <p>Optional anchor against public randomness beacons (<a href="https://drand.love/" target="_blank" rel="noopener">drand</a> by League of Entropy). A seal that anchors to round R proves it was created <em>after</em> the moment R was published. Combined with our substrate's Bitcoin anchor: temporal proof at two layers.</p>
+      </div>
+      <div class="killer">
+        <div class="name">04 &middot; Browser extension MV3</div>
+        <h3>Adoption without permission</h3>
+        <p>Detectors implemented for ChatGPT, Claude, Gemini, Perplexity. A &laquo;Seal&raquo; button appears next to every AI answer. One click, the response is sealed with a local Ed25519 key and copied to your clipboard with the CIM embedded.</p>
+      </div>
+      <div class="killer">
+        <div class="name">05 &middot; OpenAI-compatible proxy</div>
+        <h3>One env var, full conformance</h3>
+        <p>Drop-in replacement for <span class="mono">api.openai.com</span> that seals every response. <span class="mono">CROVIA_INJECT_CIM=true</span>, <span class="mono">CROVIA_BEACON_ANCHOR=true</span>, done. Your enterprise AI is provenance-compliant by default.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOUR ADOPTION PATHS ============ -->
+  <section style="margin-top: 96px;" id="paths">
+    <div class="cv-sec-head">
+      <h2>Adopt in 60 seconds</h2>
+      <span class="cv-sec-meta">five paths &middot; pick yours</span>
+    </div>
+
+    <div class="paths-grid">
+
+      <div class="path-card">
+        <span class="who">01 &middot; AI company</span>
+        <h3>Put the proxy in front of your model</h3>
+        <p>Every response you serve carries a cryptographic receipt. Auditors, regulators, and users can prove a given output is &mdash; or is not &mdash; authentically from your system, regardless of the path it travelled.</p>
+        <pre><span class="cmt"># add the proxy in front of your endpoint</span>
+pip install -e integrations/proxy
+<span class="vr">CROVIA_UPSTREAM_URL</span>=http://your-model:8000 \
+<span class="vr">CROVIA_INJECT_CIM</span>=true \
+<span class="vr">CROVIA_BEACON_ANCHOR</span>=true \
+crovia-proxy --port 443</pre>
+      </div>
+
+      <div class="path-card">
+        <span class="who">02 &middot; Individual user</span>
+        <h3>Install the browser extension</h3>
+        <p>Every time you use ChatGPT / Claude / Gemini / Perplexity, a <strong>Seal</strong> button appears next to each answer. One click &mdash; the response is sealed with your local Ed25519 key and copied with an invisible Crovia mark that survives paste.</p>
+        <pre><span class="cmt"># build the extension (Chrome/Firefox MV3)</span>
+cd integrations/browser-extension
+npm install &amp;&amp; npm run build
+
+<span class="cmt"># load the dist/ folder as an unpacked extension</span></pre>
+      </div>
+
+      <div class="path-card">
+        <span class="who">03 &middot; Verifier (lawyer / journalist)</span>
+        <h3>Verify a seal in three lines</h3>
+        <p>You received a text claiming to be from an AI. Open the <a href="/registry/seal/verify/" style="color:var(--accent)">in-browser verifier</a>, paste the seal: signature, canonical bytes and chain links are checked client-side, offline. Or do it in three lines of Python:</p>
+        <pre><span class="cmt"># offline verification, no network</span>
+from crovia_seal import verify_seal
+import json
+
+seal = json.loads(open(<span class="vr">"received.seal.json"</span>).read())
+vr = verify_seal(seal, issuer_pubkey_hex=<span class="vr">"&lt;pinned key&gt;"</span>)
+assert vr.ok, vr.errors</pre>
+      </div>
+
+      <div class="path-card">
+        <span class="who">04 &middot; Infrastructure operator</span>
+        <h3>Run a transparency log</h3>
+        <p>Public append-only log of every seal an issuer commits to. Download the chain, prove inclusion, catch re-writes. Crovia runs the first mirror — conformance vectors live today; production issuers onboard via Causari.</p>
+        <pre><span class="cmt"># browse the public log</span>
+curl https://croviatrust.com/registry/data/seal/public_log.jsonl
+
+<span class="cmt"># human-readable view</span>
+open https://croviatrust.com/registry/seal/log/</pre>
+        <p style="margin-top:12px"><a href="/registry/seal/log/" style="color:var(--accent);font:600 13px var(--sans)">Open Seal Transparency Log →</a></p>
+      </div>
+
+      <div class="path-card">
+        <span class="who">05 &middot; Software team</span>
+        <h3>Seal every AI-written line of code</h3>
+        <p><a href="https://github.com/croviatrust/causari" target="_blank" rel="noopener" style="color:var(--accent)">Causari</a> &mdash; the first production Seal issuer &mdash; is a Rust proxy that sits between your coding agent and the model. Every completion gets a signed, hash-chained receipt; the chain verifies offline against the normative conformance vectors.</p>
+        <pre><span class="cmt"># one flag: every completion sealed</span>
+re proxy --seal
+<span class="cmt">#  • gpt-4o  42&rarr;18 tok  &#128272; cs_2026_Q7RM&hellip;</span>
+
+re seal verify
+<span class="cmt"># &#10003; 128 seal(s) verified - chain contiguous</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SAMPLE SEAL ============ -->
+  <section style="margin-top: 96px;" id="schema">
+    <div class="cv-sec-head">
+      <h2>What a seal looks like</h2>
+      <span class="cv-sec-meta">~500 bytes of canonical JSON</span>
+    </div>
+
+    <p style="color: var(--text-soft); max-width: 720px; font-size: 15px;">
+      A seal is a single, self-describing JSON object. Below is a minimal example.
+      The <span class="mono" style="color:var(--accent)">signature</span> is computed over the
+      <span class="mono" style="color:var(--accent)">CSC-1</span> canonicalization of every other field, with a
+      domain-separated prefix (<span class="mono" style="color:var(--accent)">"CROVIA-SEAL-v1"</span>).
+    </p>
+
+    <div class="schema-block">
+<pre>{
+  <span class="key">"seal_version"</span>: <span class="str">"crovia.seal.v1"</span>,
+  <span class="key">"seal_id"</span>:      <span class="str">"cs_2026_YSQWAGSZ2C73DQF5TW5U4GE6QY"</span>,
+  <span class="key">"issuer"</span>: {
+    <span class="key">"id"</span>:     <span class="str">"urn:crovia:seal-issuer:crovia-trust"</span>,
+    <span class="key">"pubkey"</span>: { <span class="key">"alg"</span>: <span class="str">"ed25519"</span>, <span class="key">"key_hex"</span>: <span class="str">"b6149a42&hellip;7a28d949"</span> }
+  },
+  <span class="key">"subject"</span>: {
+    <span class="key">"input_hash"</span>:  <span class="str">"sha256:&hellip;"</span>,  <span class="key">"input_len"</span>:  <span class="num">23</span>,
+    <span class="key">"output_hash"</span>: <span class="str">"sha256:&hellip;"</span>,  <span class="key">"output_len"</span>: <span class="num">47</span>,
+    <span class="key">"modality"</span>:    <span class="str">"text"</span>
+  },
+  <span class="key">"generator"</span>: {
+    <span class="key">"id"</span>: <span class="str">"crovia/seal-svc"</span>, <span class="key">"version"</span>: <span class="str">"0.6.0"</span>,
+    <span class="key">"weights_hash"</span>: <span class="kw">null</span>, <span class="key">"params"</span>: {}   <span class="cmt">// params are strings, never floats (CSC-1)</span>
+  },
+  <span class="key">"timestamp"</span>: { <span class="key">"emitted_at"</span>: <span class="str">"2026-09-19T15:45:39.789Z"</span>, <span class="key">"nonce"</span>: <span class="str">"LZYB2Y3Z5ZHY2UHEDUNOIBF6FE"</span> },
+  <span class="key">"chain"</span>:     { <span class="key">"prev_seal_hash"</span>: <span class="kw">null</span>, <span class="key">"sequence"</span>: <span class="num">0</span> },
+  <span class="key">"checks"</span>:    { <span class="key">"privacy_mode"</span>: <span class="str">"server_hash"</span> },
+  <span class="key">"signature"</span>: {
+    <span class="key">"alg"</span>: <span class="str">"ed25519"</span>, <span class="key">"canon"</span>: <span class="str">"csc-1"</span>, <span class="key">"domain"</span>: <span class="str">"CROVIA-SEAL-v1"</span>,
+    <span class="key">"payload_hash_alg"</span>: <span class="str">"sha256"</span>, <span class="key">"sig_hex"</span>: <span class="str">"&hellip;"</span>
+  }
+}</pre>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT FITS WITH AXIOM ============ -->
+  <section style="margin-top: 96px;">
+    <div class="cv-sec-head">
+      <h2>Seal &amp; Substrate &mdash; two halves of the same thesis</h2>
+      <span class="cv-sec-meta">complementary, not competing</span>
+    </div>
+
+    <div class="cv-thesis">
+      <p>
+        <strong>Substrate</strong> (the AXIOM ledger you see at
+        <a href="/registry/explore/">/registry/explore/</a>) is what Crovia <em>observes</em>
+        about the rest of the AI world &mdash; signed forensic evidence we
+        operate as a public service.
+      </p>
+      <p>
+        <strong>Seal</strong> is what Crovia gives <em>back to the world</em> &mdash;
+        an open, permissionless protocol primitive anyone can run. It is not
+        a service we sell. It is a standard we steward.
+      </p>
+      <p>
+        Substrate proves Crovia knows how to design append-only signed history.
+        Seal is the productization of that knowledge for everyone else's AI
+        outputs. Together they form a complete provenance fabric: <em>what the
+        world said</em>, and <em>what every AI output proved about itself when
+        it was uttered.</em>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ TRUST ROOT / GET INVOLVED ============ -->
+  <section style="margin-top: 96px;">
+    <div class="cv-sec-head">
+      <h2>Get involved</h2>
+      <span class="cv-sec-meta">open standard, open implementation</span>
+    </div>
+
+    <div class="cv-trust">
+      <h2>Permissionless by design.</h2>
+      <p class="cv-trust-sub">
+        No registration. No API key. No rate limit. The license is Apache 2.0
+        on code, CC0 on the specification text. You do not need our cooperation
+        to start sealing AI outputs today.
+      </p>
+
+      <div class="cv-trust-grid">
+        <div class="cv-trust-item">
+          <div class="cv-ti-key">IETF Internet-Draft</div>
+          <div class="cv-ti-val"><a href="https://datatracker.ietf.org/doc/draft-crovia-seal/" target="_blank" rel="noopener" style="color:var(--accent)">draft-crovia-seal-01 &#8599;</a></div>
+          <div class="cv-ti-foot">on IETF datatracker &middot; Independent Submission</div>
+        </div>
+        <div class="cv-trust-item">
+          <div class="cv-ti-key">Open-source repository</div>
+          <div class="cv-ti-val"><a href="https://github.com/croviatrust/crovia-seal" target="_blank" rel="noopener" style="color:var(--accent)">github.com/croviatrust/crovia-seal &#8599;</a></div>
+          <div class="cv-ti-foot">spec, reference impl, conformance suite, CI green</div>
+        </div>
+        <div class="cv-trust-item">
+          <div class="cv-ti-key">Spec text</div>
+          <div class="cv-ti-val"><a href="/registry/seal/spec/" target="_blank" rel="noopener" style="color:var(--accent)">SPEC.md (RFC-style) &#8599;</a></div>
+          <div class="cv-ti-foot">v0.5 &middot; CC0 dedication</div>
+        </div>
+        <div class="cv-trust-item">
+          <div class="cv-ti-key">Threat model</div>
+          <div class="cv-ti-val"><a href="/registry/seal/threat-model/" target="_blank" rel="noopener" style="color:var(--accent)">docs/THREAT_MODEL.md &#8599;</a></div>
+          <div class="cv-ti-foot">attacks in scope &amp; mitigations</div>
+        </div>
+        <div class="cv-trust-item">
+          <div class="cv-ti-key">Crovia trust root</div>
+          <div class="cv-ti-val"><a href="https://seal.croviatrust.com/trust-root.json" target="_blank" rel="noopener" style="color:var(--accent)">seal.croviatrust.com/trust-root.json</a></div>
+          <div class="cv-ti-foot">our issuer Ed25519 public key</div>
+        </div>
+        <div class="cv-trust-item">
+          <div class="cv-ti-key">Contact</div>
+          <div class="cv-ti-val"><a href="mailto:info@croviatrust.com" style="color:var(--accent)">info@croviatrust.com</a></div>
+          <div class="cv-ti-foot">spec feedback &middot; interop &middot; adoption</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SEAL CEREMONY (vendor service) ============ -->
+  <section style="margin-top: 96px;">
+    <div class="cv-sec-head">
+      <h2>Seal Ceremony &mdash; for vendors</h2>
+      <span class="cv-sec-meta">the standard is free &middot; the ceremony is a service</span>
+    </div>
+
+    <div class="cv-thesis">
+      <p>
+        The Seal standard costs nothing and never will &mdash; Apache 2.0 code,
+        CC0 spec, permissionless forever. What Crovia offers on top, as a
+        service, is the <strong>Seal Ceremony</strong>: a witnessed,
+        Bitcoin-anchored certification of a model release, run with your team.
+        Your release gets a public, independently verifiable receipt in the
+        Crovia ledger &mdash; the strongest possible answer to any future
+        &laquo;you never disclosed&raquo; claim.
+      </p>
+      <p style="margin-top:18px">
+        <a href="mailto:info@croviatrust.com?subject=Seal%20Ceremony%20inquiry&body=Organization%3A%0AModel%20release%20(name%2C%20date)%3A%0A"
+           style="display:inline-block;padding:12px 22px;background:var(--accent);color:#000;font:700 13px var(--sans);border-radius:9px;text-decoration:none">
+          Request a Seal Ceremony
+        </a>
+        <span style="margin-left:14px;font:400 11px var(--mono);color:var(--text-faint)">info@croviatrust.com &middot; answered within 24h</span>
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="cv-foot">
+  <div class="cv-foot-inner">
+    <div>
+      <div class="cv-foot-links">
+        <a href="https://croviatrust.com/">Verify</a>
+        <a href="https://croviatrust.com/#watch">Watch</a>
+        <a href="https://croviatrust.com/#prove">Prove</a>
+        <a href="/registry/seal/">Seal</a>
+        <a href="/registry/seal/verify/">Seal Verifier</a>
+        <a href="/registry/seal/spec/">Spec &#8599;</a>
+        <a href="https://datatracker.ietf.org/doc/draft-crovia-seal/" target="_blank" rel="noopener">IETF draft</a>
+        <a href="mailto:info@croviatrust.com">Contact</a>
+      </div>
+      <div class="cv-foot-meta">&copy; 2026 Crovia Trust &middot; Crovia Seal is open under Apache 2.0; the specification is dedicated to the public domain under CC0 to maximize reuse by standards bodies. &middot; IETF <a href="https://datatracker.ietf.org/doc/draft-crovia-seal/" target="_blank" rel="noopener" style="color:var(--accent)">draft-crovia-seal-01</a> &middot; <a href="mailto:info@croviatrust.com" style="color:var(--accent)">info@croviatrust.com</a></div>
+    </div>
+    <div class="cv-foot-tag">Lex temporum<em>time is the law</em></div>
+  </div>
+</footer>
+
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c"></script>
+</body>
+</html>

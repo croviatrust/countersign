@@ -68,10 +68,13 @@ Every number shown on the home page or in `llms.txt` must have (a) a definition 
 
 | Label | Definition | Source file | Current status |
 |---|---|---|---|
-| Signed observations | Count of envelopes in the AXIOM ledger. | `_home_pulse.json → ledger.n_envelopes_total` | valid |
-| Bitcoin-confirmed anchors | Count of OTS anchors with status `bitcoin` whose `merkle_root` equals the substrate `latest_seal.merkle_root` at stamping time. Re-anchors of an unchanged root do not count. | `substrate/ots_anchors.json` | invalid until the OTS job stamps the substrate root |
-| Days of documented silence | Sum over targets of days between consecutive *negative, anchored* observations of that target. Silence does not accrue after the last observation. | `silence_index.json` | invalid: currently `first_seen → now` |
-| LACUNA records | Count of `AX.LAC` envelopes whose `target_id` is an AI model (not an internal collector, path, or test id). | `_home_pulse.json → ledger.by_axiom_type.AX.LAC` | invalid: currently counts collector heartbeats |
+| Hourly epochs | Count of TACET epoch sheets since genesis 2026-09-19T18:00Z; the number confirmed in Bitcoin is shown alongside. | `tacet/latest.json → epochs`, `anchored_epochs` | valid |
+| Models observed | Distinct target ids with at least one signed TACET snapshot. | `tacet/targets.json → count` | valid |
+| Signed observations of absence | TACET snapshots whose predicate result is `false`. They count toward silence only once their epoch is anchored. | `tacet/latest.json → negative_snapshots_total` | valid |
+| Bitcoin-confirmed ledger roots | Distinct substrate `merkle_root`s with a confirmed Bitcoin timestamp. Re-anchors of an unchanged root do not count. | `_home_pulse.json → anchors.distinct_roots` (from `substrate/ots_anchors.json`) | valid |
+| Signed observations (archive) | Count of envelopes in the AXIOM ledger, January–June 2026. | `_home_pulse.json → ledger.n_envelopes_total` | valid; shown only in the "2026 archive" section |
+| Days of documented silence (archive) | Sum over targets of days between consecutive *negative, anchored* observations. Does not accrue after the last observation (2026-06-01). | `_home_pulse.json → silence.total_days` (Phase 0 post-processor) | valid; shown only in the "2026 archive" section with the pause date |
+| LACUNA records | Retired as a home-page number. LACUNA candidates are TACET targets with `negative_anchored_epochs > 0`; a certificate is a level-2 silence proof. | `tacet/targets.json` | replaced by TACET |
 
 Until a number is valid, the surface must show the honest state (e.g. "observation paused since 2026-06-01"), not the number.
 
@@ -80,14 +83,17 @@ Until a number is valid, the surface must show the honest state (e.g. "observati
 Anything not listed here is not advertised anywhere (pages, `llms.txt`, `ai-plugin.json`, `openapi.yaml`, READMEs).
 
 ### Pages (`croviatrust.com`)
-`/`, `/whitepaper.html`, `/proof.html`, `/registry/`, `/registry/explore/`, `/registry/verify/`, `/registry/compliance/`, `/registry/lacuna/`, `/registry/api/`, `/registry/seal/`, `/registry/seal/spec/`, `/registry/seal/threat-model/`, `/registry/seal/verify/`, `/registry/seal/log/`, `/registry/provenance/`, `/registry/embed/silence.html`, `/llms.txt`, `/llms-full.txt`, `/robots.txt`, `/sitemap.xml`, `/.well-known/ai-plugin.json`, `/.well-known/openapi.yaml`.
+`/`, `/whitepaper.html`, `/whitepaper-v2-2026-03.html` (superseded, noindex), `/proof.html`, `/registry/`, `/registry/tacet/`, `/registry/explore/`, `/registry/verify/`, `/registry/compliance/`, `/registry/lacuna/`, `/registry/api/`, `/registry/seal/`, `/registry/seal/spec/`, `/registry/seal/threat-model/`, `/registry/seal/verify/`, `/registry/seal/log/`, `/registry/provenance/`, `/registry/embed/silence.html`, `/llms.txt`, `/llms-full.txt`, `/robots.txt`, `/sitemap.xml`, `/.well-known/ai-plugin.json`, `/.well-known/openapi.yaml`.
 
 Retired paths must return **301** to the paths above and must not appear in any probe, sitemap or link: `/check.html`, `/how-to-read.html`, `/absence-clock.html`, `/alive.html`, `/observatory/`, `/registry/{cep,chains,enterprise,forensics,omissions,outreach,ranking,substrate,tpa,v,diamond,lineage,risk,pont}/`. The exact destination of each is recorded in `canon/canon.json` → `retired_path_targets` (it mirrors the nginx map in production, e.g. `/registry/tpa/` → `/registry/verify/?mode=passport`, `/registry/substrate/` → `/registry/explore/?mode=graph`); a legacy page stays reachable only with `?legacy=1`.
 
 ### Data (`/registry/data/`)
 `_home_pulse.json`, `silence_index.json`, `lineage_graph.json`, `observatory/feed.json`, `pipeline_status.json`, `transparency_index.json`, `seal/public_log.jsonl`, `seal/transparency_log.json`, `substrate/{collectors,latest_seal,ots_anchors,quality_report,recent,trust_root,diamond,lacuna_candidates}.json`, `_smoke.json`.
 
-Files returning 403 (`global_ranking.json`, `forensic_dossiers.json`, `forensic_report.json`, `sonar_chains.json`, `tpa_latest.json`, `tpa_summary.json`) are private and must be removed from `/registry/api/`, `llms.txt` and `openapi.yaml`.
+**Access policy (decided 2026-09-19).** Every observation file under `/registry/data/` is public, CC-BY-4.0, and fetchable directly with any client (a per-IP rate limit of 15 req/min applies; no referer gate, no API key). This includes `global_ranking.json`, `tpa_latest.json`, `tpa_summary.json`, `sonar_chains.json` and everything under `tacet/`. Exactly two files are professional-tier products and return 403 without a key: `forensic_dossiers.json` and `forensic_report.json`. Paid services are attestations about a *specific party*, never access to the data: per-organisation forensic dossiers, TPA certification reports, witnessed TACET silence proofs (k/n, customer as witness), hosted Seal issuance. The rule of thumb: **evidence is free; being certified costs.**
+
+### TACET (`/registry/data/tacet/`)
+`trust_root.json`, `latest.json`, `index.json`, `targets.json`, `sheets/{epoch}.json`, `snapshots/{epoch}.jsonl`, `changes/{epoch}.json`, `values/{key_hex}.json`, `ots/{epoch}.ots`, `proofs/index.json`, `proofs/{slug}.seal.json`. Map id `urn:crovia:tacet:map:disclosure`, genesis 2026-09-19T18:00:00Z, hourly epochs. Silence figures shown anywhere on the site come from level-2 proofs and always carry `observed_to`.
 
 Large files (`substrate/chains.json`, `consensus.json`, `predecessors_map.json`, `target_index.json`, `tpa_cep.json`, `search_targets.json`) are not to be fetched by any page on load; they are replaced by per-day content-addressed shards (TACET §7).
 

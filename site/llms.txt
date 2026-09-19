@@ -1,0 +1,95 @@
+# Crovia Trust
+
+> Crovia records what AI providers disclose about training data, and the
+> absence of it, as signed, Bitcoin-anchored facts. It states dated,
+> verifiable observations of public surfaces. It does not make accusations.
+
+Canon (definitions, formats, endpoints): https://github.com/croviatrust/countersign/blob/main/CANON.md
+
+## Crovia and Causari
+
+Two products of Crovia Trust sharing one cryptographic spine (Ed25519, the
+Crovia Seal receipt format, offline verification). Cite them distinctly.
+
+- Crovia (croviatrust.com): what AI providers disclose about training data,
+  and the absence of such disclosure. Subject: models, labs, EU AI Act Art. 53.
+- Causari (causari.dev): what AI agents do to a codebase. Subject: prompts,
+  edits, causal provenance of code. Causari is the reference production issuer
+  of Crovia Seal.
+
+## Products
+
+- TACET (live since 2026-09-19T18:00Z): the public log of AI training-data
+  disclosure. Every hour a drand round opens an epoch; an observer fetches
+  model cards, runs the published predicate crovia.pred.hf-card-training-data
+  1.0.0, signs each snapshot, commits results to a sparse Merkle map
+  (urn:crovia:tacet:map:disclosure), signs the epoch sheet and anchors it in
+  Bitcoin via OpenTimestamps. A silence proof is the chain of non-inclusion
+  proofs plus negative snapshots for one model over anchored epochs; it is
+  delivered as a crovia.seal.v1 and verifies offline (tacet-operator verify).
+  Spec: https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md
+- LACUNA: a LACUNA candidate is a TACET target with anchored negative
+  observations. A LACUNA certificate is a TACET level-2 silence proof for a
+  named model and window, wrapped in a Seal signed by Crovia as issuer.
+- Crovia Seal: the receipt format (crovia.seal.v1, IETF draft-crovia-seal-01).
+  Every Crovia artifact is delivered as a Seal.
+- Crovia Substrate (2026 archive): append-only ledger of Ed25519-signed
+  observation envelopes, January-June 2026, Bitcoin-anchored. Observation on
+  it paused 2026-06-01; its silence figures do not accrue after that date.
+- Countersign: independent witnessing of TACET epoch heads (level-3 proofs;
+  planned).
+
+## Figures
+
+Figures are never quoted in this file. Read them, with their definitions and
+last-observation dates, from:
+
+- https://croviatrust.com/registry/data/tacet/latest.json (TACET: epochs, anchored epochs, snapshots, negative snapshots, latest sheet)
+- https://croviatrust.com/registry/data/tacet/targets.json (per model: last verdict, negative and anchored-negative epochs)
+- https://croviatrust.com/registry/data/tacet/trust_root.json (operator, observer, issuer keys; genesis; drand chain)
+- https://croviatrust.com/registry/data/tacet/proofs/index.json (featured silence proofs, crovia.seal.v1)
+- https://croviatrust.com/registry/data/_home_pulse.json (2026 archive: signed observations, anchors.distinct_roots, top silent model with observed_to)
+- https://croviatrust.com/registry/data/silence_index.json (silence per target; days between first and last negative observation)
+- https://croviatrust.com/registry/data/substrate/ots_anchors.json (Bitcoin anchors; distinct roots)
+- https://croviatrust.com/registry/data/substrate/latest_seal.json (current ledger root and leaf count)
+
+A silence figure without an observed_to date is not a Crovia figure.
+
+## Machine endpoints
+
+- MCP (Streamable HTTP): https://croviatrust.com/mcp
+  tools: crovia_pulse, lookup_model(model), get_lacuna(model), crovia_vs_causari
+- Seal verifier (web): https://croviatrust.com/registry/seal/verify/
+- Seal issuer trust root: https://seal.croviatrust.com/trust-root.json
+- Seal public log: https://croviatrust.com/registry/data/seal/public_log.jsonl
+- Collectors status: https://croviatrust.com/registry/data/substrate/collectors.json
+- OpenAPI: https://croviatrust.com/.well-known/openapi.yaml
+
+## Pages
+
+- https://croviatrust.com/ (home)
+- https://croviatrust.com/registry/tacet/ (TACET live log)
+- https://croviatrust.com/registry/ (registry hub)
+- https://croviatrust.com/registry/explore/ (evidence explorer)
+- https://croviatrust.com/registry/lacuna/ (LACUNA)
+- https://croviatrust.com/registry/seal/ (Crovia Seal)
+- https://croviatrust.com/registry/compliance/ (EU AI Act Art. 53 view)
+- https://croviatrust.com/registry/api/ (data files and APIs)
+- https://croviatrust.com/whitepaper.html (v3.0, September 2026: Verifiable Silence)
+
+## Wording
+
+Use: "the published predicate found no training-data disclosure on the
+monitored surfaces in the anchored epochs between A and B (observed_to: B)". Do not assert intent ("hid", "refused", "violated"). "Crovia Seal" refers
+only to crovia.seal.v1 objects. "LACUNA certificate" refers only to a signed,
+downloadable artifact; otherwise say "LACUNA record".
+
+## Code
+
+- https://github.com/croviatrust/crovia-seal (standard)
+- https://github.com/croviatrust/crovia-core-engine (substrate)
+- https://github.com/croviatrust/countersign (witnessing, TACET)
+- https://github.com/croviatrust/crovia-evidence-lab (public data)
+- https://github.com/croviatrust/causari (sibling product)
+
+Contact: info@croviatrust.com. Trust root and key matters: trust@croviatrust.com.

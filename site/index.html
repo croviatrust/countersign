@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Crovia — Silence you can verify · TACET, the public log of AI training-data disclosure</title>
+<meta name="description" content="Crovia runs TACET: every hour, a public randomness beacon opens an epoch, Crovia fetches AI model cards, runs a published predicate, commits the results to a sparse Merkle map, signs the sheet and anchors it in Bitcoin. When a lab stays silent about training data, the silence becomes a proof anyone can verify offline. LACUNA certificates. EU AI Act Article 53 observatory.">
+<link rel="canonical" href="https://croviatrust.com/">
+<link rel="icon" type="image/png" href="https://croviatrust.com/logo.png">
+<meta property="og:title" content="Crovia — Silence you can verify">
+<meta property="og:description" content="TACET: hourly, drand-opened, Bitcoin-anchored observations of what AI providers disclose about training data. Proof of absence you can verify offline.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://croviatrust.com/">
+<meta property="og:image" content="https://croviatrust.com/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://croviatrust.com/#organization",
+      "name": "Crovia",
+      "alternateName": "Crovia Trust",
+      "url": "https://croviatrust.com/",
+      "logo": "https://croviatrust.com/logo.png",
+      "email": "info@croviatrust.com",
+      "foundingDate": "2025",
+      "description": "Crovia operates TACET, a public, hourly, Bitcoin-anchored log of AI training-data disclosure. It records what AI providers disclose \u2014 and the verifiable absence of disclosure \u2014 as signed, timestamped facts.",
+      "disambiguatingDescription": "Crovia (croviatrust.com) concerns what AI PROVIDERS DISCLOSE about TRAINING DATA. It is distinct from Causari (causari.dev), a developer tool concerning what AI AGENTS DO to a CODEBASE.",
+      "sameAs": ["https://github.com/croviatrust", "https://datatracker.ietf.org/doc/draft-crovia-seal/", "https://causari.dev"]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://croviatrust.com/#website",
+      "url": "https://croviatrust.com/",
+      "name": "Crovia",
+      "publisher": { "@id": "https://croviatrust.com/#organization" },
+      "description": "Silence you can verify. TACET, the public log of AI training-data disclosure."
+    },
+    {
+      "@type": "Dataset",
+      "@id": "https://croviatrust.com/registry/data/tacet/#dataset",
+      "name": "TACET disclosure map \u2014 epoch sheets, snapshots and silence proofs",
+      "description": "Hourly, drand-opened, Bitcoin-anchored observations of training-data disclosure on public AI model cards. Sparse Merkle map urn:crovia:tacet:map:disclosure.",
+      "url": "https://croviatrust.com/registry/tacet/",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "creator": { "@id": "https://croviatrust.com/#organization" },
+      "distribution": [
+        { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://croviatrust.com/registry/data/tacet/latest.json" },
+        { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://croviatrust.com/registry/data/tacet/targets.json" }
+      ]
+    }
+  ]
+}
+</script>
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ---- page-local: hero stat strip, live sheet, scenario grid ---- */
+  .hx-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:44px}
+  .hx-stat{background:var(--bg-card);padding:20px 22px;cursor:pointer;transition:background .15s}
+  .hx-stat:hover{background:var(--bg-card-hi)}
+  .hx-stat .n{font:600 28px var(--mono);color:#fff;line-height:1;letter-spacing:-.02em}
+  .hx-stat .n em{font-style:normal;color:var(--accent)}
+  .hx-stat .l{font:400 11px var(--mono);color:var(--text-muted);margin-top:9px;letter-spacing:.04em}
+  .hx-stat .p{font:500 9px var(--mono);color:var(--text-faint);margin-top:6px;text-transform:uppercase;letter-spacing:.14em}
+  .hx-stat:hover .p{color:var(--accent)}
+
+  .hx-term{background:#05070d;border:1px solid var(--border);border-radius:12px;font:400 12.5px var(--mono);color:var(--text-soft);overflow:hidden;margin-top:8px}
+  .hx-term-bar{display:flex;align-items:center;gap:7px;padding:11px 16px;border-bottom:1px solid var(--border);color:var(--text-faint);font-size:11px}
+  .hx-term-bar .d{width:10px;height:10px;border-radius:50%;background:#20242e}
+  .hx-term-bar .live{margin-left:auto;color:var(--accent);letter-spacing:.1em}
+  .hx-term-body{padding:18px 20px;line-height:1.9;white-space:pre-wrap;word-break:break-all}
+  .hx-term-body .k{color:var(--text-faint)}
+  .hx-term-body .v{color:var(--text)}
+  .hx-term-body .ok{color:var(--accent)}
+  .hx-term-body .no{color:var(--danger)}
+  .hx-term-body .wt{color:#f5c451}
+  .hx-term-body .cm{color:var(--text-faint)}
+
+  .hx-scenarios{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+  .hx-scn{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:26px}
+  .hx-scn .num{font:500 11px var(--mono);color:var(--danger);letter-spacing:.16em}
+  .hx-scn h3{font-size:17px;margin:14px 0 12px;color:#fff}
+  .hx-scn p{color:var(--text-soft);font-size:14px;line-height:1.6}
+  .hx-scn p .hl{color:var(--accent)}
+
+  .hx-two{display:grid;grid-template-columns:1.1fr .9fr;gap:60px;align-items:center}
+  @media(max-width:820px){.hx-two{grid-template-columns:1fr;gap:36px}}
+
+  .hx-not{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+  .hx-not span{font:500 11px var(--mono);color:var(--text-muted);border:1px solid var(--border);border-radius:999px;padding:6px 13px}
+
+  .hx-verify{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:28px}
+  .hx-verify ol{margin:0;padding-left:20px}
+  .hx-verify li{color:var(--text-soft);font-size:14px;line-height:1.7;margin-bottom:12px}
+  .hx-verify li strong{color:#fff}
+  .hx-verify code{font:500 12px var(--mono);color:var(--accent);background:rgba(30,197,255,.08);padding:2px 6px;border-radius:4px}
+
+  .hx-tiers{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:8px}
+  .hx-tier{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:22px;text-align:center}
+  .hx-tier.feat{border-color:var(--accent-line)}
+  .hx-tier .amt{font:600 26px var(--mono);color:#fff}
+  .hx-tier .nm{font:600 12px var(--mono);color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin:8px 0 10px}
+  .hx-tier .ds{font-size:12.5px;color:var(--text-muted);line-height:1.5;min-height:52px}
+  .hx-tier a{display:block;margin-top:16px;padding:9px;border:1px solid var(--border-hi);border-radius:7px;font:600 12px var(--sans);color:var(--text)}
+  .hx-tier a:hover{border-color:var(--accent);color:var(--accent)}
+
+  .hx-archive{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-top:8px}
+  .hx-archive .cv-card .n{font:600 24px var(--mono);color:#fff;letter-spacing:-.02em}
+  .hx-archive .cv-card .l{font:400 11px var(--mono);color:var(--text-muted);margin-top:8px}
+
+  .hx-foot{border-top:1px solid var(--border);margin-top:40px;padding:40px 0 0;font:400 13px var(--sans);color:var(--text-muted)}
+  .hx-foot a{color:var(--text-soft)}
+  .hx-foot a:hover{color:var(--accent)}
+  .hx-foot .row{display:flex;flex-wrap:wrap;gap:18px;margin-top:10px;font-family:var(--mono);font-size:12px}
+</style>
+</head>
+<body>
+
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="https://croviatrust.com/" class="cv-brand-link"><img src="https://croviatrust.com/logo.png" alt="" class="cv-brand-mark"><span class="cv-brand-name">CROVIA</span></a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+    <div class="cv-nav-status is-ok" id="cv-nav-status"><span class="dot"></span><span data-cv-status>connecting</span></div>
+  </div>
+</nav>
+
+<main class="cv-main">
+
+  <!-- ================= HERO ================= -->
+  <section class="cv-hero" id="verify">
+    <div class="cv-eyebrow">TACET · verifiable silence · EU AI Act Art. 53 observatory</div>
+    <h1>Silence you can <em>verify.</em></h1>
+    <p class="cv-lede">Every hour, a public randomness beacon opens an epoch. Crovia fetches the model cards of the AI systems under watch, runs a <strong>published predicate</strong> over the bytes — <em>does this card name its training data?</em> — commits every answer to a sparse Merkle map, signs the sheet and anchors it in <strong>Bitcoin</strong>. When a lab stays silent, the silence stops being an opinion and becomes a <strong>proof anyone can verify offline</strong>.</p>
+    <div class="cv-hero-cta">
+      <a class="cv-btn cv-btn-primary" href="/registry/tacet/">Watch the live log</a>
+      <a class="cv-btn" href="/registry/tacet/#verify">Verify a proof yourself</a>
+    </div>
+
+    <div class="hx-strip" id="strip">
+      <div class="hx-stat" data-proof="epochs"><div class="n" id="s-epochs">—</div><div class="l">hourly epochs · <span id="s-epochs-anchored">—</span> in Bitcoin</div><div class="p">proof ›</div></div>
+      <div class="hx-stat" data-proof="models"><div class="n" id="s-models">—</div><div class="l">models observed since genesis</div><div class="p">proof ›</div></div>
+      <div class="hx-stat" data-proof="negative"><div class="n" id="s-neg">—</div><div class="l">signed observations of absence</div><div class="p">proof ›</div></div>
+      <div class="hx-stat" data-proof="btc"><div class="n" id="s-btc">—</div><div class="l">Bitcoin-confirmed ledger roots</div><div class="p">proof ›</div></div>
+    </div>
+  </section>
+
+  <!-- ================= PROBLEM ================= -->
+  <section id="watch">
+    <div class="cv-sec-head"><h2>Silence is the evidence nobody keeps.</h2><span class="cv-sec-meta" id="watch-meta">— models observed in 2026</span></div>
+    <div class="hx-scenarios">
+      <div class="hx-scn">
+        <div class="num">01 · THE DENIAL</div>
+        <h3>The model card that named nothing</h3>
+        <p>A lab ships a frontier model. The card never names a single training source. A year later, in discovery, counsel argues they <span class="hl">"always disclosed responsibly."</span> Who holds the hourly, Bitcoin-anchored record that says otherwise?</p>
+      </div>
+      <div class="hx-scn">
+        <div class="num">02 · THE EDIT</div>
+        <h3>The disclosure that quietly appeared</h3>
+        <p>A training-data paragraph shows up on a card the week a lawsuit is filed. Their git history is theirs to rewrite. <span class="hl">Crovia's map isn't</span> — the hour the card first said it, and every hour before when it didn't, are committed under a root that Bitcoin already timestamped.</p>
+      </div>
+      <div class="hx-scn">
+        <div class="num">03 · THE LAW</div>
+        <h3>Article 53 wanted a summary</h3>
+        <p>The EU AI Act requires a public summary of training content. For <span class="hl" id="scn-targets">the models we observed</span> between January and June 2026, that summary was mostly <span class="hl">absent</span> — and Crovia can name the exact hours it stayed absent.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= THESIS ================= -->
+  <section id="prove">
+    <div class="cv-eyebrow">The category nobody else is building</div>
+    <div class="cv-thesis">
+      <p><strong>FMTI</strong> rates what companies <em>choose</em> to disclose. <strong>Ranking sites</strong> rank what's popular. Both measure <span class="mono">presence</span>.</p>
+      <p>Crovia certifies, with a public randomness beacon on one side and a Bitcoin block on the other, what a company did <strong>not</strong> disclose — and for exactly which hours. We call the protocol <a href="/registry/tacet/"><span class="mono">TACET</span></a>: verifiable silence.</p>
+      <p>Presence is easy: it's already published. Absence is the hard part — you have to prove a negative, contemporaneously, in a way that survives cross-examination. <strong>It's the only part that holds up in court.</strong></p>
+    </div>
+  </section>
+
+  <!-- ================= LIVE SHEET + LACUNA ================= -->
+  <section>
+    <div class="cv-sec-head"><h2>The LACUNA certificate</h2><span class="cv-sec-meta">TACET level-2 silence proof · wrapped in a Crovia Seal</span></div>
+    <div class="hx-two">
+      <div>
+        <p class="cv-lede" style="margin-bottom:0">A LACUNA certificate states one cryptographically defensible fact: during a defined window, Crovia fetched a model's public surfaces hour by hour, ran the published predicate, and found <strong style="color:#fff">no training-data disclosure</strong> — each observation signed, each hour opened by drand and closed by a Bitcoin anchor. The opposing party can verify it without trusting Crovia.</p>
+        <div class="hx-not">
+          <span>not a fraud finding</span>
+          <span>not "evidence never existed"</span>
+          <span>not a claim of bad faith</span>
+          <span>not damages</span>
+        </div>
+        <div class="cv-hero-cta" style="margin-top:26px">
+          <a class="cv-btn cv-btn-primary" href="/registry/lacuna/">Live LACUNA candidates</a>
+          <a class="cv-btn" href="mailto:info@croviatrust.com?subject=LACUNA%20certificate%20request&body=Target%20(org%2Fmodel)%3A%0AWindow%20(from%20%E2%80%93%20to)%3A%0AUse%20(regulator%20%2F%20litigation%20%2F%20diligence%20%2F%20press)%3A%0A">Request a signed certificate</a>
+        </div>
+      </div>
+      <div class="hx-term">
+        <div class="hx-term-bar"><span class="d"></span><span class="d"></span><span class="d"></span><span style="margin-left:6px">tacet · latest epoch sheet</span><span class="live" id="term-live">LIVE</span></div>
+        <div class="hx-term-body" id="term">loading latest.json…</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HOW IT WORKS ================= -->
+  <section id="ledger">
+    <div class="cv-sec-head"><h2>How a silence becomes evidence</h2><span class="cv-sec-meta">every hour · nothing can be backdated</span></div>
+    <div class="cv-steps">
+      <div class="cv-card"><div class="cv-card-title">01 · Open</div><p style="color:var(--text-soft);font-size:14px;line-height:1.6">The epoch starts with a <strong style="color:#fff">drand</strong> beacon round nobody can predict. Anything committed under it provably happened <em>after</em> that hour began.</p></div>
+      <div class="cv-card"><div class="cv-card-title">02 · Observe</div><p style="color:var(--text-soft);font-size:14px;line-height:1.6">Crovia fetches each model card over TLS, keeps the bytes, and runs the <a href="/registry/tacet/#hour">public predicate</a>. Result, hash of the page, certificate and IP are signed as a snapshot.</p></div>
+      <div class="cv-card"><div class="cv-card-title">03 · Commit</div><p style="color:var(--text-soft);font-size:14px;line-height:1.6">Every snapshot updates one slot in a <strong style="color:#fff">sparse Merkle map</strong>. The new root, the previous sheet and the beacon go into a signed epoch sheet. Slots move forward only.</p></div>
+      <div class="cv-card"><div class="cv-card-title">04 · Anchor</div><p style="color:var(--text-soft);font-size:14px;line-height:1.6">The sheet hash is timestamped on <strong style="color:#fff">Bitcoin</strong> via OpenTimestamps. Now the hour is sandwiched: after the beacon, before the block. A silence proof is the chain of those sandwiches.</p></div>
+    </div>
+  </section>
+
+  <!-- ================= VERIFY IT YOURSELF ================= -->
+  <section id="verify-it">
+    <div class="cv-sec-head"><h2>Don't trust us. Verify us.</h2><span class="cv-sec-meta">open data · CC-BY-4.0 · open code · Apache-2.0</span></div>
+    <div class="hx-verify">
+      <ol>
+        <li><strong>Read the log.</strong> Every epoch sheet, snapshot and map change is public JSON under <code>/registry/data/tacet/</code>. Start with <a href="/registry/data/tacet/latest.json">latest.json</a>.</li>
+        <li><strong>Verify a silence proof offline.</strong> <code>pip install</code> the reference implementation, download a <code>.seal.json</code> from <a href="/registry/tacet/#proofs">proofs/</a>, run <code>tacet-operator verify</code>. It recomputes every root, checks the drand round, the Bitcoin anchors and the signatures — with no Crovia server in the loop. <a href="/registry/tacet/#verify">Step by step →</a></li>
+        <li><strong>Re-run the predicate.</strong> The predicate is versioned and hashed into every snapshot. Fetch the same card and run it yourself; if you disagree with the verdict, the disagreement is about public code, not about Crovia.</li>
+        <li><strong>Check the 2026 archive.</strong> The earlier AXIOM ledger (January–June 2026) is still public at <code>/registry/data/substrate/</code>, with its Bitcoin anchor manifest and an <a href="/proof.html">in-browser signature check</a>.</li>
+      </ol>
+      <div class="cv-hero-cta" style="margin-top:22px">
+        <a class="cv-btn cv-btn-primary" href="/registry/tacet/#verify">Verify a proof &rarr;</a>
+        <a class="cv-btn" href="https://github.com/croviatrust/countersign" target="_blank" rel="noopener">Read the code ↗</a>
+      </div>
+      <p style="margin-top:18px;font:400 12px var(--mono);color:var(--text-faint)">Proofs are wrapped in a Crovia Seal — an open standard, IETF Internet-Draft <a href="https://datatracker.ietf.org/doc/draft-crovia-seal/" target="_blank" rel="noopener">draft-crovia-seal</a>. Apache-2.0 + CC0.</p>
+    </div>
+  </section>
+
+  <!-- ================= THE SYSTEM / DOORS ================= -->
+  <section id="score">
+    <div class="cv-sec-head"><h2>One cryptographic spine</h2><span class="cv-sec-meta">every door opens onto the same map</span></div>
+    <div class="cv-artifacts-grid">
+      <a class="cv-artifact" href="/registry/tacet/"><div class="cv-artifact-num">01 · THE PROTOCOL</div><div class="cv-artifact-title">TACET</div><div class="cv-artifact-desc">Hourly epochs, sparse Merkle map, drand + Bitcoin sandwich, silence proofs. Specification, reference implementation, live operator.</div><span class="cv-artifact-cta">Open →</span></a>
+      <a class="cv-artifact" href="/registry/lacuna/"><div class="cv-artifact-num">02 · PROOF OF ABSENCE</div><div class="cv-artifact-title">LACUNA Certificates</div><div class="cv-artifact-desc">A signed silence proof for a named model and window. For litigators, regulators, journalists and due diligence.</div><span class="cv-artifact-cta">Open →</span></a>
+      <a class="cv-artifact" href="/registry/seal/"><div class="cv-artifact-num">03 · THE STANDARD</div><div class="cv-artifact-title">Crovia Seal — IETF draft</div><div class="cv-artifact-desc">An open, tamper-evident receipt for any AI output. Every TACET proof is a Seal. Verifiable offline in three lines.</div><span class="cv-artifact-cta">Open →</span></a>
+      <a class="cv-artifact" href="/registry/embed/silence.html"><div class="cv-artifact-num">04 · LIVE SIGNAL</div><div class="cv-artifact-title">The Silence Index</div><div class="cv-artifact-desc">One number per model that only grows while its card stays silent. Embed it on any page in one line.</div><span class="cv-artifact-cta">Open →</span></a>
+    </div>
+  </section>
+
+  <!-- ================= 2026 ARCHIVE ================= -->
+  <section id="archive">
+    <div class="cv-sec-head"><h2>The 2026 archive</h2><span class="cv-sec-meta">AXIOM ledger · January–June 2026 · read-only</span></div>
+    <p class="cv-lede" style="margin-bottom:18px">Before TACET, Crovia ran a first generation of collectors that produced an append-only, Ed25519-signed ledger of disclosure observations. Observation on that ledger <strong style="color:#fff">paused on 2026-06-01</strong>; its silence figures stop there and do not accrue. The ledger and its Bitcoin anchors remain public and verifiable.</p>
+    <div class="hx-archive">
+      <div class="cv-card"><div class="n" id="a-env">—</div><div class="l">signed observations</div></div>
+      <div class="cv-card"><div class="n" id="a-targets">—</div><div class="l">models observed</div></div>
+      <div class="cv-card"><div class="n" id="a-days">—</div><div class="l">days of documented silence, observation-bounded</div></div>
+      <div class="cv-card"><div class="n" id="a-median">—</div><div class="l">median silence per model (days)</div></div>
+    </div>
+    <p style="margin-top:14px;font:400 11.5px var(--mono);color:var(--text-faint)">Source: <a href="/registry/data/_home_pulse.json">_home_pulse.json</a> · <a href="/registry/data/silence_index.json">silence_index.json</a> · <a href="/registry/data/substrate/ots_anchors.json">substrate/ots_anchors.json</a> · explore at <a href="/registry/explore/">/registry/explore/</a></p>
+  </section>
+
+  <!-- ================= FORENSIC (PRO) ================= -->
+  <section id="about">
+    <div class="cv-sec-head"><h2>When "we observed silence" isn't enough</h2><span class="cv-sec-meta">professional · confidential</span></div>
+    <div class="hx-two">
+      <div>
+        <p class="cv-lede" style="margin-bottom:22px">For active litigation and regulatory work, Crovia produces court-ready forensic dossiers: the TACET proof for your model and window, the archived surface copies, the predicate source, memorization probes on closed models, and a per-model EU AI Act Art. 53 timeline — every claim backed by a signed, anchored object.</p>
+        <div class="cv-hero-cta">
+          <a class="cv-btn cv-btn-primary" href="mailto:info@croviatrust.com?subject=Forensic%20Dossier%20request&body=Model(s)%20or%20organization(s)%20of%20interest%3A%0ACase%20context%20(litigation%2C%20regulatory%2C%20M%26A)%3A%0ADeadline%3A%0A">Request a forensic dossier</a>
+          <a class="cv-btn" href="mailto:info@croviatrust.com?subject=EU%20AI%20Act%20Art.%2053%20monitoring&body=Organization%3A%0AModels%20to%20monitor%3A%0A">EU AI Act monitoring</a>
+        </div>
+        <p style="margin-top:14px;font:400 11px var(--mono);color:var(--text-faint)">Confidential · engagement letter before any work · info@croviatrust.com</p>
+      </div>
+      <div class="cv-card">
+        <div class="cv-card-title">What Crovia is — and is not</div>
+        <div class="cv-kv">
+          <div class="cv-kv-row"><span class="cv-kv-key">is</span><span class="cv-kv-val">a signed, anchored record of public disclosure</span></div>
+          <div class="cv-kv-row"><span class="cv-kv-key">is</span><span class="cv-kv-val">a public predicate anyone can re-run</span></div>
+          <div class="cv-kv-row"><span class="cv-kv-key">is not</span><span class="cv-kv-val">an accusation</span></div>
+          <div class="cv-kv-row"><span class="cv-kv-key">is not</span><span class="cv-kv-val">a compliance certification</span></div>
+          <div class="cv-kv-row"><span class="cv-kv-key">is not</span><span class="cv-kv-val">a model quality rating</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SUSTAIN ================= -->
+  <section id="sustain">
+    <div class="cv-sec-head"><h2>Public infrastructure. No vendor money.</h2><span class="cv-sec-meta">every contribution is receipted</span></div>
+    <div class="hx-tiers">
+      <div class="hx-tier"><div class="amt">€5</div><div class="nm">Witness</div><div class="ds">Keep the hourly observer running. Your name on the supporters wall.</div><a href="https://buy.stripe.com/aFa7sN1Nx7De8ZN2tz3Nm00" target="_blank" rel="noopener">Support</a></div>
+      <div class="hx-tier feat"><div class="amt">€25</div><div class="nm">Anchor</div><div class="ds">Fund a month of Bitcoin anchors. Priority on the wall + monthly report.</div><a href="https://buy.stripe.com/9B6bJ363N3mY7VJgkp3Nm02" target="_blank" rel="noopener">Support</a></div>
+      <div class="hx-tier"><div class="amt">€100</div><div class="nm">Guardian</div><div class="ds">Sustain the full observatory node. Logo on the wall + quarterly briefing.</div><a href="https://buy.stripe.com/dRmeVfgIr9Lm1xl2tz3Nm01" target="_blank" rel="noopener">Support</a></div>
+    </div>
+  </section>
+
+  <footer class="hx-foot">
+    <p>Crovia — Silence you can verify · <span id="foot-date"></span> · All observation data CC-BY-4.0</p>
+    <p style="margin-top:6px;font-size:12px">Every number on this page is read live from a public file; click it to see the source.</p>
+    <div class="row">
+      <a href="/registry/tacet/">TACET</a>
+      <a href="/registry/lacuna/">LACUNA</a>
+      <a href="/registry/seal/">Seal</a>
+      <a href="/registry/api/">Data &amp; API</a>
+      <a href="https://github.com/croviatrust" target="_blank" rel="noopener">GitHub ↗</a>
+      <a href="https://datatracker.ietf.org/doc/draft-crovia-seal/" target="_blank" rel="noopener">IETF draft ↗</a>
+      <a href="https://causari.dev" target="_blank" rel="noopener">Causari ↗</a>
+      <a href="mailto:info@croviatrust.com">info@croviatrust.com</a>
+    </div>
+  </footer>
+
+</main>
+
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c"></script>
+<script>
+(function(){
+  var DATA='/registry/data/';
+  function j(rel){return fetch(DATA+rel,{cache:'no-store'}).then(function(r){if(!r.ok)throw 0;return r.json();});}
+  function n(x){return (x==null||typeof x!=='number')?'—':x.toLocaleString('en-US');}
+  function set(id,v){var e=document.getElementById(id);if(e)e.textContent=v;}
+  function esc(s){return String(s==null?'':s).replace(/[&<>]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+  var L=null, T=null, PU=null;
+
+  Promise.allSettled([j('tacet/latest.json'), j('tacet/targets.json'), j('_home_pulse.json')]).then(function(res){
+    L  = res[0].status==='fulfilled'?res[0].value:null;
+    T  = res[1].status==='fulfilled'?res[1].value:null;
+    PU = res[2].status==='fulfilled'?res[2].value:null;
+
+    if(L){
+      set('s-epochs', n(L.epochs));
+      set('s-epochs-anchored', n(L.anchored_epochs));
+      set('s-neg', n(L.negative_snapshots_total));
+      renderSheet(L);
+    } else {
+      document.getElementById('term').innerHTML='<span class="no">latest.json unreachable</span>';
+      set('term-live','OFFLINE');
+    }
+    if(T){ set('s-models', n(T.count)); }
+    if(PU){
+      var s=PU.silence||{}, l=PU.ledger||{}, a=PU.anchors||{};
+      set('watch-meta', n(s.n_targets)+' models observed in 2026 · observation paused 2026-06-01');
+      set('scn-targets', n(s.n_targets)+' models');
+      set('a-env', n(l.n_envelopes_total));
+      set('a-targets', n(s.n_targets));
+      set('a-days', n(s.total_days));
+      set('a-median', n(s.median_silence_days));
+      set('s-btc', n(a.distinct_roots));
+    }
+  });
+
+  function fmtLeft(ms){ if(ms<0)return '0:00'; var s=Math.floor(ms/1000), m=Math.floor(s/60); s=s%60; return m+':'+(s<10?'0':'')+s; }
+  function renderSheet(L){
+    var sh=L.latest_sheet||{}; var body=document.getElementById('term'); if(!body)return;
+    var anchored = sh.closed && sh.closed!=='pending';
+    var end = sh.epoch_end?new Date(sh.epoch_end).getTime():null;
+    var draw=function(){
+      var left = end?fmtLeft((end+5*60*1000)-Date.now()):'—';
+      body.innerHTML =
+        '<span class="cm">$ curl -s croviatrust.com/registry/data/tacet/latest.json</span>\n'+
+        '<span class="k">map         </span><span class="v">'+esc(L.map_id)+'</span>\n'+
+        '<span class="k">epoch       </span><span class="v">#'+esc(sh.epoch)+'  '+esc((sh.epoch_start||'').replace('T',' ').slice(0,16))+' → '+esc((sh.epoch_end||'').slice(11,16))+' UTC</span>\n'+
+        '<span class="k">opened_by   </span><span class="ok">drand round '+esc(sh.beacon_round)+'</span>\n'+
+        '<span class="k">observed    </span><span class="v">'+esc(sh.snapshots)+' cards</span> · <span class="no">'+esc(sh.negative)+' silent</span> · <span class="ok">'+esc((sh.snapshots||0)-(sh.negative||0))+' disclose</span>\n'+
+        '<span class="k">root        </span><span class="v">'+esc(String(sh.root||'').slice(0,42))+'…</span>\n'+
+        '<span class="k">sheet_hash  </span><span class="v">'+esc(String(sh.sheet_hash||'').slice(0,42))+'…</span>\n'+
+        '<span class="k">closed_by   </span>'+(anchored?'<span class="ok">Bitcoin block '+esc(sh.block_height)+' ✓</span>':'<span class="wt">OpenTimestamps pending · Bitcoin confirmation in progress</span>')+'\n\n'+
+        '<span class="cm">next epoch sheet in '+left+'</span>';
+    };
+    draw(); setInterval(draw, 1000);
+  }
+
+  // proof-on-click for the hero stats
+  var PROOFS={
+    epochs:{title:'Hourly epochs',subtitle:'TACET · urn:crovia:tacet:map:disclosure',
+      rows:[['what','one signed epoch sheet per hour since genesis 2026-09-19 18:00 UTC'],['opened by','drand quicknet round',{mono:true,accent:true}],['closed by','OpenTimestamps → Bitcoin',{mono:true}],['source','/registry/data/tacet/latest.json',{mono:true,copy:'https://croviatrust.com/registry/data/tacet/latest.json'}]],
+      actions:[{label:'Open the log',href:'/registry/tacet/',primary:true},{label:'latest.json',href:'https://croviatrust.com/registry/data/tacet/latest.json',external:true}]},
+    models:{title:'Models observed',subtitle:'distinct Hugging Face model ids in the map',
+      rows:[['what','every model id with at least one signed snapshot'],['surface','README.md of the model repo, fallback: model page',{mono:true}],['predicate','crovia.pred.hf-card-training-data v1.0.0',{mono:true,accent:true}],['source','/registry/data/tacet/targets.json',{mono:true,copy:'https://croviatrust.com/registry/data/tacet/targets.json'}]],
+      actions:[{label:'targets.json',href:'https://croviatrust.com/registry/data/tacet/targets.json',external:true,primary:true}]},
+    negative:{title:'Signed observations of absence',subtitle:'snapshots where the predicate returned false',
+      rows:[['what','fetch + predicate = "no training-data disclosure", signed by the observer key'],['each carries','http status · body sha-256 · TLS cert sha-256 · IP · predicate hash',{mono:true}],['counts toward silence','only once its epoch is confirmed in Bitcoin',{accent:true}],['source','/registry/data/tacet/latest.json',{mono:true,copy:'https://croviatrust.com/registry/data/tacet/latest.json'}]],
+      actions:[{label:'LACUNA candidates',href:'/registry/lacuna/',primary:true},{label:'Browse the log',href:'/registry/tacet/#latest'}]},
+    btc:{title:'Bitcoin-confirmed ledger roots',subtitle:'2026 AXIOM ledger · OpenTimestamps',
+      rows:[['what','distinct substrate Merkle roots with a confirmed Bitcoin timestamp'],['not counted','re-anchors of an unchanged root',{accent:true}],['verify','cross-check block heights on any explorer'],['manifest','/registry/data/substrate/ots_anchors.json',{mono:true,copy:'https://croviatrust.com/registry/data/substrate/ots_anchors.json'}]],
+      actions:[{label:'Open anchor manifest',href:'https://croviatrust.com/registry/data/substrate/ots_anchors.json',external:true,primary:true}]}
+  };
+  document.querySelectorAll('.hx-stat').forEach(function(el){
+    el.addEventListener('click',function(){
+      var p=PROOFS[el.getAttribute('data-proof')];
+      if(p&&window.CroviaProof)window.CroviaProof.open(p);
+    });
+  });
+
+  var fd=document.getElementById('foot-date');
+  if(fd)fd.textContent=new Date().toISOString().slice(0,10);
+})();
+</script>
+</body>
+</html>

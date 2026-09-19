@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crovia Passport — CROVIA Registry</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<style>
+    :root {
+        --bg: #050505;
+        --card-bg: rgba(20, 20, 25, 0.6);
+        --card-border: rgba(255, 255, 255, 0.08);
+        --card-hover: rgba(255, 255, 255, 0.15);
+        --accent: #8B5CF6;
+        --accent-dim: rgba(139, 92, 246, 0.15);
+        --green: #10b981; --red: #ef4444; --yellow: #f59e0b; --blue: #3b82f6; --cyan: #06b6d4;
+        --text-main: #f8fafc;
+        --text-muted: #94a3b8;
+        --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        background: var(--bg); color: var(--text-main);
+        font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+        line-height: 1.5; font-size: 14px;
+        overflow-x: hidden;
+        background-image: 
+            radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.04), transparent 25%),
+            radial-gradient(circle at 85% 30%, rgba(6, 182, 212, 0.04), transparent 25%);
+        background-attachment: fixed;
+    }
+
+    .topnav {
+        position: sticky; top: 0; z-index: 100;
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 12px 24px;
+        background: rgba(10, 10, 15, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--card-border);
+    }
+    .topnav .logo { font-weight: 800; font-size: 18px; color: #fff; text-decoration: none; letter-spacing: 1px; }
+    .topnav nav { display: flex; gap: 4px; }
+    .topnav nav a {
+        color: var(--text-muted); text-decoration: none; font-size: 13px; font-weight: 500;
+        padding: 6px 12px; border-radius: 6px; transition: all 0.2s;
+    }
+    .topnav nav a:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .topnav nav a.active { color: var(--accent); background: var(--accent-dim); }
+    @media (max-width: 768px) { .topnav nav { display: none; } }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+    
+    .hero { text-align: center; margin-bottom: 40px; }
+    .hero h1 { font-size: 36px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 12px; }
+    .hero h1 span { background: linear-gradient(135deg, #fff, #a78bfa); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { color: var(--text-muted); max-width: 600px; margin: 0 auto; font-size: 15px; }
+
+    .search-container {
+        position: relative; max-width: 700px; margin: 0 auto 40px auto;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .search-container.compact {
+        margin-bottom: 24px;
+    }
+    .search-input-wrap {
+        position: relative;
+        background: rgba(15, 15, 20, 0.8); backdrop-filter: blur(16px);
+        border: 1px solid var(--card-border); border-radius: 16px;
+        padding: 4px; display: flex; align-items: center;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        transition: border-color 0.2s;
+    }
+    .search-input-wrap:focus-within { border-color: var(--accent); box-shadow: 0 8px 32px rgba(139, 92, 246, 0.15); }
+    .search-icon { color: var(--text-muted); padding: 0 16px; font-size: 18px; }
+    .search-input {
+        flex: 1; background: transparent; border: none; color: #fff;
+        font-size: 16px; padding: 14px 0; outline: none; font-family: var(--font-mono);
+    }
+    .search-input::placeholder { color: #475569; font-family: sans-serif; }
+    
+    #search-autocomplete {
+        position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+        background: rgba(15, 15, 20, 0.95); backdrop-filter: blur(16px);
+        border: 1px solid var(--card-border); border-radius: 12px;
+        max-height: 300px; overflow-y: auto; z-index: 50;
+        box-shadow: 0 12px 40px rgba(0,0,0,0.5); display: none;
+    }
+    .ac-item {
+        padding: 12px 16px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03);
+        display: flex; align-items: center; gap: 12px; transition: background 0.1s;
+    }
+    .ac-item:hover { background: rgba(255,255,255,0.05); }
+    .ac-item:last-child { border-bottom: none; }
+    
+    .example-chips { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+    .chip {
+        background: rgba(255,255,255,0.05); border: 1px solid var(--card-border);
+        padding: 6px 12px; border-radius: 20px; font-size: 12px; color: var(--text-muted);
+        cursor: pointer; transition: all 0.2s; font-family: var(--font-mono);
+    }
+    .chip:hover { color: #fff; border-color: #52525b; background: rgba(255,255,255,0.1); }
+
+    #dashboard { display: none; opacity: 0; transition: opacity 0.4s ease; }
+    #dashboard.visible { display: block; opacity: 1; }
+
+    .dashboard-header {
+        display: flex; justify-content: space-between; align-items: flex-end;
+        margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--card-border);
+    }
+    .model-title { font-size: 28px; font-weight: 700; font-family: var(--font-mono); letter-spacing: -0.5px; }
+    .model-subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+    
+    .badges-row { display: flex; gap: 8px; margin-top: 12px; flex-wrap:wrap; }
+    .badge {
+        padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+        text-transform: uppercase; display: inline-flex; align-items: center; gap: 6px;
+    }
+    
+    .bento-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 20px;
+    }
+    .bento-card {
+        background: var(--card-bg); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--card-border); border-radius: 16px;
+        padding: 24px; overflow: hidden; position: relative;
+        display: flex; flex-direction: column;
+        transition: transform 0.2s, border-color 0.2s;
+    }
+    .bento-card:hover { border-color: var(--card-hover); }
+    .bento-card::before {
+        content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        background: var(--card-accent, transparent);
+    }
+    
+    .card-compliance { grid-column: span 4; --card-accent: var(--accent); }
+    .card-crypto { grid-column: span 4; --card-accent: var(--green); }
+    .card-tpa { grid-column: span 4; --card-accent: var(--cyan); }
+    .card-dsse { grid-column: span 6; --card-accent: var(--green); }
+    .card-cds { grid-column: span 3; --card-accent: #f472b6; }
+    .card-gdna { grid-column: span 3; --card-accent: var(--yellow); }
+    .card-outreach { grid-column: span 6; --card-accent: var(--blue); }
+    .card-temporal { grid-column: span 6; --card-accent: #a855f7; }
+    .verified-sig { display:inline-flex; align-items:center; gap:4px; font-size:11px; padding:3px 8px; border-radius:4px; font-weight:600; font-family:var(--font-mono); }
+    .sig-ok { background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); color:#10b981; }
+    .sig-warn { background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.2); color:#f59e0b; }
+
+    @media (max-width: 992px) {
+        .card-compliance, .card-crypto, .card-tpa, .card-dsse, .card-cds, .card-gdna, .card-outreach, .card-temporal {
+            grid-column: span 6;
+        }
+    }
+    @media (max-width: 768px) {
+        .card-compliance, .card-crypto, .card-tpa, .card-dsse, .card-cds, .card-gdna, .card-outreach, .card-temporal {
+            grid-column: span 12;
+        }
+        .dashboard-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+    }
+
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .card-title { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display:flex; align-items:center; gap:8px;}
+    .card-icon { font-size: 16px; opacity: 0.8; }
+    .card-link { font-size: 12px; color: var(--text-muted); text-decoration: none; transition: color 0.2s; background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 4px; }
+    .card-link:hover { color: #fff; background: rgba(255,255,255,0.1); }
+    
+    .big-score { font-size: 42px; font-weight: 800; line-height: 1; margin-bottom: 4px; font-family: var(--font-mono); letter-spacing:-1px;}
+    .score-label { font-size: 13px; color: var(--text-muted); }
+    
+    .data-list { list-style: none; display: flex; flex-direction: column; gap: 12px; flex:1; }
+    .data-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; padding-bottom: 8px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .data-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .data-key { color: var(--text-muted); }
+    .data-val { font-weight: 600; text-align: right; }
+    .data-val.mono { font-family: var(--font-mono); font-weight: 400; font-size: 12px; }
+
+    .loader-wrap {
+        display: none; justify-content: center; align-items: center; padding: 60px 0; flex-direction: column; gap: 16px;
+    }
+    .spinner {
+        width: 32px; height: 32px; border: 3px solid rgba(139, 92, 246, 0.2);
+        border-top-color: var(--accent); border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .text-green { color: var(--green); }
+    .text-red { color: var(--red); }
+    .text-yellow { color: var(--yellow); }
+    .text-cyan { color: var(--cyan); }
+    .bg-green-dim { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); color: var(--green); }
+    .bg-purple-dim { background: rgba(139, 92, 246, 0.1); border: 1px solid rgba(139, 92, 246, 0.2); color: #c4b5fd; }
+    .bg-cyan-dim { background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.2); color: var(--cyan); }
+    .bg-red-dim { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--red); }
+    .bg-yellow-dim { background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); color: var(--yellow); }
+    .bg-gray-dim { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted); }
+
+    .progress-track { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; margin-top: 12px; }
+    .progress-fill { height: 100%; border-radius: 3px; transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    .tag-wrap { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+    .tag { padding: 4px 8px; background: rgba(255,255,255,0.05); border-radius: 4px; font-size: 11px; font-family: var(--font-mono); }
+    
+    .empty-state { color: var(--text-muted); font-size: 13px; font-style: italic; }
+
+    /* ── LANDING STATE ── */
+    #landing-state { transition: opacity 0.3s ease; }
+    #landing-state.hidden { display: none; opacity: 0; }
+
+    .hero-stats {
+        display: flex; gap: 0; justify-content: center; margin: 28px auto 0;
+        background: rgba(15,15,20,0.6); border: 1px solid var(--card-border); border-radius: 14px;
+        overflow: hidden; max-width: 700px;
+    }
+    .hero-stat {
+        flex: 1; padding: 18px 12px; text-align: center;
+        border-right: 1px solid var(--card-border);
+    }
+    .hero-stat:last-child { border-right: none; }
+    .hero-stat-num { font-size: 24px; font-weight: 800; font-family: var(--font-mono); letter-spacing: -0.5px; display: block; }
+    .hero-stat-lbl { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+
+    .trust-strip {
+        display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 24px auto;
+    }
+    .trust-chip {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+    .trust-chip.green { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.25); color: #10b981; }
+    .trust-chip.cyan { background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.25); color: #06b6d4; }
+    .trust-chip.purple { background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.25); color: #a78bfa; }
+
+    .section-divider {
+        font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;
+        letter-spacing: 1.5px; margin: 40px 0 20px; text-align: center;
+    }
+
+    .featured-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 14px; max-width: 900px; margin: 0 auto;
+    }
+    .featured-card {
+        background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;
+        padding: 16px 18px; cursor: pointer; transition: all 0.2s;
+        display: flex; flex-direction: column; gap: 8px;
+    }
+    .featured-card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(139,92,246,0.1); }
+    .fc-model { font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: #fff; word-break: break-all; }
+    .fc-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+    .fc-badge {
+        font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+        text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .fc-badge.critical { background: rgba(239,68,68,0.15); color: #ef4444; }
+    .fc-badge.high { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .fc-badge.moderate { background: rgba(59,130,246,0.15); color: #3b82f6; }
+    .fc-badge.low { background: rgba(16,185,129,0.15); color: #10b981; }
+    .fc-stat { font-size: 11px; color: var(--text-muted); }
+
+    .evidence-preview {
+        display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+        max-width: 800px; margin: 0 auto;
+    }
+    .ev-item {
+        display: flex; align-items: center; gap: 8px;
+        padding: 10px 16px; background: rgba(15,15,20,0.6); border: 1px solid var(--card-border);
+        border-radius: 10px; font-size: 12px; color: var(--text-muted);
+    }
+    .ev-icon { font-size: 16px; }
+    .ev-label { font-weight: 600; color: #e2e8f0; }
+
+    .card-dc { grid-column: span 6; --card-accent: #22d3ee; }
+    .card-rp { grid-column: span 6; --card-accent: #ec4899; }
+    .card-geney { grid-column: span 3; --card-accent: #f59e0b; }
+    .forensic-verdict-strip { display:flex; gap:8px; align-items:center; margin-top:12px; padding:10px 14px; background:rgba(0,0,0,0.3); border-radius:10px; border:1px solid rgba(255,255,255,0.05); }
+    .fv-badge { font-size:10px; font-weight:800; padding:4px 10px; border-radius:6px; text-transform:uppercase; letter-spacing:.5px; }
+    .fv-trained { background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); }
+    .fv-likely { background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); }
+    .fv-inconclusive { background:rgba(148,163,184,0.15); color:#94a3b8; border:1px solid rgba(148,163,184,0.3); }
+    .fv-not-trained { background:rgba(34,197,94,0.15); color:#22c55e; border:1px solid rgba(34,197,94,0.3); }
+    .fv-pending { background:rgba(139,92,246,0.1); color:#a78bfa; border:1px solid rgba(139,92,246,0.3); }
+    .dc-domain-row { display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+    .dc-domain-name { font-size:12px; width:75px; color:#888; text-transform:capitalize; }
+    .dc-bar-track { flex:1; height:5px; background:rgba(255,255,255,0.05); border-radius:3px; overflow:hidden; }
+    .dc-bar-fill { height:100%; border-radius:3px; }
+    .dc-val { font-size:11px; font-family:var(--font-mono); width:60px; text-align:right; }
+    .dc-wash { font-size:10px; font-family:var(--font-mono); width:50px; text-align:right; color:#444; }
+    .rp-cluster-box { padding:10px; background:rgba(0,0,0,0.2); border-radius:8px; border:1px solid rgba(255,255,255,0.04); margin-bottom:8px; }
+    .rp-cluster-box:last-child { margin-bottom:0; }
+    .rp-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+    .rp-sep-val { font-size:15px; font-weight:800; font-family:var(--font-mono); }
+    .rp-cid { font-size:10px; color:#444; font-family:var(--font-mono); }
+    .rp-toks { display:flex; gap:4px; flex-wrap:wrap; }
+    .rp-tok { font-size:10px; padding:2px 6px; border-radius:3px; font-family:'Courier New',monospace; }
+    .rp-tok-embed { background:rgba(139,92,246,0.12); color:#a78bfa; border:1px solid rgba(139,92,246,0.2); }
+    .rp-tok-acoustic { background:rgba(6,182,212,0.12); color:#22d3ee; border:1px solid rgba(6,182,212,0.2); }
+    .rp-assim { font-size:10px; color:#555; margin-top:4px; }
+    .rp-assim em { color:#f59e0b; font-style:normal; font-weight:600; }
+    .gy-big { font-size:36px; font-weight:800; font-family:var(--font-mono); letter-spacing:-1px; line-height:1; }
+    .gy-label { font-size:11px; margin-top:4px; }
+    .conf-mini { height:4px; background:rgba(255,255,255,0.05); border-radius:2px; overflow:hidden; margin-top:8px; }
+    .conf-mini-fill { height:100%; border-radius:2px; }
+
+    @media (max-width: 992px) {
+        .card-dc, .card-rp { grid-column: span 6; }
+        .card-geney { grid-column: span 6; }
+    }
+    @media (max-width: 768px) {
+        .card-dc, .card-rp, .card-geney { grid-column: span 12; }
+    }
+
+</style>
+
+</head>
+
+<body>
+
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="https://croviatrust.com/" class="cv-brand-link"><img src="https://croviatrust.com/logo.png" alt="" class="cv-brand-mark"><span class="cv-brand-name">CROVIA</span></a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+    <div class="cv-nav-status" id="cv-nav-status"><span class="dot"></span><span data-cv-status>connecting</span></div>
+  </div>
+</nav>
+
+<div class="container">
+    <!-- SEARCH (always visible) -->
+    <div class="search-container" id="search-box">
+        <div style="text-align:center; margin-bottom:8px;">
+            <h1 style="font-size:32px; font-weight:800; letter-spacing:-0.5px; margin-bottom:6px;">
+                <span style="background:linear-gradient(135deg,#fff,#a78bfa);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Crovia Passport</span>
+            </h1>
+            <p style="color:var(--text-muted); font-size:14px; max-width:500px; margin:0 auto;">Search any AI model to see its full evidence profile — compliance, cryptographic proofs, temporal history, and provenance.</p>
+        </div>
+        <div class="search-input-wrap" style="margin-top:20px;">
+            <div class="search-icon">🔍</div>
+            <input type="text" class="search-input" id="model-input" placeholder="Search model (e.g. deepseek-ai/DeepSeek-V3)" autocomplete="off" oninput="onSearchInput(this.value)" onkeydown="onSearchKey(event)" />
+        </div>
+        <div id="search-autocomplete"></div>
+    </div>
+
+    <!-- LANDING STATE (hidden after search) -->
+    <div id="landing-state">
+        <!-- Hero Stats -->
+        <div class="hero-stats" id="hero-stats">
+            <div class="hero-stat">
+                <span class="hero-stat-num" style="color:#a78bfa;" id="pp-models">--</span>
+                <span class="hero-stat-lbl">Models Tracked</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-num" style="color:#06b6d4;" id="pp-chain">--</span>
+                <span class="hero-stat-lbl">Chain Height</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-num" style="color:#10b981;" id="pp-proofs">--</span>
+                <span class="hero-stat-lbl">TPA Proofs</span>
+            </div>
+            <div class="hero-stat">
+                <span class="hero-stat-num" style="color:#f59e0b;">11</span>
+                <span class="hero-stat-lbl">Jurisdictions</span>
+            </div>
+        </div>
+
+        <!-- Crypto Trust Strip -->
+        <div class="trust-strip">
+            <span class="trust-chip green">Ed25519 Signatures</span>
+            <span class="trust-chip green">Pedersen secp256k1</span>
+            <span class="trust-chip cyan">Merkle Chain</span>
+            <span class="trust-chip cyan">CF Witness</span>
+            <span class="trust-chip purple">20 NEC Elements</span>
+        </div>
+
+        <!-- What you'll see -->
+        <div class="section-divider">What you'll discover</div>
+        <div class="evidence-preview">
+            <div class="ev-item"><span class="ev-icon">🛡️</span><span class="ev-label">Compliance Score</span></div>
+            <div class="ev-item"><span class="ev-icon">🔏</span><span class="ev-label">Crypto Proof</span></div>
+            <div class="ev-item"><span class="ev-icon">⚖️</span><span class="ev-label">TPA Audit</span></div>
+            <div class="ev-item"><span class="ev-icon">🔍</span><span class="ev-label">Provenance</span></div>
+            <div class="ev-item"><span class="ev-icon">✨</span><span class="ev-label">Geometric DNA</span></div>
+            <div class="ev-item"><span class="ev-icon">💎</span><span class="ev-label">Deep Crystallography</span></div>
+            <div class="ev-item"><span class="ev-icon">📡</span><span class="ev-label">Resonance Probe</span></div>
+            <div class="ev-item"><span class="ev-icon">🧬</span><span class="ev-label">Gene Y</span></div>
+            <div class="ev-item"><span class="ev-icon">⏱️</span><span class="ev-label">Temporal History</span></div>
+            <div class="ev-item"><span class="ev-icon">📩</span><span class="ev-label">Outreach Log</span></div>
+        </div>
+
+        <!-- Featured Models -->
+        <div class="section-divider">Featured Models</div>
+        <div class="featured-grid" id="featured-grid">
+            <!-- populated by JS -->
+        </div>
+
+        <div style="text-align:center; margin-top:48px; padding-bottom:20px;">
+            <p style="color:#444; font-size:12px;">Every data point is cryptographically anchored. Every proof is independently verifiable.</p>
+        </div>
+    </div>
+
+    <!-- LOADING -->
+    <div class="loader-wrap" id="loading-state">
+        <div class="spinner"></div>
+        <div style="color:var(--text-muted); font-size:13px; font-family:var(--font-mono);">Resolving artifacts for <span id="loading-model" style="color:#fff;"></span>...</div>
+    </div>
+
+    <!-- DASHBOARD (shown after search) -->
+    <div id="dashboard">
+        <div style="margin-bottom:16px;"><a href="/registry/verify" style="color:var(--text-muted);font-size:12px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;" onclick="backToLanding(event)">← Back to Passport</a></div>
+        <div class="dashboard-header" id="dashboard-header"></div>
+        <div class="bento-grid" id="results-content"></div>
+        
+        <div style="margin-top: 40px; border-top: 1px solid var(--card-border); padding-top: 20px;">
+            <div style="cursor:pointer; color:var(--text-muted); font-size:13px; font-weight:600; display:flex; align-items:center; gap:8px;" onclick="toggleAdvanced()">
+                <span>⚙️ Advanced: Target Comparison</span>
+            </div>
+            <div id="adv-content" style="display:none; margin-top:16px; background:var(--card-bg); padding:20px; border-radius:12px; border:1px solid var(--card-border);">
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">Compare compliance gaps across multiple targets to identify relative omissions.</p>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <input type="text" id="target1-input" placeholder="meta-llama/Llama-3.1-8B" style="padding:10px 14px;background:rgba(0,0,0,0.3);border:1px solid var(--card-border);border-radius:8px;color:#fff;font-size:13px;font-family:var(--font-mono);flex:1;min-width:200px;outline:none;">
+                    <input type="text" id="target2-input" placeholder="openai/gpt-4-turbo" style="padding:10px 14px;background:rgba(0,0,0,0.3);border:1px solid var(--card-border);border-radius:8px;color:#fff;font-size:13px;font-family:var(--font-mono);flex:1;min-width:200px;outline:none;">
+                    <button onclick="compareTargets()" style="padding:10px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-weight:600;cursor:pointer;">Compare</button>
+                </div>
+                <div id="compare-result" style="margin-top:16px; font-size:13px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+const API = window.location.origin;
+
+/* ── UTILS ── */
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function fmt(s){if(!s)return'--';try{return new Date(s).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});}catch(e){return s.slice(0,10);}}
+function scoreColor(p){if(p>=80)return'#22c55e';if(p>=60)return'#f59e0b';if(p>=40)return'#f97316';return'#ef4444';}
+function setModel(id){document.getElementById('model-input').value=id;closeAutocomplete();analyze();}
+function toggleSignal(el){el.closest('.signal-card').classList.toggle('open');}
+
+/* ── AUTOCOMPLETE + LANDING ── */
+let _acModels=[];
+let _acIdx=-1;
+let _tpaCache=null;
+const SEV_ORDER={CRITICAL:0,HIGH:1,MODERATE:2,LOW:3};
+
+async function loadLandingData(){
+    try{
+        const r=await fetch(`${API}/registry/data/tpa_latest.json`);
+        if(!r.ok)return;
+        const data=await r.json();
+        _tpaCache=data;
+        const tpas=data.tpas||[];
+        _acModels=tpas.map(t=>t.model_id).filter(Boolean);
+
+        // Hero stats
+        const el=id=>document.getElementById(id);
+        el('pp-models').textContent=(data.total_available||tpas.length).toLocaleString();
+        el('pp-chain').textContent=data.chain_height||'--';
+        el('pp-proofs').textContent=tpas.length.toLocaleString();
+
+        // Featured models: pick top ones by severity
+        const featured=tpas
+            .filter(t=>t.highest_severity)
+            .sort((a,b)=>(SEV_ORDER[a.highest_severity]??9)-(SEV_ORDER[b.highest_severity]??9))
+            .slice(0,6);
+        const grid=document.getElementById('featured-grid');
+        grid.innerHTML=featured.map(t=>{
+            const sev=(t.highest_severity||'').toLowerCase();
+            const obs=t.observations||[];
+            const absent=obs.filter(o=>!o.is_present).length;
+            const ts=t.observation_timestamp?(t.observation_timestamp).slice(0,10):'';
+            const sigOk=t.signature_algorithm==='ed25519';
+            return `<div class="featured-card" onclick="setModel('${esc(t.model_id)}')">
+                <div class="fc-model">${esc(t.model_id)}</div>
+                <div class="fc-meta">
+                    <span class="fc-badge ${sev}">${t.highest_severity}</span>
+                    ${sigOk?'<span class="fc-badge" style="background:rgba(16,185,129,0.12);color:#10b981;">Ed25519</span>':''}
+                    <span class="fc-stat">${absent} absent / ${obs.length} NEC</span>
+                </div>
+                <div class="fc-stat">${t.total_jurisdictions_exposed||0} jurisdictions exposed · ${ts}</div>
+            </div>`;
+        }).join('');
+    }catch(e){}
+}
+loadLandingData();
+
+function showLanding(){
+    document.getElementById('landing-state').classList.remove('hidden');
+    document.getElementById('dashboard').classList.remove('visible');
+    document.getElementById('search-box').classList.remove('compact');
+}
+function hideLanding(){
+    document.getElementById('landing-state').classList.add('hidden');
+}
+function backToLanding(e){
+    e.preventDefault();
+    document.getElementById('model-input').value='';
+    showLanding();
+    window.history.replaceState(null,'','/registry/verify/');
+}
+function onSearchInput(val){
+    if(!_acModels.length) loadLandingData();
+    const q=val.trim().toLowerCase();
+    const ac=document.getElementById('search-autocomplete');
+    if(!q){ac.style.display='none';return;}
+    const matches=_acModels.filter(m=>m.toLowerCase().includes(q)).slice(0,12);
+    if(matches.length===0){ac.style.display='none';return;}
+    _acIdx=-1;
+    ac.innerHTML=matches.map((m,i)=>{
+        const hi=m.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<strong style="color:#8B5CF6;">$1</strong>');
+        return`<div class="ac-item" data-idx="${i}" data-val="${esc(m)}" onmousedown="setModel('${esc(m)}')" onmouseover="acHover(${i})">${hi}</div>`;
+    }).join('');
+    ac.style.display='block';
+}
+function onSearchKey(e){
+    const ac=document.getElementById('search-autocomplete');
+    const items=ac.querySelectorAll('.ac-item');
+    if(e.key==='ArrowDown'){e.preventDefault();_acIdx=Math.min(_acIdx+1,items.length-1);acHighlight(items);}
+    else if(e.key==='ArrowUp'){e.preventDefault();_acIdx=Math.max(_acIdx-1,0);acHighlight(items);}
+    else if(e.key==='Enter'){if(_acIdx>=0&&items[_acIdx]){setModel(items[_acIdx].dataset.val);}else{closeAutocomplete();analyze();}}
+    else if(e.key==='Escape'){closeAutocomplete();}
+}
+function acHover(i){_acIdx=i;const items=document.getElementById('search-autocomplete').querySelectorAll('.ac-item');acHighlight(items);}
+function acHighlight(items){items.forEach((el,i)=>el.style.background=i===_acIdx?'rgba(139,92,246,.15)':'');}
+function closeAutocomplete(){document.getElementById('search-autocomplete').style.display='none';_acIdx=-1;}
+document.addEventListener('click',e=>{if(!e.target.closest('.search-container'))closeAutocomplete();});
+function toggleAdvanced() {
+    const c=document.getElementById('adv-content');
+    c.style.display = c.style.display === 'none' ? 'block' : 'none';
+}
+
+/* ── ANALYZE PRINCIPALE ── */
+async function analyze(){
+    const modelId=document.getElementById('model-input').value.trim();
+    if(!modelId)return;
+    const wrap=document.getElementById('dashboard');
+    const content=document.getElementById('results-content');
+    const loading=document.getElementById('loading-state');
+    
+    hideLanding();
+    document.getElementById('search-box').classList.add('compact');
+    document.getElementById('loading-model').textContent=modelId;
+    wrap.classList.remove('visible');
+    loading.style.display='flex';
+    content.innerHTML='';
+    
+    const [dR,cR,tR,tmR,oR,cdsR,fR,cmR]=await Promise.allSettled([
+        fetchDSSE(modelId),fetchCompliance(modelId),fetchTPA(modelId),fetchTemporal(modelId),fetchOutreach(modelId),fetchCDS(modelId),fetchForensic(modelId),fetchCopyrightMemo(modelId)
+    ]);
+    
+    loading.style.display='none';
+    wrap.classList.add('visible');
+    
+    const d=dR.status==='fulfilled'?dR.value:null;
+    const c=cR.status==='fulfilled'?cR.value:null;
+    const t=tR.status==='fulfilled'?tR.value:null;
+    const tm=tmR.status==='fulfilled'?tmR.value:null;
+    const o=oR.status==='fulfilled'?oR.value:null;
+    const cds=cdsR.status==='fulfilled'?cdsR.value:null;
+    const forensic=fR.status==='fulfilled'?fR.value:null;
+    const copyrightMemo=cmR.status==='fulfilled'?cmR.value:null;
+
+    renderHeader(modelId,d,c,t,tm,forensic);
+
+    try {
+        content.innerHTML =
+            renderCompliance(c,modelId) +
+            renderCryptoVerification(t) +
+            renderTPA(t,modelId) +
+            renderDSSE(d) +
+            renderCDS(cds) +
+            renderDeepCrystallography(forensic) +
+            renderResonanceProbe(forensic) +
+            renderGeneY(forensic) +
+            renderGeometricDNA(modelId) +
+            renderTemporal(tm,modelId) +
+            renderCopyrightMemo(copyrightMemo) +
+            renderOutreach(o,modelId);
+    } catch(e) {
+        console.error('Passport render error:', e);
+    }
+
+    loadGeometricDNA(modelId);
+}
+
+/* ── FETCHERS ── */
+async function fetchDSSE(id){
+    try{
+        const r=await fetch(`${API}/registry/data/sonar_chains.json`);
+        if(!r.ok)return null;
+        const data=await r.json();
+        const arr=Array.isArray(data)?data:(data.chains?data.chains:Object.values(data));
+        return arr.find(m=>(m.model_id||m.id)===id)||null;
+    }catch(e){return null;}
+}
+async function fetchCompliance(id){
+    try{
+        const r=await fetch(`${API}/registry/data/compliance/${id.replace('/','__')}.json`);
+        if(!r.ok)return null;return r.json();
+    }catch(e){return null;}
+}
+async function fetchTPA(id){
+    try{
+        const r=await fetch(`${API}/registry/data/tpa_latest.json`);
+        if(!r.ok)return null;
+        const data=await r.json();
+        return(data.tpas||[]).find(t=>t.model_id===id)||null;
+    }catch(e){return null;}
+}
+async function fetchTemporal(id){
+    try{
+        const r=await fetch(`${API}/api/targets/summary`);
+        if(!r.ok)return null;
+        const data=await r.json();
+        return(data.targets||[]).find(t=>t.target_id===id)||null;
+    }catch(e){return null;}
+}
+async function fetchOutreach(id){
+    try{
+        const r=await fetch(`${API}/registry/data/outreach_status.json`);
+        if(!r.ok)return null;
+        const data=await r.json();
+        return(data.records||[]).find(rec=>rec.target_id===id)||null;
+    }catch(e){return null;}
+}
+
+
+/* ── FORENSIC FETCHER ── */
+async function fetchForensic(id){
+    try{
+        const r=await fetch(`${API}/registry/data/forensic_dossiers.json?t=${Date.now()}`);
+        if(!r.ok)return null;
+        const data=await r.json();
+        const models=data.models||[];
+        return models.find(m=>m.model_id===id)||null;
+    }catch(e){return null;}
+}
+
+/* ── CDS FETCHER ── */
+async function fetchCDS(id){
+    try{
+        const r=await fetch(`${API}/registry/data/cds_results.json?t=${Date.now()}`);
+        if(!r.ok)return null;
+        const data=await r.json();
+        const results=data.results||data.models||[];
+        return results.find(m=>(m.model_id||m.id)===id)||null;
+    }catch(e){return null;}
+}
+
+
+
+
+/* ── COPYRIGHT MEMORIZATION FETCHER ── */
+let _copyrightCache = null;
+async function fetchCopyrightMemo(id){
+    try{
+        if(!_copyrightCache){
+            const r=await fetch('/registry/data_v4/copyright_memorization.json?t='+Date.now());
+            if(!r.ok)return null;
+            _copyrightCache=await r.json();
+        }
+        const d=_copyrightCache;
+        const short=id.split('/').pop().toLowerCase();
+        function match(name){
+            const n=name.toLowerCase().replace(/[^a-z0-9]/g,'');
+            const s=short.replace(/[^a-z0-9]/g,'');
+            return n===s || s.includes(n) || n.includes(s);
+        }
+        const fp=(d.fingerprinting?.results||[]).filter(r=>match(r.model));
+        const ext=(d.extraction_bypass?.results||[]).filter(r=>match(r.model));
+        const ev=(d.evasion_detection?.pairs||[]).filter(r=>{
+            const orgLow=(r.org||'').toLowerCase();
+            return orgLow.includes(short.split('-')[0]) || match(r.org.split(' ')[0]);
+        });
+        const sc=(d.scaling_law?.families||[]).filter(f=>{
+            return short.includes(f.family.toLowerCase());
+        });
+        const co=d.cross_org_bpc||null;
+        let coModel=null;
+        if(co&&co.models){
+            coModel=co.models.find(m=>match(m.name));
+        }
+        if(fp.length===0 && ext.length===0 && ev.length===0 && sc.length===0 && !coModel) return null;
+        return {fingerprinting:fp, extraction:ext, evasion:ev, scaling:sc, cross_org:coModel, categories:co?.categories, meta:d.meta};
+    }catch(e){console.error('Copyright memo fetch error:',e);return null;}
+}
+
+
+/* ── COPYRIGHT MEMORIZATION CARD ── */
+function renderCopyrightMemo(cm){
+    if(!cm) return '';
+    let sections='';
+
+    // Fingerprinting ratios
+    if(cm.fingerprinting.length>0){
+        let rows='';
+        cm.fingerprinting.forEach(r=>{
+            const col=r.ratio>3?'#ef4444':r.ratio>1.5?'#f59e0b':'#22c55e';
+            const barW=Math.min((r.ratio/8)*100,100);
+            rows+=`<div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
+                <span style="width:130px;font-size:11px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(r.book)}</span>
+                <div style="flex:1;height:6px;background:#1a1a2e;border-radius:3px;overflow:hidden;">
+                    <div style="width:${barW}%;height:100%;background:${col};border-radius:3px;"></div>
+                </div>
+                <span style="font-size:11px;font-weight:600;color:${col};font-family:var(--font-mono);min-width:40px;text-align:right;">${r.ratio.toFixed(2)}x</span>
+            </div>`;
+        });
+        sections+=`<div style="margin-bottom:16px;">
+            <div style="font-size:10px;font-weight:700;color:#8B5CF6;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Dataset Fingerprinting</div>
+            <div style="font-size:10px;color:#555;margin-bottom:8px;">Original/Paraphrase BPC ratio (>1.0 = memorized)</div>
+            ${rows}
+        </div>`;
+    }
+
+    // Extraction bypass
+    if(cm.extraction.length>0){
+        let rows='';
+        cm.extraction.forEach(r=>{
+            const col=r.match_pct>80?'#ef4444':r.match_pct>40?'#f59e0b':'#22c55e';
+            rows+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
+                <span style="font-size:11px;color:#888;">${esc(r.book)}</span>
+                <span style="font-size:11px;font-weight:700;color:${col};font-family:var(--font-mono);">${r.match_pct}%</span>
+            </div>`;
+        });
+        sections+=`<div style="margin-bottom:16px;">
+            <div style="font-size:10px;font-weight:700;color:#ec4899;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Extraction Bypass</div>
+            <div style="font-size:10px;color:#555;margin-bottom:8px;">Verbatim reproduction via simple prompts</div>
+            ${rows}
+        </div>`;
+    }
+
+    // Evasion detection
+    if(cm.evasion.length>0){
+        let rows='';
+        cm.evasion.forEach(r=>{
+            const col=r.divergence_pct<10?'#ef4444':'#22c55e';
+            rows+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;">
+                <span style="font-size:11px;color:#888;">Base: ${r.base_score} / Instruct: ${r.instruct_score}</span>
+                <span style="font-size:11px;font-weight:700;color:${col};font-family:var(--font-mono);">${r.divergence_pct}% div</span>
+            </div>`;
+        });
+        sections+=`<div style="margin-bottom:16px;">
+            <div style="font-size:10px;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Evasion Detection</div>
+            <div style="font-size:10px;color:#555;margin-bottom:8px;">Min-K20% base vs instruct divergence (<10% = cosmetic)</div>
+            ${rows}
+        </div>`;
+    }
+
+    // Scaling law
+    if(cm.scaling.length>0){
+        cm.scaling.forEach(f=>{
+            let pts='';
+            f.sizes.forEach((s,i)=>{
+                pts+=`<span style="display:inline-flex;flex-direction:column;align-items:center;padding:4px 12px;">
+                    <span style="font-size:13px;font-weight:700;color:#22d3ee;font-family:var(--font-mono);">${f.bpc[i]}</span>
+                    <span style="font-size:9px;color:#555;">${s}</span>
+                </span>`;
+            });
+            sections+=`<div style="margin-bottom:16px;">
+                <div style="font-size:10px;font-weight:700;color:#22d3ee;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Scaling Law (${esc(f.family)})</div>
+                <div style="font-size:10px;color:#555;margin-bottom:8px;">BPC drops ${f.reduction_pct}% as size increases</div>
+                <div style="display:flex;gap:4px;justify-content:center;background:rgba(34,211,238,0.05);border-radius:8px;padding:8px;">${pts}</div>
+            </div>`;
+        });
+    }
+
+    // Cross-org BPC mini heatmap
+    if(cm.cross_org && cm.categories){
+        let cells='';
+        cm.categories.forEach((cat,i)=>{
+            const v=cm.cross_org.values[i];
+            const col=v<0.5?'rgba(239,68,68,0.8)':v<1.0?'rgba(245,158,11,0.6)':'rgba(34,197,94,0.3)';
+            cells+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.02);">
+                <span style="font-size:10px;color:#666;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(cat)}</span>
+                <span style="font-size:11px;font-weight:600;color:${col};font-family:var(--font-mono);">${v.toFixed(2)}</span>
+            </div>`;
+        });
+        sections+=`<div style="margin-bottom:8px;">
+            <div style="font-size:10px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Cross-Org BPC Profile</div>
+            <div style="font-size:10px;color:#555;margin-bottom:8px;">Avg BPC by category (lower = more memorized)</div>
+            ${cells}
+        </div>`;
+    }
+
+    if(!sections) return '';
+
+    const doi=cm.meta?.doi||'';
+    const doiLink=doi?`<a href="https://doi.org/${doi}" target="_blank" style="font-size:9px;color:#8B5CF6;text-decoration:none;opacity:0.7;">DOI: ${doi}</a>`:'';
+
+    return `<div class="bento-card" style="border:1px solid rgba(139,92,246,0.2);background:linear-gradient(135deg,rgba(139,92,246,0.03),rgba(236,72,153,0.02));">
+        <div class="card-header">
+            <div class="card-title">\ud83d\udcda Copyright Memorization</div>
+            <span class="verified-sig" style="font-size:9px;background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.3);color:#8B5CF6;">PEER-REVIEWED</span>
+        </div>
+        <div style="font-size:11px;color:#555;margin-bottom:12px;">Evidence from <em>Verbatim in the Weights</em> (2026) ${doiLink}</div>
+        ${sections}
+    </div>`;
+}
+
+/* ── DEEP CRYSTALLOGRAPHY CARD ── */
+function renderDeepCrystallography(f){
+    if(!f||!f.dc) return '';
+    const dc=f.dc;
+    const domains=dc.domains||[];
+    if(domains.length===0) return '';
+    const maxGap=Math.max.apply(null,domains.map(d=>Math.abs(d.deep_gap)))||0.05;
+
+    function gapColor(g){ var a=Math.abs(g); return a>0.03?'#ef4444':a>0.01?'#f59e0b':a>0.005?'#22d3ee':'#333'; }
+
+    let rows='';
+    domains.forEach(d=>{
+        const barW=Math.min(Math.abs(d.deep_gap)/maxGap*100,100);
+        const dir=d.deep_gap>=0?'+':'';
+        const wDir=d.washing_delta>=0?'+':'';
+        const wCol=Math.abs(d.washing_delta)>0.001?(d.washing_delta>0?'color:#f59e0b':'color:#22d3ee'):'color:#333';
+        rows+=`<div class="dc-domain-row">
+            <span class="dc-domain-name">${esc(d.name.replace('code_','').replace('_',' '))}</span>
+            <div class="dc-bar-track"><div class="dc-bar-fill" style="width:${barW}%;background:${gapColor(d.deep_gap)}"></div></div>
+            <span class="dc-val" style="color:${gapColor(d.deep_gap)}">${dir}${d.deep_gap.toFixed(4)}</span>
+            <span class="dc-wash" style="${wCol}">\u0394${wDir}${d.washing_delta.toFixed(4)}</span>
+        </div>`;
+    });
+
+    const tensorShort=(dc.layer||'').split('.').slice(-3).join('.');
+
+    return `<div class="bento-card card-dc">
+        <div class="card-header">
+            <div class="card-title">\ud83d\udc8e Deep Crystallography</div>
+            <span class="verified-sig sig-ok" style="font-size:10px;">${dc.n_domains} domains</span>
+        </div>
+        <div style="margin-bottom:12px;">
+            <div style="font-size:11px;color:#666;margin-bottom:4px;">Domain crystallization gaps vs negative controls</div>
+            <div style="display:flex;gap:16px;font-size:11px;color:#555;">
+                <span>Neg \u03bc(surface): <strong style="color:#fff;">${dc.surface_neg_mean?.toFixed(4)||'--'}</strong></span>
+                <span>Neg \u03bc(deep): <strong style="color:#fff;">${dc.deep_neg_mean?.toFixed(4)||'--'}</strong></span>
+            </div>
+        </div>
+        ${rows}
+        <div style="margin-top:8px;font-size:10px;color:#333;font-family:var(--font-mono);">tensor: ${esc(tensorShort)}</div>
+    </div>`;
+}
+
+/* ── RESONANCE PROBE CARD ── */
+function renderResonanceProbe(f){
+    if(!f||!f.rp) return '';
+    const rp=f.rp;
+    const clusters=rp.top_clusters||[];
+    if(clusters.length===0) return '';
+
+    function sepCol(s){ var a=Math.abs(s); return a>0.3?'#ef4444':a>0.1?'#f59e0b':a>0.03?'#ec4899':'#666'; }
+
+    let chtml='';
+    clusters.slice(0,4).forEach(cl=>{
+        let toks='';
+        (cl.top_tokens||[]).slice(0,5).forEach(t=>{
+            toks+=`<span class="rp-tok rp-tok-embed">${esc(t)}</span>`;
+        });
+        (cl.acoustic||[]).slice(0,3).forEach(t=>{
+            toks+=`<span class="rp-tok rp-tok-acoustic">${esc(t)}</span>`;
+        });
+        const assimLine=cl.assimilation?`<div class="rp-assim">assimilation: <em>${esc(cl.assimilation)}</em> (${cl.chain_steps} steps)</div>`:'';
+        chtml+=`<div class="rp-cluster-box">
+            <div class="rp-head">
+                <span class="rp-sep-val" style="color:${sepCol(cl.separation)}">sep ${cl.separation>=0?'+':''}${cl.separation.toFixed(4)}</span>
+                <span class="rp-cid">cluster #${cl.id}</span>
+            </div>
+            <div class="rp-toks">${toks}</div>
+            ${assimLine}
+        </div>`;
+    });
+
+    return `<div class="bento-card card-rp">
+        <div class="card-header">
+            <div class="card-title">\ud83d\udce1 Resonance Probe</div>
+            <span class="verified-sig" style="font-size:10px;background:rgba(236,72,153,0.1);border:1px solid rgba(236,72,153,0.2);color:#ec4899;">${rp.n_clusters} clusters</span>
+        </div>
+        <div style="font-size:11px;color:#666;margin-bottom:10px;">Vocabulary-space cluster fingerprints · ${rp.n_layers} attention layers · max sep ${rp.max_separation?.toFixed(4)||'--'}</div>
+        ${chtml}
+    </div>`;
+}
+
+/* ── GENE Y CARD ── */
+function renderGeneY(f){
+    if(!f||!f.gene_y) return '';
+    const gy=f.gene_y;
+    const rho=gy.mean_rho;
+    const col=rho>0.7?'#ef4444':rho>0.4?'#f59e0b':'#22c55e';
+    const interpLabel=gy.interpretation==='HIGH_SHARED_DATA'?'HIGH SHARED':gy.interpretation==='MODERATE_SHARED_DATA'?'MODERATE':gy.interpretation==='LOW_SHARED_DATA'?'LOW':'DIFFERENT';
+    const interpCls=gy.interpretation==='HIGH_SHARED_DATA'?'bg-red-dim':gy.interpretation==='MODERATE_SHARED_DATA'?'bg-yellow-dim':'bg-green-dim';
+
+    let corrRows='';
+    if(gy.correlations){
+        Object.entries(gy.correlations).forEach(([refId,rv])=>{
+            const rhoVal=typeof rv==='object'?Number(rv.spearman_rho||0):Number(rv)||0;
+            const rc=rhoVal>0.7?'#ef4444':rhoVal>0.4?'#f59e0b':'#22c55e';
+            corrRows+=`<div class="data-row"><span class="data-key" style="font-size:11px;">${esc(refId.split('/').pop())}</span><span class="data-val mono" style="color:${rc};">\u03c1=${rhoVal.toFixed(4)}</span></div>`;
+        });
+    }
+
+    return `<div class="bento-card card-geney">
+        <div class="card-header">
+            <div class="card-title">\ud83e\uddec Gene Y</div>
+        </div>
+        <div class="gy-big" style="color:${col};">\u03c1=${rho.toFixed(3)}</div>
+        <div class="gy-label" style="color:#666;">Ranking fingerprint correlation</div>
+        <div style="margin-top:8px;"><span class="badge ${interpCls}" style="font-size:10px;">${interpLabel}</span></div>
+        ${gy.max_rho!=null?`<div class="data-row" style="margin-top:12px;"><span class="data-key">Max \u03c1</span><span class="data-val mono" style="color:${col};">${gy.max_rho.toFixed(4)}</span></div>`:''}
+        ${corrRows?`<div style="margin-top:8px;font-size:10px;color:#444;margin-bottom:6px;">Reference correlations</div>${corrRows}`:''}
+    </div>`;
+}
+
+/* ── CRYPTO VERIFICATION CARD ── */
+function renderCryptoVerification(t){
+    if(!t) return '';
+
+    const sigHex=t.signature_hex||'';
+    const algo=t.signature_algorithm||'unknown';
+    const pubKey=t.public_key_hex||'';
+    const merkle=t.merkle_root||'';
+    const aggX=t.aggregate_commitment_x||'';
+    const witness=t.witness_verification||t.http_witness||null;
+    const isEd25519=algo==='ed25519';
+    const sigShort=sigHex?sigHex.slice(0,16)+'...'+sigHex.slice(-8):'-';
+    const merkleShort=merkle?merkle.slice(0,16)+'...':'-';
+    const pubShort=pubKey?pubKey.slice(0,12)+'...':'-';
+    const cfActive=witness&&(witness.cf_oracle_configured||witness.sha256);
+
+    return `<div class="bento-card card-crypto">
+        <div class="card-header">
+            <div class="card-title">🔏 Crypto Proof</div>
+            <span class="verified-sig ${isEd25519?'sig-ok':'sig-warn'}">${isEd25519?'Ed25519 ✓':'Unverified'}</span>
+        </div>
+        <div class="data-list">
+            <div class="data-row"><span class="data-key">Signature</span><span class="data-val mono" title="${esc(sigHex)}">${sigShort}</span></div>
+            <div class="data-row"><span class="data-key">Algorithm</span><span class="data-val" style="color:${isEd25519?'#10b981':'#f59e0b'};">${algo.toUpperCase()}</span></div>
+            <div class="data-row"><span class="data-key">Public Key</span><span class="data-val mono" title="${esc(pubKey)}">${pubShort}</span></div>
+            <div class="data-row"><span class="data-key">Merkle Root</span><span class="data-val mono" title="${esc(merkle)}">${merkleShort}</span></div>
+            <div class="data-row"><span class="data-key">Pedersen</span><span class="data-val ${aggX?'text-green':''} ">${aggX?'secp256k1 ✓':'N/A'}</span></div>
+            <div class="data-row"><span class="data-key">CF Witness</span><span class="data-val ${cfActive?'text-green':''}">${cfActive?'Active ✓':'Pending'}</span></div>
+        </div>
+    </div>`;
+}
+
+/* ── CDS CARD ── */
+function renderCDS(cds){
+    if(!cds) return `<div class="bento-card card-cds" id="cds-card" style="display:none;"></div>`;
+    const score=cds.cds_score??cds.similarity_score??null;
+    const conf=cds.confidence_interval||cds.ci||null;
+    const tier=cds.tier||cds.data_tier||'-';
+    const bpcDim=cds.bpc_dimensions||cds.dimensions||'-';
+    const col=score!=null?(score>=0.7?'#ef4444':score>=0.4?'#f59e0b':'#22c55e'):'#666';
+
+    return `<div class="bento-card card-cds">
+        <div class="card-header">
+            <div class="card-title">📐 Data Similarity</div>
+            <span class="verified-sig sig-ok" style="font-size:10px;">CDS v3</span>
+        </div>
+        ${score!=null?`<div class="big-score" style="color:${col};font-size:32px;">${(score*100).toFixed(1)}%</div>
+        <div class="score-label">Corpus overlap signal</div>`:''}
+        <div class="data-list" style="margin-top:12px;">
+            ${conf?`<div class="data-row"><span class="data-key">95% CI</span><span class="data-val mono">[${conf[0]?.toFixed(2)}, ${conf[1]?.toFixed(2)}]</span></div>`:''}
+            <div class="data-row"><span class="data-key">Data Tier</span><span class="data-val">${esc(tier)}</span></div>
+            <div class="data-row"><span class="data-key">BPC Dims</span><span class="data-val mono">${bpcDim}</span></div>
+        </div>
+    </div>`;
+}
+
+/* ── RENDERERS ── */
+function renderHeader(id,d,c,t,tm,forensic){
+    const sigs=[];
+    if(d) sigs.push('<span class="badge bg-green-dim">DSSE ✓</span>');
+    const score = c?.score ?? c?.summary?.overall_score_pct;
+    if(score!=null) sigs.push(`<span class="badge bg-purple-dim">Score ${score}%</span>`);
+    if(tm) sigs.push('<span class="badge bg-cyan-dim">Monitored</span>');
+    if(t?.signature_algorithm==='ed25519') sigs.push('<span class="badge bg-green-dim">Ed25519 ✓</span>');
+    if(t?.witness_verification?.cf_oracle_configured||t?.http_witness) sigs.push('<span class="badge bg-cyan-dim">CF Witness</span>');
+
+    if(forensic){
+        const fvCls = forensic.primary_verdict==='trained'?'fv-trained':forensic.primary_verdict==='likely'?'fv-likely':forensic.primary_verdict==='not-trained'?'fv-not-trained':forensic.primary_verdict==='inconclusive'?'fv-inconclusive':'fv-pending';
+        const fvLabel = forensic.primary_verdict?forensic.primary_verdict.toUpperCase().replace('-',' '):'PENDING';
+        sigs.push('<span class="badge fv-'+forensic.primary_verdict+'">Forensic: '+fvLabel+'</span>');
+        if(forensic.dc) sigs.push('<span class="badge bg-cyan-dim">Crystal. ✓</span>');
+        if(forensic.rp) sigs.push('<span class="badge" style="background:rgba(236,72,153,0.1);border:1px solid rgba(236,72,153,0.2);color:#ec4899;">Resonance ✓</span>');
+        if(forensic.gene_y) sigs.push('<span class="badge" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);color:#f59e0b;">Gene Y ✓</span>');
+    }
+
+        document.getElementById('dashboard-header').innerHTML = `
+        <div>
+            <div class="model-title">${esc(id)}</div>
+            <div class="model-subtitle">Crovia Evidence Artifacts</div>
+        </div>
+        <div class="badges-row">
+            ${sigs.join('')}
+        </div>
+    `;
+    return '';
+}
+
+function renderDSSE(d){
+    if(!d) return '';
+    
+    const chains=d.chains||[];
+    const ok=chains.length===0;
+    const sources=d.declared_sources||[];
+    
+    let tagHtml = '';
+    if(sources.length) {
+        tagHtml = `<div class="tag-wrap">${sources.slice(0,4).map(s=>`<span class="tag">${esc(s)}</span>`).join('')}${sources.length>4?`<span class="tag">+${sources.length-4}</span>`:``}</div>`;
+    }
+
+    return `<div class="bento-card card-dsse">
+        <div class="card-header">
+            <div class="card-title">🔍 Provenance / Sonar</div>
+            <a href="/registry/provenance/#${encodeURIComponent(d.id||'')}" class="card-link">Radar View</a>
+        </div>
+        <div class="data-list">
+            <div class="data-row">
+                <span class="data-key">Shadow Risk</span>
+                <span class="data-val ${ok?'text-green':'text-red'}">${ok?'Clear':'Shadow Found'}</span>
+            </div>
+            <div class="data-row">
+                <span class="data-key">Unresolved Chains</span>
+                <span class="data-val mono">${chains.length}</span>
+            </div>
+            <div class="data-row" style="flex-direction:column; align-items:flex-start;">
+                <span class="data-key" style="margin-bottom:4px;">Declared Sources</span>
+                ${sources.length ? tagHtml : '<span class="data-val">None documented</span>'}
+            </div>
+        </div>
+    </div>`;
+}
+
+function renderCompliance(c,modelId){
+    if(!c) return `<div class="bento-card card-compliance"><div class="card-header"><div class="card-title">🛡️ Compliance</div></div><div class="empty-state">No compliance scan available.</div></div>`;
+
+    const s = c.score ?? c.summary?.overall_score_pct;
+    if(s==null) return `<div class="bento-card card-compliance"><div class="card-header"><div class="card-title">🛡️ Compliance</div></div><div class="empty-state">Compliance scan exists but score is not available yet.</div></div>`;
+
+    const omissionsCount = Array.isArray(c.omissions) ? c.omissions.length : (c.summary?.absent ?? '--');
+    const lastScan = c.last_scan || c.generated_at || c.updated_at || c.scan_timestamp || null;
+    const col=scoreColor(s);
+    let pFill=`<div class="progress-track"><div class="progress-fill" style="width:${s}%; background:${col};"></div></div>`;
+    
+    return `<div class="bento-card card-compliance">
+        <div class="card-header">
+            <div class="card-title">🛡️ Compliance</div>
+            <a href="/registry/compliance/#${encodeURIComponent(modelId)}" class="card-link">View Full</a>
+        </div>
+        <div class="big-score" style="color:${col}">${s}%</div>
+        <div class="score-label">Global Compliance Index</div>
+        ${pFill}
+        <div class="data-list" style="margin-top:16px;">
+            <div class="data-row"><span class="data-key">Issues</span><span class="data-val text-red">${omissionsCount} detected</span></div>
+            <div class="data-row"><span class="data-key">Last Scan</span><span class="data-val mono">${fmt(lastScan)}</span></div>
+        </div>
+    </div>`;
+}
+
+function renderTPA(t,modelId){
+    if(!t) return '';
+
+    const observations = Array.isArray(t.observations) ? t.observations : [];
+    const pres=observations.filter(o=>o.is_present).length;
+    const tot=observations.length;
+    const abs=tot-pres;
+    const auditRate = t.audit_rate ?? (tot>0 ? Math.round((abs/tot)*100) : null);
+    const lastSnapshot = t.observation_timestamp || t.timestamp || t.generated_at || null;
+    const absentTags=observations.filter(o=>!o.is_present).slice(0,3).map(o=>`<span class="tag">${esc(o.necessity_id||o.target_name||'missing-item')}</span>`).join('');
+
+    return `<div class="bento-card card-tpa">
+        <div class="card-header">
+            <div class="card-title">⚖️ TPA Audit</div>
+            <a href="/registry/verify/?mode=passport" class="card-link">Details</a>
+        </div>
+        <div class="data-list">
+            <div class="data-row"><span class="data-key">Audit Rate</span><span class="data-val">${auditRate!=null ? `${auditRate}% absence` : '--'}</span></div>
+            <div class="data-row"><span class="data-key">Missed Entities</span><span class="data-val text-red">${abs}</span></div>
+            <div class="data-row"><span class="data-key">Last Snapshot</span><span class="data-val mono">${fmt(lastSnapshot)}</span></div>
+        </div>
+        ${absentTags ? `<div class="tag-wrap" style="margin-top:auto; padding-top:12px;">${absentTags}</div>` : ''}
+    </div>`;
+}
+
+/* ── GEOMETRIC DNA ── */
+function renderGeometricDNA(modelId){
+    return `<div class="bento-card card-gdna" id="gdna-card" style="display:none;">
+        <div class="card-header">
+            <div class="card-title">✨ Geometric DNA</div>
+        </div>
+        <div id="gdna-content"></div>
+    </div>`;
+}
+
+async function loadGeometricDNA(modelId){
+    const card=document.getElementById('gdna-card');
+    const content=document.getElementById('gdna-content');
+    if(!card) return;
+    try {
+        const [curatedRes, rawRes] = await Promise.allSettled([
+            fetch(`${API}/registry/data/gdna_public_curated.json?t=${Date.now()}`),
+            fetch(`${API}/registry/data/gdna_results.json?t=${Date.now()}`)
+        ]);
+        const curated = (curatedRes.status==='fulfilled'&&curatedRes.value.ok) ? await curatedRes.value.json() : null;
+        const raw = (rawRes.status==='fulfilled'&&rawRes.value.ok) ? await rawRes.value.json() : null;
+        
+        let run = null;
+        if(curated && curated.models && curated.models.includes(modelId)) {
+            run = curated.runs ? curated.runs.find(r=>r.model_id===modelId) : null;
+            if(!run && raw && raw.runs) run = raw.runs.find(r=>r.model_id===modelId);
+        } else if(raw && raw.runs) {
+            run = raw.runs.find(r=>r.model_id===modelId);
+        }
+
+        // Also try matching by safe name (org__model)
+        if(!run){
+            const safeName = modelId.replace('/', '__');
+            if(raw && raw.runs) run = raw.runs.find(r=>(r.model_id||'').replace('/','__')===safeName);
+        }
+        if(!run){
+            card.style.display='none';
+            return;
+        }
+
+        // Only show if run has real GDNA fields
+        if(!run.gdna_hash && !run.stats && !run.fingerprint){
+            card.style.display='none';
+            return;
+        }
+        card.style.display='flex';
+        const st=run.stats||{};
+        const wp=run.washing_profile||{};
+        const fp=run.fingerprint||[];
+        const fpd = fp.length>1 ? fp[1] : (fp.length>0 ? fp[0] : 0);
+        
+        content.innerHTML=`
+            <div class="data-list">
+                <div class="data-row"><span class="data-key">Signature Hash</span><span class="data-val mono" title="${run.gdna_hash||''} ">${run.gdna_hash?run.gdna_hash.slice(0,12)+'...':'N/A'}</span></div>
+                <div class="data-row"><span class="data-key">Base Topology</span><span class="data-val mono">${st.topology_score?st.topology_score.toFixed(3):'--'}</span></div>
+                <div class="data-row"><span class="data-key">Alignment Shift</span><span class="data-val mono">${wp.alignment_shift?wp.alignment_shift.toFixed(3):'--'}</span></div>
+                <div class="data-row"><span class="data-key">Latent Space D.</span><span class="data-val mono">${fpd?fpd.toFixed(3):'--'}</span></div>
+            </div>
+        `;
+    } catch(e) {
+        card.style.display='none';
+    }
+}
+
+function renderOutreach(o,modelId){
+    if(!o) return '';
+    const stat=o?.status||'paused';
+    const c=stat==='acknowledged'?'text-green':stat==='pending'?'text-yellow':'text-red';
+    return `<div class="bento-card card-outreach">
+        <div class="card-header">
+            <div class="card-title">📩 Outreach</div>
+            <a href="/registry/compliance/" class="card-link">Log</a>
+        </div>
+        <div class="data-list">
+            <div class="data-row"><span class="data-key">Status</span><span class="data-val ${c}" style="text-transform:capitalize;">${stat}</span></div>
+            ${o?.last_contact ? `<div class="data-row"><span class="data-key">Last Contact</span><span class="data-val mono">${fmt(o.last_contact)}</span></div>` : ''}
+        </div>
+        ${stat==='paused'?`<div style="font-size:11px;color:var(--text-muted);margin-top:auto;padding-top:12px;">Automated outreach via HF is currently suspended.</div>`:``}
+    </div>`;
+}
+
+function renderTemporal(tm,modelId){
+    if(!tm) return '';
+    if(!tm) return `<div class="bento-card card-temporal"><div class="card-header"><div class="card-title">⏱️ Temporal Evidence</div></div><div class="empty-state">This model is not in the temporal monitoring registry.</div></div>`;
+
+    const latestType = (tm.latest_type||'--').toUpperCase();
+    const latestClass = tm.latest_type==='presence' ? 'text-green' : (tm.latest_type==='absence' ? 'text-yellow' : '');
+    return `<div class="bento-card card-temporal">
+        <div class="card-header">
+            <div class="card-title">⏱️ Temporal Evidence</div>
+        </div>
+        <div class="data-list">
+            <div class="data-row"><span class="data-key">Days Monitored</span><span class="data-val mono text-cyan">${tm.days_monitored ?? '--'}</span></div>
+            <div class="data-row"><span class="data-key">Observations</span><span class="data-val mono">${tm.observation_count ?? '--'}</span></div>
+            <div class="data-row"><span class="data-key">Obs / Day</span><span class="data-val mono">${tm.obs_per_day ?? '--'}</span></div>
+            <div class="data-row"><span class="data-key">Latest State</span><span class="data-val ${latestClass}">${latestType}</span></div>
+            <div class="data-row"><span class="data-key">First Seen</span><span class="data-val mono">${fmt(tm.first_seen)}</span></div>
+            <div class="data-row"><span class="data-key">Last Seen</span><span class="data-val mono">${fmt(tm.last_seen)}</span></div>
+        </div>
+    </div>`;
+}
+
+/* ── ADVANCED: Compare ── */
+async function compareTargets(){
+    const t1v=document.getElementById('target1-input').value.trim();
+    const t2v=document.getElementById('target2-input').value.trim();
+    const out=document.getElementById('compare-result');
+    if(!t1v||!t2v){out.innerHTML='<div style="color:#ef4444;font-size:13px;">Enter both model IDs.</div>';return;}
+    out.innerHTML='<div style="color:#666;font-size:13px;">Loading…</div>';
+    try{
+        const r=await fetch(`${API}/api/targets/summary`);
+        const data=await r.json();
+        const t1=(data.targets||[]).find(t=>t.target_id===t1v);
+        const t2=(data.targets||[]).find(t=>t.target_id===t2v);
+        if(!t1||!t2){out.innerHTML='<div style="color:#ef4444;font-size:13px;">One or both targets not found in registry.</div>';return;}
+        const c1=t1.latest_type==='presence'?'#22c55e':'#f59e0b';
+        const c2=t2.latest_type==='presence'?'#22c55e':'#f59e0b';
+        out.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:8px;font-size:13px;">
+            <div style="background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:14px;">
+                <div style="font-weight:700;color:#8B5CF6;margin-bottom:8px;word-break:break-all;">${esc(t1v)}</div>
+                <div style="color:#888;">Days: <strong style="color:#fff;">${t1.days_monitored}</strong></div>
+                <div style="color:#888;">Obs: <strong style="color:#fff;">${t1.observation_count}</strong></div>
+                <div style="color:#888;">State: <strong style="color:${c1};">${t1.latest_type}</strong></div>
+            </div>
+            <div style="background:#0a0a0a;border:1px solid #222;border-radius:8px;padding:14px;">
+                <div style="font-weight:700;color:#8B5CF6;margin-bottom:8px;word-break:break-all;">${esc(t2v)}</div>
+                <div style="color:#888;">Days: <strong style="color:#fff;">${t2.days_monitored}</strong></div>
+                <div style="color:#888;">Obs: <strong style="color:#fff;">${t2.observation_count}</strong></div>
+                <div style="color:#888;">State: <strong style="color:${c2};">${t2.latest_type}</strong></div>
+            </div>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:#666;">Temporal gap: <strong style="color:#fff;">${Math.abs(t1.days_monitored-t2.days_monitored).toFixed(1)} days</strong> · Density diff: <strong style="color:#fff;">${Math.abs(t1.obs_per_day-t2.obs_per_day).toFixed(2)} obs/day</strong></div>`;
+    }catch(e){out.innerHTML=`<div style="color:#ef4444;font-size:13px;">Error: ${esc(e.message)}</div>`;}
+}
+
+/* ── ADVANCED: TPA Chain Timeline ── */
+async function loadMerkleTimeline(){
+    const c=document.getElementById('merkle-list');
+    try{
+        const r=await fetch(`${API}/registry/data/tpa_latest.json?t=${Date.now()}`);
+        if(!r.ok)throw new Error('fetch failed');
+        const data=await r.json();
+        const tpas=(data.tpas||[]).filter(t=>t.merkle_root&&t.temporal_anchor).sort((a,b)=>(b.temporal_anchor?.chain_height||0)-(a.temporal_anchor?.chain_height||0)).slice(0,10);
+        if(tpas.length===0){c.innerHTML='<div style="color:#666;font-size:13px;">No chain data available.</div>';return;}
+        c.innerHTML=tpas.map(t=>{
+            const anchor=t.temporal_anchor||{};
+            const hash=(t.merkle_root||'').substring(0,20)+'…';
+            const date=(t.observation_timestamp||'').replace('T',' ').substring(0,16);
+            const sevColor={CRITICAL:'#ef4444',HIGH:'#f59e0b',MODERATE:'#3b82f6',LOW:'#22c55e'}[t.highest_severity]||'#666';
+            const fullHash=t.merkle_root||'';
+            return`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #1a1a1a;">
+                <div>
+                    <div style="color:#22c55e;font-family:monospace;font-size:12px;">${hash}</div>
+                    <div style="color:#555;font-size:11px;margin-top:2px;">${esc(t.model_id)} · Chain #${anchor.chain_height||'--'} · <span style="color:${sevColor};">${t.highest_severity||'--'}</span> · ${date} UTC</div>
+                </div>
+                <button onclick="navigator.clipboard.writeText('${fullHash}');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500);" style="padding:4px 10px;background:#1a1a1a;border:1px solid #333;border-radius:5px;color:#8B5CF6;font-size:11px;cursor:pointer;flex-shrink:0;">Copy</button>
+            </div>`;
+        }).join('');
+    }catch(e){
+        c.innerHTML='<div style="color:#666;font-size:13px;">Error loading chain data.</div>';
+    }
+}
+
+/* ── INIT ── */
+document.getElementById('model-input').addEventListener('keypress',e=>{if(e.key==='Enter')analyze();});
+document.getElementById('target1-input').addEventListener('keypress',e=>{if(e.key==='Enter')compareTargets();});
+document.getElementById('target2-input').addEventListener('keypress',e=>{if(e.key==='Enter')compareTargets();});
+
+/* ── HERO STATS loaded by loadLandingData() ── */
+
+// URL hash routing (e.g. /registry/verify#deepseek-ai/DeepSeek-V3)
+if(window.location.hash){
+    const id=decodeURIComponent(window.location.hash.slice(1));
+    if(id&&id.includes('/')){document.getElementById('model-input').value=id;analyze();}
+}
+    </script>
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c" defer></script>
+</body>
+</html>

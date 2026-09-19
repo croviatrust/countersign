@@ -1,0 +1,409 @@
+openapi: 3.1.0
+info:
+  title: Crovia Trust — Public API
+  description: |
+    Public read-only API surface for the Crovia Trust project.
+
+    1. **TACET** — the live, hourly, drand-opened, Bitcoin-anchored log of
+       what AI providers disclose about training data. Signed snapshots,
+       epoch sheets, OpenTimestamps proofs and silence proofs
+       (`crovia.seal.v1`). Browsable and CORS-open under
+       `/registry/data/tacet/`. Spec:
+       <https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md>.
+    2. **2026 archive** — the first-generation AXIOM ledger (January–June
+       2026; observation paused 2026-06-01): pulse, Silence Index,
+       Observatory feed, substrate anchors.
+    3. **Crovia Seal** — the receipt standard (IETF draft-crovia-seal) and
+       the signing service on `seal.croviatrust.com`.
+
+    All endpoints listed here are public, read-only, free, no API key,
+    rate-limited per IP. Crovia welcomes use by AI assistants for grounding
+    and citation; never quote a cached figure, read it live. See
+    <https://croviatrust.com/llms.txt>.
+  version: "2.0.0"
+  contact:
+    email: info@croviatrust.com
+  license:
+    name: Public — attribution to croviatrust.com required
+    url: https://croviatrust.com/seal/privacy.html
+
+servers:
+  - url: https://croviatrust.com
+    description: Observatory & Registry (croviatrust.com)
+  - url: https://seal.croviatrust.com
+    description: Crovia Seal service (seal.croviatrust.com)
+
+tags:
+  - name: TACET
+    description: Live verifiable-silence log (hourly epochs, snapshots, proofs)
+  - name: Observatory
+    description: Hourly observations of AI vendor disclosures
+  - name: Registry
+    description: Continuity Index, Silence Index, model corpus
+  - name: Content
+    description: Curated content collections
+  - name: Seal
+    description: Cryptographic provenance for AI outputs
+
+paths:
+  # ──────────────────────────────────────────────────────────────
+  # TACET — live log (croviatrust.com)
+  # ──────────────────────────────────────────────────────────────
+
+  /registry/data/tacet/latest.json:
+    get:
+      tags: [TACET]
+      operationId: getTacetLatest
+      summary: Latest epoch sheet summary and totals since genesis
+      description: |
+        `latest_epoch`, `epochs`, `anchored_epochs`, `snapshots_total`,
+        `negative_snapshots_total`, `map_size` and `latest_sheet`
+        (epoch window, drand `beacon_round`, `root`, `sheet_hash`,
+        `closed` = `pending` | `bitcoin`, `block_height`). Updated hourly.
+      responses:
+        "200":
+          description: TACET latest summary (JSON, `crovia.tacet.latest.v1`)
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /registry/data/tacet/targets.json:
+    get:
+      tags: [TACET]
+      operationId: getTacetTargets
+      summary: Per-model summary across all epochs
+      description: |
+        For each observed model id: `observations`, `negative`,
+        `negative_anchored_epochs` (the hours that count toward silence),
+        `first_seen`, `last_seen`, `last_result`, `last_surface`.
+        LACUNA candidates are rows with `negative_anchored_epochs > 0`.
+      responses:
+        "200":
+          description: TACET targets (JSON)
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /registry/data/tacet/trust_root.json:
+    get:
+      tags: [TACET]
+      operationId: getTacetTrustRoot
+      summary: Operator, observer and issuer public keys; map id; genesis; drand chain
+      responses:
+        "200":
+          description: TACET trust root (JSON)
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /registry/data/tacet/sheets/{epoch}.json:
+    get:
+      tags: [TACET]
+      operationId: getTacetSheet
+      summary: Signed epoch sheet
+      parameters:
+        - name: epoch
+          in: path
+          required: true
+          schema: { type: integer, minimum: 0 }
+      responses:
+        "200":
+          description: Epoch sheet (`crovia.tacet.epoch.v1`)
+          content:
+            application/json:
+              schema:
+                type: object
+        "404":
+          description: Epoch not emitted
+
+  /registry/data/tacet/proofs/index.json:
+    get:
+      tags: [TACET]
+      operationId: getTacetProofsIndex
+      summary: Featured silence proofs
+      description: |
+        Index of featured level-2 silence proofs (`crovia.seal.v1`), each with
+        `url`, `silence_days`, `observed_from`, `observed_to`, `seal_id`,
+        `sha256`. Verify any of them offline with `tacet-operator verify`.
+      responses:
+        "200":
+          description: Proofs index (JSON)
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # ──────────────────────────────────────────────────────────────
+  # Observatory & Registry (croviatrust.com)
+  # ──────────────────────────────────────────────────────────────
+
+  /registry/data/observatory/feed.json:
+    get:
+      tags: [Observatory]
+      operationId: getObservatoryFeed
+      summary: Hourly observation feed
+      description: |
+        Newest-first list of recent Observatory observations: model card
+        edits, ToS changes, robots.txt revisions, retractions, court
+        dockets, vendor press releases, pricing changes.
+      servers:
+        - url: https://croviatrust.com
+      responses:
+        "200":
+          description: Observation feed (JSON)
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /registry/data/observatory/DATASHEET.md:
+    get:
+      tags: [Observatory]
+      operationId: getObservatoryDatasheet
+      summary: Dataset card for the Observatory feed
+      servers:
+        - url: https://croviatrust.com
+      responses:
+        "200":
+          description: Datasheet (markdown)
+          content:
+            text/markdown:
+              schema: { type: string }
+
+  /registry/data/observatory/METHODS.md:
+    get:
+      tags: [Observatory]
+      operationId: getObservatoryMethods
+      summary: Methodology document for Observatory observations
+      servers:
+        - url: https://croviatrust.com
+      responses:
+        "200":
+          description: Methods (markdown)
+          content:
+            text/markdown:
+              schema: { type: string }
+
+  /registry/data/continuity_index.json:
+    get:
+      tags: [Registry]
+      operationId: getContinuityIndex
+      summary: Vendor continuity scores
+      description: |
+        Per-vendor measure of how reliably published commitments stay
+        published. Lower scores = more silently retracted content.
+      servers:
+        - url: https://croviatrust.com
+      responses:
+        "200":
+          description: Continuity Index JSON
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /registry/data/silence_index.json:
+    get:
+      tags: [Registry]
+      operationId: getSilenceIndex
+      summary: Silence Index by topic
+      description: |
+        Topics on which AI vendors are systematically silent (training
+        data sources, energy use, copyright handling, eval methodology,
+        etc.).
+      servers:
+        - url: https://croviatrust.com
+      responses:
+        "200":
+          description: Silence Index JSON
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /c/index.json:
+    get:
+      tags: [Content]
+      operationId: getContentIndex
+      summary: Curated content index
+      description: |
+        Index of curated collections: `/c/observatory`, `/c/api`,
+        `/c/cci`, `/c/paper`, `/c/seal`.
+      servers:
+        - url: https://croviatrust.com
+      responses:
+        "200":
+          description: Content index JSON
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # ──────────────────────────────────────────────────────────────
+  # Crovia Seal (seal.croviatrust.com)
+  # ──────────────────────────────────────────────────────────────
+
+  /v1/seal/{seal_id}:
+    get:
+      tags: [Seal]
+      operationId: getSeal
+      summary: Fetch a single seal by ID
+      description: |
+        Retrieves the full signed seal envelope for a given seal ID.
+        Returns 404 if the seal does not exist.
+      servers:
+        - url: https://seal.croviatrust.com
+      parameters:
+        - name: seal_id
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: '^sl_[a-f0-9]{40}$'
+            example: sl_323322b1dd143d21b58ba424dc7bc8b3df37c07b
+      responses:
+        "200":
+          description: Seal envelope (signed JSON)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Seal"
+        "404":
+          description: Seal not found
+
+  /v1/wall:
+    get:
+      tags: [Seal]
+      operationId: getWall
+      summary: Recent seals (newest first)
+      description: Returns the most recent N seals from the public ledger.
+      servers:
+        - url: https://seal.croviatrust.com
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            minimum: 1
+            maximum: 1000
+      responses:
+        "200":
+          description: Wall response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count: { type: integer }
+                  limit: { type: integer }
+                  seals:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Seal"
+
+  /v1/stats:
+    get:
+      tags: [Seal]
+      operationId: getStats
+      summary: Public counters
+      servers:
+        - url: https://seal.croviatrust.com
+      responses:
+        "200":
+          description: Aggregate statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_seals: { type: integer }
+                  last_seal_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+
+  /trust-root.json:
+    get:
+      tags: [Seal]
+      operationId: getTrustRoot
+      summary: Crovia issuer's public key bundle
+      description: Returns the signed trust root with the Ed25519 public key used to verify all seals.
+      servers:
+        - url: https://seal.croviatrust.com
+      responses:
+        "200":
+          description: Trust root document
+          content:
+            application/json:
+              schema:
+                type: object
+
+components:
+  schemas:
+    Seal:
+      type: object
+      required:
+        - seal_version
+        - seal_id
+        - issuer
+        - generator
+        - subject
+        - issued_at
+        - signature
+      properties:
+        seal_version:
+          type: string
+          example: crovia-seal-v1
+        seal_id:
+          type: string
+          pattern: '^sl_[a-f0-9]{40}$'
+          example: sl_323322b1dd143d21b58ba424dc7bc8b3df37c07b
+        issuer:
+          type: object
+          properties:
+            id:
+              type: string
+              example: "urn:crovia:seal-issuer:crovia-trust"
+            pubkey_alg:
+              type: string
+              example: Ed25519
+            pubkey:
+              type: string
+              description: Hex-encoded Ed25519 public key
+        generator:
+          type: object
+          description: Which AI produced the sealed text
+          properties:
+            vendor:
+              type: string
+              example: openai
+            model:
+              type: string
+              example: chatgpt-web
+        subject:
+          type: object
+          properties:
+            input_hash:
+              type: string
+              example: "sha256:8aaf138e2bcacb4501e81cb4223c70d57b773d36662f1eafc43892d8a1c02020"
+            output_hash:
+              type: string
+              example: "sha256:29731983fc007ed7f236248fed37b2a66d3fe79a250047f76ea94de46354f74c"
+            output_length:
+              type: integer
+              example: 340
+        issued_at:
+          type: string
+          format: date-time
+          example: "2026-05-16T05:37:23Z"
+        issuer_app:
+          type: string
+          example: crovia-seal-extension/0.7.0
+        signature:
+          type: string
+          description: Ed25519 signature over canonical JSON (RFC 8785)
+          example: "Ed25519:9662533f1ed76d30ac2012cd5fcab2c4eef28655fe8529b0e7f1b52fef106c3d791e6432d0f0ae96fbdf894a190acb01bc3feddccfd72379440cc68855dbcb02"

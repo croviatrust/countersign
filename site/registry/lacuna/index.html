@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LACUNA — Loss-of-Auditability Certificates · Crovia</title>
+<meta name="description" content="A LACUNA certificate states one defensible fact: during a defined window, Crovia observed no training-data disclosure on a model's public surfaces, hour by hour, bounded by drand and Bitcoin. Built on TACET silence proofs.">
+<link rel="canonical" href="https://croviatrust.com/registry/lacuna/">
+<link rel="icon" type="image/png" href="https://croviatrust.com/logo.png">
+<meta property="og:title" content="LACUNA — Loss-of-Auditability Certificates">
+<meta property="og:description" content="When disclosure was not there, provably. Live candidates from the TACET log; signed certificates on request.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://croviatrust.com/registry/lacuna/">
+<meta property="og:image" content="https://croviatrust.com/og-card.png">
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  .lc-wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+  .lc-hero{padding:72px 0 26px}
+  .lc-eyebrow{font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  .lc-hero h1{font:700 clamp(34px,4.8vw,54px)/1.05 var(--sans);letter-spacing:-.03em;margin:14px 0 18px}
+  .lc-hero h1 em{font-style:normal;color:var(--accent)}
+  .lc-lead{font-size:16.5px;color:var(--text-soft);max-width:780px}
+  .lc-lead b{color:var(--text)}
+  .lc-not{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+  .lc-not span{font:500 11px var(--mono);color:var(--text-muted);border:1px solid var(--border);border-radius:999px;padding:5px 11px}
+  .lc-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-top:36px}
+  @media (max-width:860px){.lc-grid{grid-template-columns:1fr}}
+  .lc-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:22px 24px}
+  .lc-card .k{font:600 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .lc-big{font:600 40px var(--mono);color:#fff;line-height:1;letter-spacing:-.02em}
+  .lc-big small{display:block;font:400 11px var(--mono);color:var(--text-muted);margin-top:8px;letter-spacing:.04em}
+  .lc-kv{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font:400 12.5px var(--mono);margin-top:16px}
+  .lc-kv div:nth-child(odd){color:var(--text-faint)}
+  .lc-kv div:nth-child(even){color:var(--text-soft);word-break:break-all}
+  .lc-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:9px;font:600 13px var(--sans);border:1px solid var(--border-hi);color:var(--text);background:var(--bg-card-hi)}
+  .lc-btn:hover{border-color:var(--accent-line);color:#fff}
+  .lc-btn.is-primary{background:var(--accent);color:#03111a;border-color:var(--accent)}
+  .lc-btn.is-primary:hover{background:var(--accent-2);color:#03111a}
+  .lc-embed{background:#05070d;border:1px solid var(--border);border-radius:9px;padding:12px 14px;font:400 11.5px/1.7 var(--mono);color:var(--text-soft);word-break:break-all;margin-top:12px}
+  .lc-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:14px;margin:60px 0 18px}
+  .lc-head h2{font:700 26px/1.15 var(--sans);letter-spacing:-.02em}
+  .lc-head .meta{font:400 11.5px var(--mono);color:var(--text-muted)}
+  .lc-table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .lc-table th{text-align:left;font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);padding:8px 10px;border-bottom:1px solid var(--border)}
+  .lc-table td{padding:11px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+  .lc-table tr:hover td{background:var(--bg-card)}
+  .lc-table .mono{font:400 12px var(--mono);color:var(--text-soft)}
+  .lc-table .num{font:600 15px var(--mono);color:#fff}
+  .lc-pill{display:inline-block;padding:2px 8px;border-radius:999px;font:600 10.5px var(--mono);letter-spacing:.06em}
+  .lc-pill.neg{background:rgba(239,105,97,.14);color:#ff9b94;border:1px solid rgba(239,105,97,.35)}
+  .lc-pill.pending{background:rgba(245,196,81,.12);color:#f5c451;border:1px solid rgba(245,196,81,.35)}
+  .lc-pill.ok{background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line)}
+  .lc-note{font-size:12.5px;color:var(--text-faint);margin-top:12px;max-width:820px}
+  .lc-filter{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .lc-filter input{background:var(--bg-card);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px 12px;font:400 13px var(--mono);min-width:260px}
+  .lc-filter input:focus{outline:none;border-color:var(--accent-line)}
+  .lc-price{margin:26px 0 72px;font:400 12px var(--mono);color:var(--text-faint)}
+  .lc-price a{color:var(--accent)}
+  .lc-empty{padding:26px;border:1px dashed var(--border-hi);border-radius:12px;color:var(--text-muted);font-size:13.5px;text-align:center}
+</style>
+</head>
+<body>
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="https://croviatrust.com/" class="cv-brand-link"><img src="https://croviatrust.com/logo.png" alt="" class="cv-brand-mark"><span class="cv-brand-name">CROVIA</span></a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+    <div class="cv-nav-status" id="cv-nav-status"><span class="dot"></span><span data-cv-status>connecting</span></div>
+  </div>
+</nav>
+
+<main class="lc-wrap">
+  <section class="lc-hero">
+    <div class="lc-eyebrow">LACUNA · loss-of-auditability certificates · built on TACET silence proofs</div>
+    <h1>When disclosure <em>was not there</em>, provably.</h1>
+    <p class="lc-lead">A LACUNA certificate states one defensible fact: during a defined window, Crovia fetched a model's public surfaces hour by hour, ran a <b>published predicate</b> over the bytes, and found <b>no training-data disclosure</b> — each observation signed, each hour opened by a public randomness beacon and closed by a Bitcoin anchor. The certificate is a <a href="/registry/tacet/">TACET</a> level-2 silence proof, wrapped in a <a href="/registry/seal/">Crovia Seal</a>, verifiable offline by the opposing party.</p>
+    <div class="lc-not">
+      <span>not a fraud finding</span><span>not "evidence never existed"</span><span>not a claim of bad faith</span><span>not damages</span><span>not a quality grade</span><span>not an override of private records</span>
+    </div>
+  </section>
+
+  <div class="lc-grid">
+    <div class="lc-card" id="featured">
+      <div class="k">Featured · longest anchored silence in the live log</div>
+      <div id="featured-body" style="color:var(--text-faint);font-size:13px">Loading from the TACET log…</div>
+    </div>
+    <div class="lc-card">
+      <div class="k">Embed the silence index</div>
+      <p style="font-size:13px;color:var(--text-soft)">Paste this on any page. Live, no API key, no account.</p>
+      <div class="lc-embed">&lt;iframe src="https://croviatrust.com/registry/embed/silence.html?target=mistralai/Mistral-7B-v0.1" width="420" height="220" style="border:0"&gt;&lt;/iframe&gt;</div>
+      <p class="lc-note">Change <span style="color:var(--accent)">target=</span> to any model id from the table.</p>
+      <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap">
+        <a class="lc-btn" href="/registry/tacet/#proofs">Download proofs</a>
+        <a class="lc-btn" href="/registry/tacet/#verify">Verify offline</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="lc-head">
+    <div><h2>Live LACUNA candidates</h2><p class="lc-note" style="margin-top:6px">Every model in the TACET log with at least one <span class="lc-pill neg">absent</span> observation. <b style="color:var(--text)">Anchored hours</b> are the ones that count toward silence; the rest are waiting for their Bitcoin confirmation. A model that discloses leaves this table at the next epoch.</p></div>
+    <div class="lc-filter"><input id="q" type="search" placeholder="filter · org/model" aria-label="filter models"><span class="meta" id="meta"></span></div>
+  </div>
+  <div id="tbl"><div class="lc-empty">Loading…</div></div>
+  <p class="lc-note" id="foot-note"></p>
+
+  <div class="lc-head" style="margin-top:56px"><div><h2>A signed certificate for a specific window</h2><p class="lc-note" style="margin-top:6px;max-width:760px">For a regulator submission, litigation hold, M&amp;A diligence or a newsroom fact-check: the TACET proof for the model and window you name, wrapped in a Seal we sign, with the predicate source, the archived surface copies, and a counsel-facing PDF that explains exactly what is and is not being asserted.</p></div></div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <a class="lc-btn is-primary" href="mailto:info@croviatrust.com?subject=LACUNA%20certificate%20request&body=Target%20(org%2Fmodel)%3A%0AWindow%20(from%20%E2%80%93%20to)%3A%0AUse%20(regulator%20%2F%20litigation%20%2F%20diligence%20%2F%20press)%3A%0A">Request a signed LACUNA certificate</a>
+    <a class="lc-btn" href="/registry/tacet/#vendors">I am the model provider</a>
+  </div>
+  <p class="lc-price">From €2,500 per certificate · public proofs stay free (CC-BY-4.0) · stop a LACUNA from accruing with a <a href="/registry/tacet/#vendors">commitment in the map</a></p>
+</main>
+
+<footer class="cv-foot">
+  <div class="cv-foot-inner">
+    <div class="cv-foot-links">
+      <a href="https://croviatrust.com/">Verify</a>
+      <a href="/registry/tacet/">TACET</a>
+      <a href="/registry/lacuna/">LACUNA</a>
+      <a href="/registry/seal/">Seal</a>
+      <a href="/registry/api/">Data &amp; API</a>
+      <a href="mailto:info@croviatrust.com">Contact</a>
+    </div>
+    <div class="cv-foot-meta">&copy; 2026 Crovia Trust · LACUNA certificates record Crovia observation facts only.</div>
+  </div>
+</footer>
+
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c" defer></script>
+<script>
+(function(){
+  var B='/registry/data/tacet/';
+  function $(id){return document.getElementById(id)}
+  function n(x){return (x==null)?'—':Number(x).toLocaleString('en-US')}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function j(p){return fetch(B+p,{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(p+' '+r.status);return r.json()})}
+  var ROWS=[], PROOFS={};
+
+  function render(){
+    var q=($('q').value||'').toLowerCase().trim();
+    var rows=ROWS.filter(function(r){return !q||r.target_id.toLowerCase().indexOf(q)>=0});
+    $('meta').textContent=rows.length+' of '+ROWS.length+' models';
+    if(!rows.length){$('tbl').innerHTML='<div class="lc-empty">No model matches.</div>';return}
+    var h='<table class="lc-table"><thead><tr><th>model</th><th>anchored hours absent</th><th>absent observations</th><th>last observed</th><th>proof</th></tr></thead><tbody>';
+    rows.slice(0,400).forEach(function(r){
+      var p=PROOFS[r.target_id];
+      h+='<tr><td><a href="https://huggingface.co/'+esc(r.target_id)+'" target="_blank" rel="noopener">'+esc(r.target_id)+'</a></td>'+
+         '<td>'+(r.negative_anchored_epochs?'<span class="num">'+n(r.negative_anchored_epochs)+'</span> <span class="mono">h</span>':'<span class="lc-pill pending">awaiting anchor</span>')+'</td>'+
+         '<td class="mono">'+n(r.negative)+' of '+n(r.observations)+'</td>'+
+         '<td class="mono">'+esc((r.last_seen||'').replace('T',' ').replace('Z',' UTC'))+'</td>'+
+         '<td>'+(p?'<a class="lc-btn" href="'+esc(p.url)+'" download>'+esc(p.silence_days)+' d · seal</a>':'<span class="mono" style="color:var(--text-faint)">tacet-operator prove</span>')+'</td></tr>';
+    });
+    $('tbl').innerHTML=h+'</tbody></table>'+(rows.length>400?'<p class="lc-note">Showing 400 of '+rows.length+'. Use the filter, or read <a href="'+B+'targets.json">targets.json</a>.</p>':'');
+  }
+
+  Promise.all([j('targets.json'), j('proofs/index.json').catch(function(){return {proofs:[]}}), j('latest.json')]).then(function(res){
+    var T=res[0], P=res[1], L=res[2];
+    (P.proofs||[]).forEach(function(p){if(parseFloat(p.silence_days)>0)PROOFS[p.target_id]=p});
+    ROWS=(T.targets||[]).filter(function(r){return r.negative>0 && r.last_result===false});
+    ROWS.sort(function(a,b){return (b.negative_anchored_epochs-a.negative_anchored_epochs)||(b.negative-a.negative)||a.target_id.localeCompare(b.target_id)});
+    render();
+    $('foot-note').textContent='Source: '+B+'targets.json · '+n(T.count)+' models observed since genesis · epoch #'+L.latest_epoch+' · '+n(L.anchored_epochs)+' of '+n(L.epochs)+' epochs confirmed in Bitcoin · generated '+T.generated_at;
+    var top=(P.proofs||[]).filter(function(p){return parseFloat(p.silence_days)>0})[0];
+    if(top){
+      $('featured-body').innerHTML='<div class="lc-big">'+esc(top.silence_days)+'<small>days of anchored silence · '+n(top.observed_epochs)+' observed epochs · level '+top.strength+'</small></div>'+
+        '<div class="lc-kv"><div>target</div><div><a href="https://huggingface.co/'+esc(top.target_id)+'" target="_blank" rel="noopener">'+esc(top.target_id)+'</a></div><div>observed_to</div><div>'+esc(top.observed_to||'—')+'</div><div>seal</div><div>'+esc(top.seal_id)+'</div><div>sha-256</div><div>'+esc(top.sha256)+'</div></div>'+
+        '<div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap"><a class="lc-btn is-primary" href="'+esc(top.url)+'" download>Download the proof · '+Math.round(top.bytes/1024)+' KB</a><a class="lc-btn" href="/registry/tacet/#verify">How to verify</a></div>';
+    } else {
+      var first=ROWS[0];
+      $('featured-body').innerHTML='<div class="lc-big">'+n(L.negative_snapshots_total)+'<small>signed negative observations so far · '+n(L.anchored_epochs)+' epochs anchored</small></div>'+
+        '<p class="lc-note" style="margin-top:14px">The log started on 2026-09-19 at 18:00 UTC. A featured certificate appears here once the first epochs are confirmed in Bitcoin and the daily proof rebuild (04:50 UTC) has run. '+(first?'Most-observed silent model so far: <a href="https://huggingface.co/'+esc(first.target_id)+'" target="_blank" rel="noopener">'+esc(first.target_id)+'</a>.':'')+'</p>'+
+        '<div style="margin-top:16px"><a class="lc-btn" href="/registry/tacet/">Watch the log</a></div>';
+    }
+  }).catch(function(e){ $('tbl').innerHTML='<div class="lc-empty">The TACET log is not reachable right now ('+esc(e.message)+').</div>'; $('featured-body').textContent='—'; });
+  $('q').addEventListener('input',render);
+})();
+</script>
+</body>
+</html>

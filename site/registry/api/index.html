@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Crovia API · JSON endpoints</title>
+<meta name="description" content="Crovia public JSON API: 30+ endpoints exposing the entire signed evidence layer for AI continuity. Free for non-commercial use.">
+<link rel="canonical" href="https://croviatrust.com/registry/api/">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#1ec5ff">
+<link rel="icon" type="image/png" href="/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<style>
+:root{--bg:#050a12;--surface:#0c1524;--surface-2:#111e33;--border:#1e293b;--border-soft:#162033;
+--accent:#1ec5ff;--accent-soft:rgba(30,197,255,0.1);--text:#c8d6e5;--text-bright:#e2e8f0;--text-dim:#94a3b8;--muted:#64748b;
+--green:#22c55e;--amber:#f59e0b;--red:#f87171;--violet:#a78bfa;
+--mono:"JetBrains Mono","Fira Code",monospace;--sans:"Inter",system-ui,sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font:15px/1.55 var(--sans);min-height:100vh}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+.nav{position:sticky;top:0;z-index:50;background:rgba(5,10,18,0.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1280px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:24px}
+.logo{font:800 16px var(--sans);color:var(--text-bright);letter-spacing:-.01em}
+.logo .accent{color:var(--accent)}
+.nav-links{display:flex;gap:18px;font:500 13px var(--sans);margin-left:auto}
+.nav-links a{color:var(--text-dim);transition:color .15s}.nav-links a:hover{color:var(--accent);text-decoration:none}
+.container{max-width:1180px;margin:0 auto;padding:36px 24px 80px}
+.eyebrow{font:600 11px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+h1{font-size:clamp(34px,5vw,48px);font-weight:800;color:#fff;line-height:1.05;letter-spacing:-.025em;margin-bottom:16px}
+h1 .accent{color:var(--accent)}
+.tagline{font-size:17px;color:var(--text);max-width:780px;margin-bottom:36px;line-height:1.55}
+.tagline strong{color:#fff;font-weight:600}
+.tier-banner{display:flex;gap:14px;padding:16px 22px;background:linear-gradient(90deg,rgba(34,197,94,0.10),rgba(34,197,94,0.02));border:1px solid rgba(34,197,94,0.28);border-left:3px solid var(--green);border-radius:10px;margin-bottom:36px;align-items:center}
+.tier-banner .ti{flex-shrink:0;width:34px;height:34px;border-radius:8px;background:rgba(34,197,94,0.15);color:#86efac;display:flex;align-items:center;justify-content:center;font:700 16px var(--mono)}
+.tier-banner .tb{flex:1;font:500 13px var(--sans);color:var(--text);line-height:1.55}
+.tier-banner .tb strong{color:#86efac;font-weight:700}
+.group{margin-bottom:42px}
+.group-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:10px}
+.group-title{font:700 22px var(--sans);color:#fff;letter-spacing:-.01em}
+.group-tier{font:600 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;padding:3px 10px;border-radius:4px;background:rgba(34,197,94,0.15);color:#86efac}
+.group-desc{font:400 13px var(--sans);color:var(--text-dim);margin-bottom:16px;max-width:780px;line-height:1.55}
+.endpoints{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.ep{display:grid;grid-template-columns:1.6fr 1fr 100px 130px;gap:14px;padding:14px 22px;border-bottom:1px solid var(--border-soft);align-items:center}
+.ep:last-child{border-bottom:none}
+.ep:hover{background:rgba(30,197,255,0.04)}
+@media(max-width:880px){.ep{grid-template-columns:1fr;gap:6px;padding:14px 18px}.ep-stat{font-size:10px}}
+.ep-path{font:500 12px var(--mono);color:var(--accent);word-break:break-all}
+.ep-path:hover{text-decoration:underline}
+.ep-desc{font:400 12px var(--sans);color:var(--text-dim);line-height:1.5}
+.ep-stat{font:500 11px var(--mono);color:var(--text-bright);text-align:right}
+.ep-stat .lbl{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:1px}
+.paid-teaser{margin-top:50px;padding:28px 32px;background:linear-gradient(135deg,rgba(167,139,250,0.08),rgba(167,139,250,0.02));border:1px solid rgba(167,139,250,0.25);border-radius:14px}
+.paid-teaser h2{font:700 22px var(--sans);color:#c4b5fd;margin-bottom:8px}
+.paid-teaser p{font:400 13px var(--sans);color:var(--text);line-height:1.6;margin-bottom:14px;max-width:780px}
+.paid-teaser .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:18px}
+.paid-teaser .f{padding:12px 14px;background:rgba(167,139,250,0.06);border:1px solid rgba(167,139,250,0.18);border-radius:8px;font:500 12px var(--sans);color:var(--text)}
+.paid-teaser .f strong{display:block;color:#c4b5fd;font-weight:700;margin-bottom:3px;font-size:13px}
+.paid-teaser .cta{display:inline-block;margin-top:18px;padding:10px 20px;background:transparent;color:#c4b5fd;border:1px solid rgba(167,139,250,0.4);border-radius:6px;font:600 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-decoration:none}
+.paid-teaser .cta:hover{background:rgba(167,139,250,0.10);text-decoration:none}
+.usage{margin-top:42px;padding:24px 28px;background:var(--surface);border:1px solid var(--border);border-radius:12px}
+.usage h3{font:700 15px var(--sans);color:#fff;margin-bottom:12px}
+.usage pre{background:var(--bg);border:1px solid var(--border-soft);border-radius:6px;padding:12px 14px;font:500 11px var(--mono);color:var(--text-bright);overflow-x:auto;margin-bottom:10px;line-height:1.5}
+.usage code{color:var(--accent)}
+.footer{margin:60px 0 0;padding:24px 0;border-top:1px solid var(--border);font:400 11px var(--mono);color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+</style>
+</head><body>
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="https://croviatrust.com/" class="cv-brand-link"><img src="https://croviatrust.com/logo.png" alt="" class="cv-brand-mark"><span class="cv-brand-name">CROVIA</span></a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+    <div class="cv-nav-status" id="cv-nav-status"><span class="dot"></span><span data-cv-status>connecting</span></div>
+  </div>
+</nav>
+
+<div class="container">
+<div class="eyebrow">data · 30+ endpoints · cron-refreshed</div>
+<h1>JSON <span class="accent">API</span></h1>
+<p class="tagline">
+Every aggregation, ranking, dossier, graph, and TPA receipt that powers Crovia is exposed as <strong>plain JSON</strong> at a stable URL. Refreshed by cron, served via global CDN, no API key required for read access. Use them to <strong>build dashboards, plug into research pipelines, or audit our claims</strong>.
+</p>
+
+<div class="tier-banner">
+  <div class="ti">✓</div>
+  <div class="tb"><strong>Free tier · read access · no key required.</strong> All endpoints below are public, CORS-enabled, and licensed CC-BY-4.0 with attribution to <code style="background:rgba(34,197,94,0.13);color:#86efac;padding:1px 6px;border-radius:3px;font:500 11px var(--mono)">croviatrust.com</code>. Reasonable scraping is fine; please cache locally if you make more than ~1 request/second.</div>
+</div>
+
+<section class="group">
+  <div class="group-head"><h2 class="group-title">Live observatory</h2><span class="group-tier">free</span></div>
+  <p class="group-desc">Aggregate feeds and pulse stats designed for embedding and dashboards.</p>
+  <div class="endpoints">
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/observatory/feed.json" target="_blank" rel="noopener">/registry/data/observatory/feed.json</a>
+      <div class="ep-desc">Aggregated 80-event feed across all 6 streams. Refreshed every 5 minutes.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>20.4 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;09:00:01Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/_home_pulse.json" target="_blank" rel="noopener">/registry/data/_home_pulse.json</a>
+      <div class="ep-desc">Real-time pulse: ledger totals, 24h sparkline, silence watch, bitcoin anchors. TTL 60s.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>1.5 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;09:01:02Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/pipeline_status.json" target="_blank" rel="noopener">/registry/data/pipeline_status.json</a>
+      <div class="ep-desc">Per-pipeline freshness and status. Use to detect stale streams.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>2.4 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:30:01Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/run_summaries.json" target="_blank" rel="noopener">/registry/data/run_summaries.json</a>
+      <div class="ep-desc">Per-collector last-run summary across all 15 collectors.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>20.4 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;04:30:11Z</div>
+    </div>
+  </div>
+</section>
+<section class="group">
+  <div class="group-head"><h2 class="group-title">Compliance &amp; ranking</h2><span class="group-tier">mixed</span></div>
+  <p class="group-desc">Models and organizations scored against the documented training-data necessities canon.</p>
+  <div class="endpoints">
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/global_ranking.json">/registry/data/global_ranking.json</a>
+      <div class="ep-desc">6,867 ranked models + 2,083 ranked orgs with scores, severity, present/absent counts.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>2.1 MB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-09&amp;nbsp;14:30:02Z</div>
+    </div>
+    <div class="ep">
+      <span class="ep-path" title="professional tier">/registry/data/forensic_dossiers.json</span>
+      <div class="ep-desc">48 deep-dive forensic dossiers (verdict, confidence, 5 evidence-layer scores).</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">access</span>professional &middot; <a href="mailto:info@croviatrust.com">on request</a></div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>282.1 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-09&amp;nbsp;19:05:02Z</div>
+    </div>
+    <div class="ep">
+      <span class="ep-path" title="professional tier">/registry/data/forensic_report.json</span>
+      <div class="ep-desc">Aggregate forensic statistics across the dossier set.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">access</span>professional &middot; <a href="mailto:info@croviatrust.com">on request</a></div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>54.5 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;09:00:01Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/tpa_pressure.json" target="_blank" rel="noopener">/registry/data/tpa_pressure.json</a>
+      <div class="ep-desc">Temporal Pressure Index: per-model urgency + days observed.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>170.2 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-09&amp;nbsp;12:00:02Z</div>
+    </div>
+  </div>
+</section>
+<section class="group">
+  <div class="group-head"><h2 class="group-title">TPA — Training-data Provenance Attestations</h2><span class="group-tier">free</span></div>
+  <p class="group-desc">Cryptographically anchored receipts of training-data necessity claims, with merkle proofs and jurisdiction exposures.</p>
+  <div class="endpoints">
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/tpa_latest.json">/registry/data/tpa_latest.json</a>
+      <div class="ep-desc">Latest TPA receipt for every observed model. Includes merkle root, temporal anchor, jurisdiction exposures.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>9.4 MB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:49:13Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/tpa_summary.json">/registry/data/tpa_summary.json</a>
+      <div class="ep-desc">TPA aggregates: per-tier counts, severity rollup.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>7.5 MB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-03-14&amp;nbsp;15:10:03Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/tpa_pressure.json" target="_blank" rel="noopener">/registry/data/tpa_pressure.json</a>
+      <div class="ep-desc">Per-model temporal pressure (alias of compliance entry above).</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>170.2 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-09&amp;nbsp;12:00:02Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/tpa_cep.json" target="_blank" rel="noopener">/registry/data/tpa_cep.json</a>
+      <div class="ep-desc">TPA — Continuity Evidence Package companion records.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>1.7 MB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:12:01Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/tpa_stats.json" target="_blank" rel="noopener">/registry/data/tpa_stats.json</a>
+      <div class="ep-desc">Headline TPA counters.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>138 B</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:49:14Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/tpa_meta.json" target="_blank" rel="noopener">/registry/data/tpa_meta.json</a>
+      <div class="ep-desc">Schema metadata for TPA records.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>172 B</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-03-14&amp;nbsp;15:10:03Z</div>
+    </div>
+  </div>
+</section>
+<section class="group">
+  <div class="group-head"><h2 class="group-title">Substrate (graph layer)</h2><span class="group-tier">free</span></div>
+  <p class="group-desc">Raw provenance graph: predecessors, finetuning chains, multi-source consensus, and lacunas (gaps in evidence).</p>
+  <div class="endpoints">
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/lineage_graph.json" target="_blank" rel="noopener">/registry/data/lineage_graph.json</a>
+      <div class="ep-desc">Compact public lineage graph: 249 nodes + 327 edges with severity &amp; compliance.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>111.5 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:49:48Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/substrate/predecessors_map.json" target="_blank" rel="noopener">/registry/data/substrate/predecessors_map.json</a>
+      <div class="ep-desc">Full predecessor map across all observed models.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>16.1 MB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:58:05Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/substrate/chains.json" target="_blank" rel="noopener">/registry/data/substrate/chains.json</a>
+      <div class="ep-desc">Reconstructed finetuning / inheritance chains.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>9.7 MB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:58:06Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/substrate/consensus.json" target="_blank" rel="noopener">/registry/data/substrate/consensus.json</a>
+      <div class="ep-desc">Multi-source consensus weights for each observation.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>3.6 MB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:19:05Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/substrate/diamond.json" target="_blank" rel="noopener">/registry/data/substrate/diamond.json</a>
+      <div class="ep-desc">Triple-witnessed nodes (the diamonds of evidence).</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>150.2 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:19:05Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/substrate/lacuna_candidates.json" target="_blank" rel="noopener">/registry/data/substrate/lacuna_candidates.json</a>
+      <div class="ep-desc">Identified gaps in the evidence layer.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>424.9 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:37:31Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/substrate/target_index.json" target="_blank" rel="noopener">/registry/data/substrate/target_index.json</a>
+      <div class="ep-desc">Searchable index of all observed targets.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>1.8 MB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:37:31Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/substrate/recent.json" target="_blank" rel="noopener">/registry/data/substrate/recent.json</a>
+      <div class="ep-desc">Latest signed events, raw.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>90.5 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:37:31Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/substrate/ots_anchors.json" target="_blank" rel="noopener">/registry/data/substrate/ots_anchors.json</a>
+      <div class="ep-desc">OpenTimestamps bitcoin anchor index.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>5.5 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;04:00:10Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/substrate/collectors.json" target="_blank" rel="noopener">/registry/data/substrate/collectors.json</a>
+      <div class="ep-desc">Active collector roster.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>4.6 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:17:06Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/substrate/quality_report.json" target="_blank" rel="noopener">/registry/data/substrate/quality_report.json</a>
+      <div class="ep-desc">Substrate-wide quality + freshness check.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>1.4 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:21:08Z</div>
+    </div>
+  </div>
+</section>
+<section class="group">
+  <div class="group-head"><h2 class="group-title">Sonar &amp; search</h2><span class="group-tier">free</span></div>
+  <p class="group-desc">Continuous network probes and search-engine visibility tracking.</p>
+  <div class="endpoints">
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/sonar_chains.json">/registry/data/sonar_chains.json</a>
+      <div class="ep-desc">Sonar probe chains (continuous host monitoring).</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>884.3 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;02:27:00Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/search_targets.json" target="_blank" rel="noopener">/registry/data/search_targets.json</a>
+      <div class="ep-desc">Search-engine visibility tracking targets.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>185.8 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;08:15:01Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/outreach_status.json" target="_blank" rel="noopener">/registry/data/outreach_status.json</a>
+      <div class="ep-desc">Vendor outreach status tracker.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>72.2 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-05-10&amp;nbsp;07:04:19Z</div>
+    </div>
+    <div class="ep">
+      <a class="ep-path" href="/registry/data/outreach_tracker.json" target="_blank" rel="noopener">/registry/data/outreach_tracker.json</a>
+      <div class="ep-desc">Outreach campaign progress.</div>
+      <div class="ep-stat" style="color:var(--text-bright)"><span class="lbl">size</span>3.0 KB</div>
+      <div class="ep-stat"><span class="lbl">refreshed</span>2026-02-12&amp;nbsp;05:12:50Z</div>
+    </div>
+  </div>
+</section>
+<div class="usage">
+<h3>Usage examples</h3>
+<pre><code># Latest pulse — totals + 24h sparkline (TTL 60s, ideal for dashboards)
+curl -s https://croviatrust.com/registry/data/_home_pulse.json | jq .ledger.n_envelopes_total
+
+# Silence index — observation-bounded silence per model, with last-observation dates
+curl -s https://croviatrust.com/registry/data/silence_index.json | jq '.targets[] | select(.target_id | test("Llama"))'
+
+# Stream the full lineage graph
+curl -s https://croviatrust.com/registry/data/lineage_graph.json | jq '.metrics'</code></pre>
+<p style="font:400 12px var(--sans);color:var(--text-dim);margin-top:6px">All endpoints support <code>If-Modified-Since</code> and return <code>Last-Modified</code> + correct <code>Cache-Control</code> headers.</p>
+</div>
+
+<div class="paid-teaser">
+<h2>Coming next · Crovia <span style="color:#a78bfa">Pro</span></h2>
+<p>The data above is and will remain free. The <strong>Pro tier</strong> adds operational capabilities for teams running compliance / model-governance pipelines who need more than periodic snapshots.</p>
+<div class="features">
+<div class="f"><strong>Webhooks</strong>Real-time push when a target you watch changes verdict, gets a new TPA, or jumps in pressure ranking.</div>
+<div class="f"><strong>Custom canon</strong>Define your own necessity set (per jurisdiction or industry) and score the entire 6,800-model corpus against it.</div>
+<div class="f"><strong>Bulk archives</strong>Historical JSONL dumps of every signed envelope (currently 125k+) and full delta replay.</div>
+<div class="f"><strong>Vendor alerts</strong>Email digest when YOUR org or your suppliers appear in omissions, drift, or critical-severity reports.</div>
+<div class="f"><strong>White-label embed</strong>Drop-in iframe of compliance ranking branded as your own auditor view.</div>
+<div class="f"><strong>SLA + support</strong>Dedicated freshness SLA per endpoint and human triage for verification edge-cases.</div>
+</div>
+<a class="cta" href="mailto:hello@croviatrust.com?subject=Crovia%20Pro%20interest">Get notified at launch</a>
+</div>
+
+<div class="footer">
+<span>Crovia — every endpoint signed, anchored, citable. Read-access free under CC-BY-4.0.</span>
+<span>Schemas at <a href="https://github.com/croviatrust">github.com/croviatrust</a></span>
+</div>
+</div><script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c" defer></script>
+</body></html>

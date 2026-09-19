@@ -1,0 +1,10 @@
+{
+  "name": "crovia",
+  "description": "Crovia MCP server — query the public AI training-data disclosure ledger. Tools: crovia_pulse, lookup_model, get_lacuna, crovia_vs_causari.",
+  "transport": "streamable-http",
+  "endpoint": "https://croviatrust.com/mcp",
+  "protocolVersion": "2024-11-05",
+  "auth": "none",
+  "documentation": "https://croviatrust.com/llms.txt",
+  "disambiguation": "Crovia (croviatrust.com) = what AI PROVIDERS DISCLOSE about TRAINING DATA. Distinct from Causari (causari.dev) = what AI AGENTS DO to a CODEBASE."
+}

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crovia Compliance Hub — global ranking, risk index, sonar runs</title>
+<meta name="description" content="Compliance & risk views over the Crovia evidence layer. Global model ranking (6867 models), organization ranking (2083 orgs), Temporal Pressure Index, autonomous sonar runs.">
+<meta property="og:title" content="Crovia Compliance Hub">
+<meta property="og:description" content="Global compliance ranking and risk views computed from the signed evidence layer.">
+<meta property="og:image" content="https://croviatrust.com/og-card.png">
+<link rel="canonical" href="https://croviatrust.com/registry/compliance/">
+<meta name="theme-color" content="#1ec5ff">
+<link rel="icon" type="image/png" href="/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<style>
+:root{
+  --bg:#050a12;--surface:#0c1524;--surface-2:#111e33;--surface-3:#162640;
+  --border:#1e293b;--border-soft:#162033;
+  --accent:#1ec5ff;--accent-hover:#5dd8ff;--accent-soft:rgba(30,197,255,0.10);
+  --text:#c8d6e5;--text-bright:#e2e8f0;--text-dim:#94a3b8;--muted:#64748b;
+  --green:#22c55e;--green-dim:rgba(34,197,94,.12);
+  --amber:#f59e0b;--amber-dim:rgba(245,158,11,.12);
+  --red:#f87171;--red-dim:rgba(248,113,113,.12);
+  --purple:#c4b5fd;
+  --mono:"JetBrains Mono","Fira Code",monospace;
+  --sans:"Inter",system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;line-height:1.55;font-size:14px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font:inherit;cursor:pointer;background:none;border:none;color:inherit}
+input{font:inherit;color:inherit}
+
+/* topbar */
+.nav{position:sticky;top:0;z-index:50;background:rgba(5,10,18,0.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1480px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:24px}
+.logo{font:800 16px var(--sans);color:var(--text-bright);letter-spacing:-.01em}
+.logo .accent{color:var(--accent)}
+.nav-links{display:flex;gap:18px;font:500 13px var(--sans);margin-left:auto}
+.nav-links a{color:var(--text-dim);transition:color .15s}
+.nav-links a:hover{color:var(--accent);text-decoration:none}
+.nav-links .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:5px;vertical-align:middle;box-shadow:0 0 8px var(--green);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ev-hub-tabs (4 canonical hubs) */
+.ev-hub-tabs{position:sticky;top:68px;z-index:49;background:#070d18;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:thin}
+.ev-hub-tabs::-webkit-scrollbar{height:4px}
+.ev-hub-tabs-inner{display:flex;gap:0;max-width:1480px;margin:0 auto;padding:0 12px}
+.ev-hub-tabs a{flex:0 0 auto;padding:14px 18px;font:600 12px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--text-dim);text-decoration:none;border-bottom:2px solid transparent;transition:color .15s,border-color .15s,background .15s;white-space:nowrap}
+.ev-hub-tabs a:hover{color:var(--accent);background:var(--accent-soft)}
+.ev-hub-tabs a.is-active{color:var(--accent);border-bottom-color:var(--accent)}
+.ev-hub-tabs a .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:5px;vertical-align:middle;box-shadow:0 0 8px var(--green)}
+
+/* container */
+.container{max-width:1480px;margin:0 auto;padding:24px 28px 80px}
+
+/* page head */
+.page-head{margin-bottom:18px}
+.eyebrow{font:600 11px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+.page-head h1{font:800 32px var(--sans);color:#fff;line-height:1.1;letter-spacing:-.025em;margin-bottom:8px}
+.page-head h1 .accent{color:var(--accent)}
+.page-head p{font:400 14px var(--sans);color:var(--text);max-width:780px}
+
+/* sub-tabs (Models / Orgs / Risk / Sonar) */
+.subtabs{display:flex;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;margin:24px 0 18px;width:fit-content;flex-wrap:wrap}
+.subtab{padding:9px 18px;border-radius:7px;font:600 12px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--text-dim);transition:all .15s;display:inline-flex;align-items:center;gap:8px}
+.subtab:hover{color:var(--text-bright)}
+.subtab.is-active{background:var(--accent);color:var(--bg)}
+.subtab .pill{font-size:9px;padding:2px 7px;border-radius:8px;background:rgba(0,0,0,0.18);font-weight:700}
+.subtab.is-active .pill{background:rgba(0,0,0,0.22)}
+
+/* hero stat cards */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+@media(max-width:760px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:linear-gradient(180deg,var(--surface),var(--surface-2));border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.kpi-label{font:600 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:7px}
+.kpi-value{font:700 28px var(--mono);color:var(--accent);line-height:1.05;letter-spacing:-.02em}
+.kpi-sub{font:400 11px var(--mono);color:var(--muted);margin-top:5px}
+
+/* search + summary */
+.toolbar{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.input{flex:1;min-width:240px;max-width:420px;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;font:500 12px var(--mono);color:var(--text-bright);transition:border-color .12s}
+.input:focus{outline:none;border-color:var(--accent)}
+.input::placeholder{color:var(--muted)}
+.toolbar .meta{font:500 11px var(--mono);color:var(--muted)}
+.toolbar .meta strong{color:var(--accent)}
+
+/* table */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:auto;max-height:calc(100vh - 380px);min-height:400px}
+.tbl{width:100%;border-collapse:collapse;font:500 12px var(--sans)}
+.tbl th{position:sticky;top:0;background:var(--surface-2);padding:11px 14px;text-align:left;font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap;z-index:1}
+.tbl th:hover{color:var(--accent)}
+.tbl th.sort-asc::after{content:" ↑";color:var(--accent)}
+.tbl th.sort-desc::after{content:" ↓";color:var(--accent)}
+.tbl th.numeric, .tbl td.numeric{text-align:right;font-family:var(--mono)}
+.tbl td{padding:9px 14px;border-bottom:1px solid var(--border-soft);color:var(--text);vertical-align:middle}
+.tbl tr:hover{background:rgba(30,197,255,0.03)}
+.tbl td.col-id{font-weight:600;color:var(--text-bright);max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbl .rank{font:700 12px var(--mono);color:var(--accent);width:46px;display:inline-block;text-align:right}
+
+/* score chip */
+.chip{display:inline-block;padding:2px 10px;border-radius:11px;font:700 10px var(--mono);letter-spacing:.04em}
+.chip-green{background:var(--green-dim);color:#86efac}
+.chip-amber{background:var(--amber-dim);color:#fcd34d}
+.chip-red{background:var(--red-dim);color:#fca5a5}
+.chip-grey{background:rgba(100,116,139,0.18);color:var(--text-dim)}
+
+/* score bar */
+.scorebar{display:flex;align-items:center;gap:8px}
+.scorebar-track{flex:1;height:6px;background:var(--bg);border:1px solid var(--border);border-radius:3px;overflow:hidden;min-width:60px;max-width:140px}
+.scorebar-fill{height:100%;border-radius:3px;background:var(--accent)}
+
+/* severity */
+.sev-critical{color:#fca5a5;font-weight:700}
+.sev-high    {color:#fcd34d;font-weight:600}
+.sev-medium  {color:#7dd3fc}
+.sev-low     {color:#86efac}
+.sev-none    {color:var(--text-dim)}
+
+/* loading */
+.skeleton{padding:60px 22px;text-align:center;color:var(--muted);font:500 12px var(--mono);letter-spacing:.1em}
+.empty{padding:48px 22px;text-align:center;color:var(--muted);font:500 13px var(--mono)}
+
+/* footer */
+.footer{margin:36px 0 0;padding:22px 0;border-top:1px solid var(--border);font:400 11px var(--mono);color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+/* loading bar */
+.loading-bar{position:fixed;top:0;left:0;height:3px;background:var(--accent);width:0;transition:width .25s ease;z-index:100;box-shadow:0 0 8px var(--accent)}
+</style>
+</head>
+<body>
+
+<div class="loading-bar" id="loading-bar"></div>
+
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="https://croviatrust.com/" class="cv-brand-link"><img src="https://croviatrust.com/logo.png" alt="" class="cv-brand-mark"><span class="cv-brand-name">CROVIA</span></a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+    <div class="cv-nav-status" id="cv-nav-status"><span class="dot"></span><span data-cv-status>connecting</span></div>
+  </div>
+</nav>
+
+<nav class="ev-hub-tabs" aria-label="Evidence Hub">
+  <div class="ev-hub-tabs-inner">
+    <a href="/registry/"><span class="live-dot"></span>Live</a>
+    <a href="/registry/explore/">Explore</a>
+    <a href="/registry/compliance/" class="is-active">Compliance</a>
+    <a href="/registry/verify/">Verify</a>
+  </div>
+</nav>
+
+<div class="container">
+
+  <div class="page-head">
+    <div class="eyebrow">computed views · refreshed every 6h · signed</div>
+    <h1>Compliance <span class="accent">Hub</span></h1>
+    <p>Aggregate views computed from the signed evidence layer. Model and organization rankings, Temporal Pressure Index for risk surfacing, and autonomous sonar runs that probe latent training-data presence.</p>
+  </div>
+
+  <div class="subtabs" role="tablist">
+    <button class="subtab is-active" data-view="models" role="tab">Models <span class="pill" id="pill-models">—</span></button>
+    <button class="subtab" data-view="orgs" role="tab">Organizations <span class="pill" id="pill-orgs">—</span></button>
+    <button class="subtab" data-view="risk" role="tab">Risk Index <span class="pill" id="pill-risk">—</span></button>
+    <button class="subtab" data-view="sonar" role="tab">Sonar Runs <span class="pill" id="pill-sonar">—</span></button>
+  </div>
+
+  <div id="kpi-row"></div>
+
+  <div class="toolbar">
+    <input class="input" id="search-input" type="search" placeholder="filter by model, org, family..." autocomplete="off">
+    <div class="meta"><strong id="meta-count">—</strong> rows · <span id="meta-source">—</span></div>
+  </div>
+
+  <div id="result"><div class="skeleton">loading compliance data…</div></div>
+
+  <div class="footer">
+    <span>Apache-2.0 · all rankings reproducible from underlying signed observations · cron-regenerated</span>
+    <span><a href="/registry/">← live feed</a> · <a href="/registry/explore/">explore evidence</a> · <a href="/registry/data/global_ranking.json">raw ranking JSON</a></span>
+  </div>
+
+</div>
+
+<script>
+"use strict";
+
+/* ───── data sources (real, on disk, cron-fed) ───── */
+const SRC = {
+  ranking : "/registry/data/global_ranking.json",   // 2.1 MB · 6h
+  pressure: "/registry/data/tpa_pressure.json",     // 174 KB · 12h
+  sonar   : "/registry/data/run_summaries.json",    // 20 KB  · 4h
+};
+
+/* ───── state ───── */
+const state = {
+  view: "models",   // models | orgs | risk | sonar
+  data: { ranking: null, pressure: null, sonar: null },
+  search: "",
+  sort: { col: "rank", dir: "asc" },
+};
+
+const $ = (id) => document.getElementById(id);
+const escapeHtml = (s) => s == null ? "" : String(s).replace(/[<>&"']/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtNum = (n) => n == null || n === undefined ? "—" : (Math.abs(n) < 1000 ? String(n) : Number(n).toLocaleString());
+const fmtPct = (n) => n == null ? "—" : (typeof n === "number" ? n.toFixed(1).replace(/\.0$/, "") + "%" : String(n));
+
+function severityChip(s){
+  const v = (s||"").toLowerCase();
+  if (v === "critical") return `<span class="chip chip-red">critical</span>`;
+  if (v === "high")     return `<span class="chip chip-amber">high</span>`;
+  if (v === "medium")   return `<span class="chip" style="background:rgba(56,189,248,0.13);color:#7dd3fc">medium</span>`;
+  if (v === "low")      return `<span class="chip chip-green">low</span>`;
+  if (v === "none" || v === "")     return `<span class="chip chip-grey">—</span>`;
+  return `<span class="chip chip-grey">${escapeHtml(v)}</span>`;
+}
+
+function scoreBar(score, max){
+  if (score == null) return "—";
+  const pct = Math.max(0, Math.min(100, (score / max) * 100));
+  // Color by score band
+  let color = "var(--red)";
+  if (score >= max * 0.7) color = "var(--green)";
+  else if (score >= max * 0.3) color = "var(--amber)";
+  return `<div class="scorebar"><span style="font:600 11px var(--mono);min-width:36px;color:${color}">${fmtNum(score)}</span>
+    <div class="scorebar-track"><div class="scorebar-fill" style="width:${pct}%;background:${color}"></div></div></div>`;
+}
+
+function urgencyChip(u){
+  const v = (u||"").toLowerCase();
+  if (v === "urgent" || v === "high") return `<span class="chip chip-red">${escapeHtml(v)}</span>`;
+  if (v === "elevated" || v === "medium") return `<span class="chip chip-amber">${escapeHtml(v)}</span>`;
+  if (v === "stable" || v === "low") return `<span class="chip chip-green">${escapeHtml(v)}</span>`;
+  return `<span class="chip chip-grey">${escapeHtml(v||"—")}</span>`;
+}
+
+/* ───── loader ───── */
+async function loadJson(key){
+  if (state.data[key]) return state.data[key];
+  setLoading(true);
+  try {
+    const r = await fetch(SRC[key] + "?_=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    state.data[key] = await r.json();
+    return state.data[key];
+  } finally {
+    setLoading(false);
+  }
+}
+
+let loadingTimer = null;
+function setLoading(on){
+  const bar = $("loading-bar");
+  if (on){
+    bar.style.width = "30%";
+    clearTimeout(loadingTimer);
+    loadingTimer = setTimeout(() => bar.style.width = "70%", 250);
+  } else {
+    bar.style.width = "100%";
+    setTimeout(() => bar.style.width = "0%", 200);
+  }
+}
+
+/* ───── KPIs (per view) ───── */
+function renderKpis(){
+  const row = $("kpi-row");
+  if (state.view === "models" || state.view === "orgs"){
+    const r = state.data.ranking;
+    if (!r) return row.innerHTML = "";
+    const kpis = [
+      ["Total models",    fmtNum(r.total_models),    "scored"],
+      ["Total orgs",      fmtNum(r.total_orgs),      "in registry"],
+      ["Avg score",       fmtPct(r.stats?.avg_score),"across all models"],
+      ["Zero-disclosure", fmtNum(r.stats?.zero_score),"models with score=0"],
+    ];
+    row.innerHTML = '<div class="kpi-row">' + kpis.map(([l,v,s]) =>
+      `<div class="kpi"><div class="kpi-label">${l}</div><div class="kpi-value">${v}</div><div class="kpi-sub">${s}</div></div>`
+    ).join("") + "</div>";
+  } else if (state.view === "risk"){
+    const p = state.data.pressure;
+    if (!p) return row.innerHTML = "";
+    const s = p.stats || {};
+    const kpis = [
+      ["Models tracked",  fmtNum(p.all_models?.length), "with pressure data"],
+      ["Mean pressure",   s.mean_pressure != null ? s.mean_pressure.toFixed(2) : "—", "across all models"],
+      ["Urgent",          fmtNum(s.urgent_count),  "models flagged urgent"],
+      ["Top-pressure org",s.top_org || "—",        "highest avg pressure"],
+    ];
+    row.innerHTML = '<div class="kpi-row">' + kpis.map(([l,v,sub]) =>
+      `<div class="kpi"><div class="kpi-label">${l}</div><div class="kpi-value">${v}</div><div class="kpi-sub">${sub}</div></div>`
+    ).join("") + "</div>";
+  } else if (state.view === "sonar"){
+    const arr = state.data.sonar || [];
+    const families = new Set(arr.map(r => r.family).filter(Boolean));
+    const profiles = new Set(arr.map(r => r.scoring_profile).filter(Boolean));
+    const kpis = [
+      ["Total runs",       fmtNum(arr.length),         "sonar v2 batches"],
+      ["Model families",   fmtNum(families.size),      "distinct families"],
+      ["Scoring profiles", fmtNum(profiles.size),      "active profiles"],
+      ["Last run",         arr[0]?.run_id ? String(arr[0].run_id).slice(0,16) : "—", "most recent"],
+    ];
+    row.innerHTML = '<div class="kpi-row">' + kpis.map(([l,v,s]) =>
+      `<div class="kpi"><div class="kpi-label">${l}</div><div class="kpi-value">${v}</div><div class="kpi-sub">${s}</div></div>`
+    ).join("") + "</div>";
+  }
+}
+
+/* ───── data extractors per view ───── */
+function rowsForView(){
+  const q = state.search.toLowerCase().trim();
+  const filt = (haystack) => !q || haystack.toLowerCase().includes(q);
+
+  if (state.view === "models"){
+    const arr = state.data.ranking?.model_ranking || [];
+    return arr.filter(r => filt((r.model_id||"") + " " + (r.org||"")));
+  }
+  if (state.view === "orgs"){
+    const arr = state.data.ranking?.org_ranking || [];
+    return arr.filter(r => filt(r.org||""));
+  }
+  if (state.view === "risk"){
+    const arr = state.data.pressure?.all_models || state.data.pressure?.top_pressure || [];
+    return arr.filter(r => filt((r.model_id||"") + " " + (r.org||"")));
+  }
+  if (state.view === "sonar"){
+    const arr = state.data.sonar || [];
+    return arr.filter(r => filt((r.model_id||"") + " " + (r.family||"")));
+  }
+  return [];
+}
+
+/* ───── columns per view ───── */
+function columnsForView(){
+  if (state.view === "models"){
+    return [
+      { key: "rank",     label: "#",        align:"right", w: 46, get: (r,i) => `<span class="rank">${r.rank ?? i+1}</span>` },
+      { key: "model_id", label: "Model",                   get: (r) => `<a href="/registry/explore/?subject=${encodeURIComponent(r.model_id||"")}&mode=dossier">${escapeHtml(r.model_id||"")}</a>` },
+      { key: "org",      label: "Org",                     get: (r) => escapeHtml(r.org||"") },
+      { key: "score",    label: "Score",   align:"right",  get: (r) => scoreBar(r.score, 100) },
+      { key: "severity", label: "Severity",                get: (r) => severityChip(r.severity) },
+      { key: "present",  label: "Present", align:"right",  get: (r) => fmtNum(r.present) },
+      { key: "absent",   label: "Absent",  align:"right",  get: (r) => `<span style="color:#fca5a5">${fmtNum(r.absent)}</span>` },
+      { key: "total_nec",label: "NEC",     align:"right",  get: (r) => fmtNum(r.total_nec) },
+    ];
+  }
+  if (state.view === "orgs"){
+    return [
+      { key: "rank",         label: "#",          align:"right", w: 46, get: (r,i) => `<span class="rank">${r.rank ?? i+1}</span>` },
+      { key: "org",          label: "Organization",            get: (r) => `<a href="/registry/explore/?vendor=${encodeURIComponent(r.org||"")}">${escapeHtml(r.org||"")}</a>` },
+      { key: "models",       label: "Models",     align:"right", get: (r) => fmtNum(r.models) },
+      { key: "avg_score",    label: "Avg score",  align:"right", get: (r) => scoreBar(r.avg_score, 100) },
+      { key: "worst_severity", label: "Worst severity",         get: (r) => severityChip(r.worst_severity) },
+      { key: "total_downloads", label: "Downloads", align:"right", get: (r) => fmtNum(r.total_downloads) },
+    ];
+  }
+  if (state.view === "risk"){
+    return [
+      { key: "rank",     label: "#",       align:"right", w: 46, get: (r,i) => `<span class="rank">${i+1}</span>` },
+      { key: "model_id", label: "Model",                  get: (r) => `<a href="/registry/explore/?subject=${encodeURIComponent(r.model_id||"")}&mode=dossier">${escapeHtml(r.model_id||"")}</a>` },
+      { key: "org",      label: "Org",                    get: (r) => escapeHtml(r.org||"") },
+      { key: "pressure", label: "Pressure", align:"right", get: (r) => `<span class="${(r.severity||"").toLowerCase() === "critical" ? "sev-critical" : (r.severity||"").toLowerCase() === "high" ? "sev-high" : "sev-medium"}">${typeof r.pressure === "number" ? r.pressure.toFixed(2) : "—"}</span>` },
+      { key: "urgency",  label: "Urgency",                get: (r) => urgencyChip(r.urgency) },
+      { key: "severity", label: "Severity",               get: (r) => severityChip(r.severity) },
+      { key: "days_observed", label: "Days obs.", align:"right", get: (r) => fmtNum(r.days_observed) },
+    ];
+  }
+  if (state.view === "sonar"){
+    return [
+      { key: "model_id", label: "Model",                                  get: (r) => `<a href="/registry/explore/?subject=${encodeURIComponent(r.model_id||"")}&mode=dossier">${escapeHtml(r.model_id||"")}</a>` },
+      { key: "family",   label: "Family",                                 get: (r) => escapeHtml(r.family||"") },
+      { key: "scoring_profile", label: "Profile",                         get: (r) => escapeHtml(r.scoring_profile||"") },
+      { key: "controls", label: "Controls", align:"right",                get: (r) => fmtNum(Array.isArray(r.controls) ? r.controls.length : r.controls) },
+      { key: "domain_scores", label: "Domains", align:"right",            get: (r) => fmtNum(r.domain_scores ? Object.keys(r.domain_scores).length : 0) },
+      { key: "run_id",   label: "Run ID",                                 get: (r) => `<span style="font:500 11px var(--mono);color:var(--muted)">${escapeHtml(String(r.run_id||"").slice(0,20))}</span>` },
+    ];
+  }
+  return [];
+}
+
+/* ───── render ───── */
+function render(){
+  // active sub-tab
+  document.querySelectorAll(".subtab").forEach(b => b.classList.toggle("is-active", b.dataset.view === state.view));
+
+  renderKpis();
+
+  const rows = rowsForView();
+  const cols = columnsForView();
+
+  // sort
+  const c = state.sort.col;
+  const d = state.sort.dir === "asc" ? 1 : -1;
+  if (c){
+    rows.sort((a,b) => {
+      const va = a[c], vb = b[c];
+      if (va == null && vb == null) return 0;
+      if (va == null) return 1;
+      if (vb == null) return -1;
+      if (typeof va === "number" && typeof vb === "number") return (va - vb) * d;
+      return String(va).localeCompare(String(vb)) * d;
+    });
+  }
+
+  $("meta-count").textContent = fmtNum(rows.length);
+  $("meta-source").textContent = ({
+    models : "global_ranking.json",
+    orgs   : "global_ranking.json",
+    risk   : "tpa_pressure.json",
+    sonar  : "run_summaries.json",
+  })[state.view];
+
+  if (!rows.length){
+    $("result").innerHTML = '<div class="empty">no rows match the current filter</div>';
+    return;
+  }
+
+  const ths = cols.map(col => {
+    const sortCls = col.key === state.sort.col ? `sort-${state.sort.dir}` : "";
+    const num = col.align === "right" ? "numeric" : "";
+    const w = col.w ? ` style="width:${col.w}px"` : "";
+    return `<th class="${sortCls} ${num}" data-sort="${col.key}"${w}>${col.label}</th>`;
+  }).join("");
+
+  // hard cap at 1000 rows in DOM (keep table smooth)
+  const CAP = 1000;
+  const tbody = rows.slice(0, CAP).map((r, i) => {
+    return "<tr>" + cols.map(col => {
+      const num = col.align === "right" ? "numeric" : "";
+      const idCls = col.key === "model_id" || col.key === "org" ? "col-id" : "";
+      return `<td class="${num} ${idCls}">${col.get(r, i)}</td>`;
+    }).join("") + "</tr>";
+  }).join("");
+
+  const note = rows.length > CAP ? `<div style="padding:10px 4px;font:500 11px var(--mono);color:var(--muted)">Showing ${CAP} of ${fmtNum(rows.length)} — narrow with the search field</div>` : "";
+
+  $("result").innerHTML = `<div class="table-wrap"><table class="tbl"><thead><tr>${ths}</tr></thead><tbody>${tbody}</tbody></table></div>${note}`;
+
+  // wire sort
+  document.querySelectorAll(".tbl th[data-sort]").forEach(th => {
+    th.addEventListener("click", () => {
+      const col = th.dataset.sort;
+      if (state.sort.col === col){
+        state.sort.dir = state.sort.dir === "asc" ? "desc" : "asc";
+      } else {
+        state.sort.col = col;
+        state.sort.dir = (col === "score" || col === "avg_score" || col === "pressure" || col === "models" || col === "absent" || col === "total_downloads" || col === "controls") ? "desc" : "asc";
+      }
+      render();
+    });
+  });
+}
+
+/* ───── pill counts (fast, no full load until tab clicked) ───── */
+async function updatePills(){
+  if (state.data.ranking){
+    $("pill-models").textContent = fmtNum(state.data.ranking.total_models);
+    $("pill-orgs").textContent   = fmtNum(state.data.ranking.total_orgs);
+  }
+  if (state.data.pressure){
+    $("pill-risk").textContent = fmtNum(state.data.pressure.all_models?.length);
+  }
+  if (state.data.sonar){
+    $("pill-sonar").textContent = fmtNum(state.data.sonar.length);
+  }
+}
+
+/* ───── view switching ───── */
+async function switchTo(view){
+  state.view = view;
+  // initial sort defaults per view
+  if (view === "models")     state.sort = { col: "rank", dir: "asc" };
+  else if (view === "orgs")  state.sort = { col: "rank", dir: "asc" };
+  else if (view === "risk")  state.sort = { col: "pressure", dir: "desc" };
+  else if (view === "sonar") state.sort = { col: "model_id", dir: "asc" };
+
+  // URL param reflect
+  const u = new URL(location.href);
+  if (view === "models") u.searchParams.delete("view");
+  else u.searchParams.set("view", view);
+  history.replaceState(null, "", u.pathname + (u.search || ""));
+
+  // ensure data
+  $("result").innerHTML = '<div class="skeleton">loading data…</div>';
+  if (view === "models" || view === "orgs") await loadJson("ranking");
+  if (view === "risk")                       await loadJson("pressure");
+  if (view === "sonar")                      await loadJson("sonar");
+  updatePills();
+  render();
+}
+
+/* ───── boot ───── */
+async function boot(){
+  // Wire sub-tabs
+  document.querySelectorAll(".subtab").forEach(b => {
+    b.addEventListener("click", () => switchTo(b.dataset.view));
+  });
+  // Search
+  let t;
+  $("search-input").addEventListener("input", (e) => {
+    clearTimeout(t);
+    t = setTimeout(() => { state.search = e.target.value; render(); }, 200);
+  });
+
+  // Read view from URL (deep-link)
+  const view = new URLSearchParams(location.search).get("view");
+  const initial = ["models","orgs","risk","sonar"].includes(view) ? view : "models";
+
+  // Pre-load ranking + pressure + sonar in parallel (small total) for snappy pill counts
+  Promise.all([loadJson("ranking"), loadJson("pressure"), loadJson("sonar")])
+    .then(updatePills).catch(()=>{});
+
+  switchTo(initial);
+}
+
+boot();
+</script>
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c" defer></script>
+</body>
+</html>

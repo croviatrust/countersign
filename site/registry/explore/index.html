@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crovia Evidence Explorer — query the signed AI continuity layer</title>
+<meta name="description" content="Query the entire Crovia evidence layer: filter by stream, model, vendor, time, type. Four views: timeline, graph, table, dossier. Every result permalinkable.">
+<meta property="og:title" content="Crovia Evidence Explorer">
+<meta property="og:description" content="Query the signed AI continuity layer. Cross-stream correlations, deep-link filters, citable results.">
+<meta property="og:image" content="https://croviatrust.com/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://croviatrust.com/registry/explore/">
+<meta name="theme-color" content="#1ec5ff">
+<link rel="icon" type="image/png" href="/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<style>
+:root{
+  --bg:#050a12;--surface:#0c1524;--surface-2:#111e33;--surface-3:#162640;
+  --border:#1e293b;--border-soft:#162033;
+  --accent:#1ec5ff;--accent-hover:#5dd8ff;--accent-soft:rgba(30,197,255,0.10);
+  --text:#c8d6e5;--text-bright:#e2e8f0;--text-dim:#94a3b8;--muted:#64748b;
+  --green:#22c55e;--green-dim:rgba(34,197,94,.15);
+  --amber:#f59e0b;--amber-dim:rgba(245,158,11,.15);
+  --red:#f87171;--red-dim:rgba(248,113,113,.15);
+  --purple:#c4b5fd;
+  --mono:"JetBrains Mono","Fira Code",monospace;
+  --sans:"Inter",system-ui,sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;line-height:1.55;font-size:14px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font:inherit;cursor:pointer;background:none;border:none;color:inherit}
+input,select{font:inherit;color:inherit}
+
+/* ───── topbar ───── */
+.nav{position:sticky;top:0;z-index:50;background:rgba(5,10,18,0.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1480px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;gap:24px}
+.logo{font:800 16px var(--sans);color:var(--text-bright);letter-spacing:-.01em}
+.logo .accent{color:var(--accent)}
+.nav-links{display:flex;gap:18px;font:500 13px var(--sans);margin-left:auto}
+.nav-links a{color:var(--text-dim);transition:color .15s}
+.nav-links a:hover{color:var(--accent);text-decoration:none}
+
+/* ───── ev-hub-tabs (top of explore) ───── */
+.ev-hub-tabs{position:sticky;top:68px;z-index:49;background:#070d18;border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.ev-hub-tabs::-webkit-scrollbar{height:4px}
+.ev-hub-tabs::-webkit-scrollbar-thumb{background:var(--border)}
+.ev-hub-tabs-inner{display:flex;gap:0;max-width:1480px;margin:0 auto;padding:0 12px}
+.ev-hub-tabs a{flex:0 0 auto;padding:14px 18px;font:600 12px var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--text-dim);text-decoration:none;border-bottom:2px solid transparent;transition:color .15s,border-color .15s,background .15s;white-space:nowrap}
+.ev-hub-tabs a:hover{color:var(--accent);background:var(--accent-soft)}
+.ev-hub-tabs a.is-active{color:var(--accent);border-bottom-color:var(--accent)}
+.ev-hub-tabs a .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green);margin-right:6px;vertical-align:middle;box-shadow:0 0 8px var(--green);animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ───── main 2-col layout ───── */
+.layout{display:grid;grid-template-columns:300px 1fr;gap:0;max-width:1480px;margin:0 auto;min-height:calc(100vh - 110px)}
+@media(max-width:980px){.layout{grid-template-columns:1fr}}
+
+/* ───── filter rail (sidebar) ───── */
+.rail{background:var(--surface);border-right:1px solid var(--border);padding:24px 22px;position:sticky;top:110px;height:calc(100vh - 110px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.rail::-webkit-scrollbar{width:6px}
+.rail::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+@media(max-width:980px){.rail{position:relative;top:0;height:auto;border-right:none;border-bottom:1px solid var(--border)}}
+.rail h2{font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
+.rail-sub{font:500 12px var(--mono);color:var(--muted);margin-bottom:22px;line-height:1.5}
+.rail-section{margin-bottom:24px;border-bottom:1px solid var(--border-soft);padding-bottom:18px}
+.rail-section:last-child{border-bottom:none}
+.rail-label{font:600 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.rail-label .count{color:var(--muted);font-size:9px}
+
+/* checkbox list */
+.checklist{display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;scrollbar-width:thin}
+.checklist::-webkit-scrollbar{width:4px}
+.checklist::-webkit-scrollbar-thumb{background:var(--border)}
+.cb{display:flex;align-items:center;gap:9px;padding:5px 8px;border-radius:5px;cursor:pointer;font:500 12px var(--sans);color:var(--text);transition:background .12s}
+.cb:hover{background:var(--surface-2)}
+.cb input{appearance:none;width:13px;height:13px;border:1.5px solid var(--border);border-radius:3px;cursor:pointer;flex-shrink:0;transition:all .12s;background:var(--bg)}
+.cb input:checked{background:var(--accent);border-color:var(--accent);box-shadow:inset 0 0 0 2px var(--bg)}
+.cb-label{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cb-meta{font:500 10px var(--mono);color:var(--muted);flex-shrink:0}
+
+/* text input */
+.input{width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font:500 12px var(--mono);color:var(--text-bright);transition:border-color .12s}
+.input:focus{outline:none;border-color:var(--accent)}
+.input::placeholder{color:var(--muted)}
+
+/* time presets */
+.preset-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.preset{padding:5px 9px;background:var(--surface-2);border:1px solid var(--border);border-radius:5px;font:500 10px var(--mono);color:var(--text-dim);cursor:pointer;transition:all .12s}
+.preset:hover{border-color:var(--accent);color:var(--accent)}
+.preset.is-active{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:700}
+
+/* slider */
+.slider-row{display:flex;align-items:center;gap:10px}
+.slider-row input[type=range]{flex:1;accent-color:var(--accent)}
+.slider-val{font:600 12px var(--mono);color:var(--accent);min-width:30px;text-align:right}
+
+/* toggle */
+.toggle{display:flex;align-items:center;gap:10px;font:500 12px var(--sans);color:var(--text);cursor:pointer}
+.toggle input{appearance:none;width:32px;height:18px;background:var(--border);border-radius:9px;position:relative;cursor:pointer;transition:background .15s}
+.toggle input:checked{background:var(--accent)}
+.toggle input::after{content:"";position:absolute;width:14px;height:14px;border-radius:50%;background:#fff;top:2px;left:2px;transition:left .15s}
+.toggle input:checked::after{left:16px}
+
+/* rail actions */
+.rail-actions{display:flex;gap:8px;margin-top:8px}
+.rail-btn{flex:1;padding:9px 10px;border-radius:6px;font:600 11px var(--mono);letter-spacing:.05em;text-transform:uppercase;cursor:pointer;transition:all .15s}
+.rail-btn-primary{background:var(--accent);color:var(--bg)}
+.rail-btn-primary:hover{background:var(--accent-hover)}
+.rail-btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text-dim)}
+.rail-btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ───── result pane ───── */
+.pane{padding:24px 28px 100px;min-width:0}
+
+/* mode switcher */
+.modes{display:flex;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;margin-bottom:18px;width:fit-content}
+.mode-btn{padding:8px 16px;border-radius:7px;font:600 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);transition:all .15s}
+.mode-btn:hover{color:var(--text-bright)}
+.mode-btn.is-active{background:var(--accent);color:var(--bg)}
+
+/* page heading */
+.page-head{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:18px;gap:18px;flex-wrap:wrap}
+.page-head h1{font:800 26px var(--sans);color:#fff;line-height:1.15;letter-spacing:-.02em}
+.page-head h1 .accent{color:var(--accent)}
+.page-head-sub{font:500 12px var(--mono);color:var(--muted);margin-top:4px}
+
+/* permalink */
+.perma-row{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 10px 7px 14px;font:500 11px var(--mono);color:var(--text-dim);max-width:100%;overflow:hidden}
+.perma-url{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-bright);min-width:0}
+.perma-btn{flex-shrink:0;padding:5px 11px;background:var(--accent);color:var(--bg);border-radius:5px;font:600 10px var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.perma-btn:hover{background:var(--accent-hover)}
+.perma-btn.is-copied{background:var(--green);color:#fff}
+
+/* result count bar */
+.count-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;font:500 12px var(--mono);color:var(--text-dim);flex-wrap:wrap;gap:12px}
+.count-bar strong{color:var(--accent);font-weight:700}
+.count-bar .stat{display:inline-flex;align-items:center;gap:5px;margin-right:14px}
+.count-bar .stat:last-child{margin-right:0}
+
+/* timeline events */
+.events{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.day-bucket{border-bottom:1px solid var(--border-soft)}
+.day-bucket:last-child{border-bottom:none}
+.day-head{padding:9px 18px;background:var(--surface-2);font:600 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--border-soft);display:flex;justify-content:space-between}
+.day-head .count{color:var(--muted)}
+.event{display:grid;grid-template-columns:90px 1fr;gap:14px;padding:12px 18px;border-bottom:1px solid var(--border-soft);transition:background .12s;color:inherit;text-decoration:none;cursor:pointer}
+.event:last-child{border-bottom:none}
+.event:hover{background:rgba(30,197,255,0.04);text-decoration:none}
+.event:hover .event-subject{color:var(--accent)}
+.event-time{font:500 11px var(--mono);color:var(--muted);padding-top:2px;text-align:right}
+.event-time .ago{color:var(--text-bright);display:block;font-weight:600;font-size:11px}
+.event-time .abs{display:block;font-size:9px;margin-top:2px}
+.event-body{min-width:0}
+.event-row1{display:flex;gap:6px;align-items:center;margin-bottom:3px;flex-wrap:wrap}
+.stream-tag{font:600 9px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:3px}
+.stream-omissions{background:rgba(248,113,113,0.13);color:#fca5a5}
+.stream-ledger{background:rgba(168,85,247,0.13);color:#c4b5fd}
+.stream-wayback{background:rgba(245,158,11,0.13);color:#fcd34d}
+.stream-arxiv{background:rgba(56,189,248,0.13);color:#7dd3fc}
+.stream-robots{background:rgba(34,197,94,0.13);color:#86efac}
+.stream-seals{background:var(--accent-soft);color:var(--accent)}
+.event-type{font:600 9px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim)}
+.event-subject{font:600 13px var(--sans);color:var(--text-bright);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;transition:color .12s}
+.event-headline{font:400 12px var(--sans);color:var(--text);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* table mode */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:auto;max-height:calc(100vh - 280px)}
+.tbl{width:100%;border-collapse:collapse;font:500 12px var(--sans)}
+.tbl th{position:sticky;top:0;background:var(--surface-2);padding:10px 14px;text-align:left;font:600 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
+.tbl th:hover{color:var(--accent)}
+.tbl th.sort-asc::after{content:" ↑";color:var(--accent)}
+.tbl th.sort-desc::after{content:" ↓";color:var(--accent)}
+.tbl td{padding:9px 14px;border-bottom:1px solid var(--border-soft);color:var(--text);vertical-align:top;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px}
+.tbl tr:hover{background:rgba(30,197,255,0.03)}
+.tbl td.col-subject{font-weight:600;color:var(--text-bright)}
+.tbl td.col-conf{font:500 11px var(--mono);color:var(--text-dim);text-align:right}
+.tbl td a{color:var(--accent)}
+
+/* coming soon panels */
+.placeholder{background:var(--surface);border:1px dashed var(--border);border-radius:12px;padding:60px 32px;text-align:center}
+.placeholder h3{font:700 18px var(--sans);color:var(--text-bright);margin-bottom:8px}
+.placeholder h3 .accent{color:var(--accent)}
+.placeholder p{font:500 13px var(--sans);color:var(--text-dim);max-width:520px;margin:0 auto 18px;line-height:1.6}
+.placeholder .file-list{display:inline-flex;flex-direction:column;gap:4px;font:500 11px var(--mono);color:var(--muted);background:var(--bg);padding:14px 22px;border-radius:8px;border:1px solid var(--border-soft);text-align:left}
+.placeholder .file-list code{color:var(--accent)}
+
+/* empty / error */
+.empty{padding:60px 22px;text-align:center;color:var(--muted);font:500 13px var(--mono)}
+.skeleton{padding:40px 22px;text-align:center;color:var(--muted);font:500 12px var(--mono);letter-spacing:.1em}
+
+/* footer */
+.footer{margin:42px 0 0;padding:24px 0;border-top:1px solid var(--border);font:400 11px var(--mono);color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+/* mode explainer (sits above each result pane) */
+.explain{display:flex;gap:14px;align-items:flex-start;padding:14px 18px 14px 16px;background:linear-gradient(90deg,rgba(30,197,255,0.07),rgba(30,197,255,0.02));border:1px solid rgba(30,197,255,0.22);border-left:3px solid var(--accent);border-radius:10px;margin-bottom:14px}
+.explain-icon{flex-shrink:0;width:28px;height:28px;border-radius:7px;background:var(--accent-soft);display:flex;align-items:center;justify-content:center;color:var(--accent);font:700 14px var(--mono)}
+.explain-body{flex:1;font:500 12px var(--sans);color:var(--text);line-height:1.55}
+.explain-body strong{color:var(--text-bright);font-weight:700}
+.explain-body .accent{color:var(--accent);font-weight:600}
+.explain-body .step{display:inline-block;padding:1px 7px;background:var(--accent-soft);color:var(--accent);border-radius:4px;font:600 10px var(--mono);letter-spacing:.04em;margin-right:5px}
+</style>
+</head>
+<body>
+
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="https://croviatrust.com/" class="cv-brand-link"><img src="https://croviatrust.com/logo.png" alt="" class="cv-brand-mark"><span class="cv-brand-name">CROVIA</span></a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+    <div class="cv-nav-status" id="cv-nav-status"><span class="dot"></span><span data-cv-status>connecting</span></div>
+  </div>
+</nav>
+
+<nav class="ev-hub-tabs" aria-label="Evidence Hub">
+  <div class="ev-hub-tabs-inner">
+    <a href="/registry/"><span class="live-dot"></span>Live</a>
+    <a href="/registry/explore/" class="is-active">Explore</a>
+    <a href="/registry/compliance/">Compliance</a>
+    <a href="/registry/verify/">Verify</a>
+  </div>
+</nav>
+
+<div class="layout">
+
+  <!-- ============ FILTER RAIL ============ -->
+  <aside class="rail">
+    <h2>Filter</h2>
+    <div class="rail-sub">Query the entire signed evidence layer. All filters reflected in URL.</div>
+
+    <div class="rail-section">
+      <div class="rail-label">Stream <span class="count" id="cnt-stream">—</span></div>
+      <div class="checklist" id="filter-stream"></div>
+    </div>
+
+    <div class="rail-section">
+      <div class="rail-label">Subject (text search)</div>
+      <input class="input" id="filter-subject" type="search" placeholder="model, vendor, paper..." autocomplete="off">
+    </div>
+
+    <div class="rail-section">
+      <div class="rail-label">Vendor <span class="count" id="cnt-vendor">—</span></div>
+      <div class="checklist" id="filter-vendor"></div>
+    </div>
+
+    <div class="rail-section">
+      <div class="rail-label">Time range</div>
+      <div class="preset-row" id="filter-time-presets">
+        <button class="preset" data-time="24h">24h</button>
+        <button class="preset" data-time="7d">7d</button>
+        <button class="preset is-active" data-time="30d">30d</button>
+        <button class="preset" data-time="90d">90d</button>
+        <button class="preset" data-time="all">all</button>
+      </div>
+    </div>
+
+    <div class="rail-section">
+      <div class="rail-label">Type <span class="count" id="cnt-type">—</span></div>
+      <div class="checklist" id="filter-type"></div>
+    </div>
+
+    <div class="rail-section">
+      <div class="rail-label">Has receipt</div>
+      <label class="toggle"><input type="checkbox" id="filter-receipt"> Only events with signed receipt</label>
+    </div>
+
+    <div class="rail-actions">
+      <button class="rail-btn rail-btn-ghost" id="btn-reset">Reset</button>
+      <button class="rail-btn rail-btn-primary" id="btn-permalink">Permalink</button>
+    </div>
+  </aside>
+
+  <!-- ============ RESULT PANE ============ -->
+  <main class="pane">
+
+    <div class="page-head">
+      <div>
+        <h1>Evidence <span class="accent">Explorer</span></h1>
+        <div class="page-head-sub">Query · filter · correlate. One tool, every signed evidence stream.</div>
+      </div>
+      <div class="perma-row" style="max-width:520px;flex:1">
+        <span class="perma-url" id="perma-url">/registry/explore/</span>
+        <button class="perma-btn" id="perma-btn">Copy</button>
+      </div>
+    </div>
+
+    <div class="modes" role="tablist" aria-label="View mode">
+      <button class="mode-btn is-active" data-mode="timeline" role="tab">Timeline</button>
+      <button class="mode-btn" data-mode="table" role="tab">Table</button>
+      <button class="mode-btn" data-mode="graph" role="tab">Graph</button>
+      <button class="mode-btn" data-mode="dossier" role="tab">Dossier</button>
+    </div>
+
+    <div class="count-bar" id="count-bar">
+      <div>
+        <span class="stat"><strong id="stat-events">—</strong> events</span>
+        <span class="stat"><strong id="stat-subjects">—</strong> subjects</span>
+        <span class="stat"><strong id="stat-streams">—</strong> streams</span>
+      </div>
+      <div style="font-size:11px">
+        Source: <a href="/registry/data/observatory/feed.json" target="_blank">feed.json</a>
+        · refreshed every 5 min · <span id="updated-meta">—</span>
+      </div>
+    </div>
+
+    <div id="result"><div class="skeleton">loading evidence…</div></div>
+
+    <div class="footer">
+      <span>Apache-2.0 · all events reproducible from underlying JSONL · cron-regenerated</span>
+      <span><a href="/registry/">← live feed</a> · <a href="/whitepaper.html">whitepaper</a> · <a href="https://github.com/croviatrust/crovia-seal" target="_blank" rel="noopener">github</a></span>
+    </div>
+
+  </main>
+</div>
+
+<script>
+"use strict";
+
+/* ───── constants ───── */
+const FEED_URL = "/registry/data/observatory/feed.json";
+const STREAM_LABELS = {
+  omissions:"Omissions", ledger:"Ledger", wayback:"Wayback",
+  arxiv:"arXiv", robots:"robots.txt", seals:"Seals"
+};
+
+/* ───── state (single source of truth) ───── */
+const state = {
+  feed: null,        // raw feed.json
+  events: [],        // working set (filtered)
+  filters: {
+    streams: new Set(),     // active streams (empty = all)
+    subject: "",            // text search
+    vendors: new Set(),     // active vendors
+    time: "30d",            // preset key
+    types: new Set(),
+    receipt: false,
+  },
+  mode: "timeline",
+  sort: { col: "ts", dir: "desc" },
+  cache: {                  // lazy-loaded heavy JSONs (per session)
+    forensic:  null,
+    tpaLatest: null,
+    ranking:   null,
+    pressure:  null,
+    lineage:   null,
+  },
+};
+
+const HEAVY_SOURCES = {
+  forensic:  "/registry/data/forensic_dossiers.json",
+  tpaLatest: "/registry/data/tpa_latest.json",
+  ranking:   "/registry/data/global_ranking.json",
+  pressure:  "/registry/data/tpa_pressure.json",
+  lineage:   "/registry/data/lineage_graph.json",
+};
+
+async function loadCache(key){
+  if (state.cache[key]) return state.cache[key];
+  const url = HEAVY_SOURCES[key];
+  if (!url) throw new Error("unknown cache key: " + key);
+  const r = await fetch(url + "?_=" + Date.now(), { cache: "default" });
+  if (!r.ok) throw new Error("HTTP " + r.status + " for " + url);
+  state.cache[key] = await r.json();
+  return state.cache[key];
+}
+
+/* ───── helpers ───── */
+const $ = (id) => document.getElementById(id);
+const escapeHtml = (s) => s == null ? "" : String(s).replace(/[<>&"']/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;","'":"&#39;"}[c]));
+const fmtNum = (n) => n == null ? "—" : (n < 1000 ? String(n) : n.toLocaleString());
+
+function ago(iso){
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  const s = (Date.now() - d.getTime()) / 1000;
+  if (s < 60)  return Math.floor(s) + "s";
+  if (s < 3600) return Math.floor(s/60) + "m";
+  if (s < 86400) return Math.floor(s/3600) + "h";
+  if (s < 86400*30) return Math.floor(s/86400) + "d";
+  return Math.floor(s/86400/30) + "mo";
+}
+
+function dayOf(iso){
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "—";
+  return d.toISOString().slice(0,10);
+}
+
+function shortAbs(iso){
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return d.toISOString().slice(11,16) + "Z";
+}
+
+function vendorOf(e){
+  // Heuristic: HuggingFace-style "vendor/model" subjects → "vendor"
+  // URL subjects → hostname. Fallback to first word.
+  const s = e.subject || "";
+  if (s.includes("://")){
+    try { return new URL(s).hostname.replace(/^www\./,""); } catch(_) {}
+  }
+  if (s.includes("/")) return s.split("/")[0];
+  return s.split(/\s+/)[0] || "—";
+}
+
+const TIME_PRESET_MS = {
+  "24h":  24*3600*1000,
+  "7d":   7*86400*1000,
+  "30d":  30*86400*1000,
+  "90d":  90*86400*1000,
+  "all":  Infinity,
+};
+
+/* ───── URL <-> state ───── */
+function readUrl(){
+  const p = new URLSearchParams(location.search);
+  if (p.has("stream")) state.filters.streams = new Set(p.get("stream").split(",").filter(Boolean));
+  if (p.has("subject")) state.filters.subject = p.get("subject");
+  if (p.has("vendor")) state.filters.vendors = new Set(p.get("vendor").split(",").filter(Boolean));
+  if (p.has("time"))    state.filters.time = p.get("time");
+  if (p.has("type"))    state.filters.types = new Set(p.get("type").split(",").filter(Boolean));
+  if (p.has("receipt")) state.filters.receipt = p.get("receipt") === "1";
+  if (p.has("mode") && ["timeline","table","graph","dossier"].includes(p.get("mode"))){
+    state.mode = p.get("mode");
+  }
+}
+
+function buildUrl(){
+  const p = new URLSearchParams();
+  if (state.filters.streams.size) p.set("stream", [...state.filters.streams].join(","));
+  if (state.filters.subject) p.set("subject", state.filters.subject);
+  if (state.filters.vendors.size) p.set("vendor", [...state.filters.vendors].join(","));
+  if (state.filters.time !== "30d") p.set("time", state.filters.time);
+  if (state.filters.types.size) p.set("type", [...state.filters.types].join(","));
+  if (state.filters.receipt) p.set("receipt", "1");
+  if (state.mode !== "timeline") p.set("mode", state.mode);
+  const qs = p.toString();
+  return "/registry/explore/" + (qs ? "?" + qs : "");
+}
+
+function pushUrl(){
+  const u = buildUrl();
+  history.replaceState(null, "", u);
+  $("perma-url").textContent = location.origin + u;
+}
+
+/* ───── filter engine ───── */
+function applyFilters(){
+  const f = state.filters;
+  const cutoff = f.time === "all" ? 0 : Date.now() - (TIME_PRESET_MS[f.time] || TIME_PRESET_MS["30d"]);
+  const subjectQ = f.subject.toLowerCase().trim();
+
+  state.events = (state.feed?.events || []).filter(e => {
+    if (f.streams.size && !f.streams.has(e.stream)) return false;
+    if (f.types.size   && !f.types.has(e.type))     return false;
+    if (subjectQ && !(e.subject||"").toLowerCase().includes(subjectQ)) return false;
+    if (f.vendors.size && !f.vendors.has(vendorOf(e))) return false;
+    if (f.receipt && !(e.ref && e.ref.length > 0)) return false;
+    if (cutoff){
+      const ts = Date.parse(e.ts);
+      if (isNaN(ts) || ts < cutoff) return false;
+    }
+    return true;
+  });
+}
+
+/* ───── rendering: filter rail ───── */
+function renderFilterRail(){
+  const events = state.feed?.events || [];
+
+  // Stream list (from feed.streams)
+  const streams = state.feed?.streams || [];
+  $("filter-stream").innerHTML = streams.map(s => {
+    const checked = state.filters.streams.has(s.id) ? "checked" : "";
+    return `<label class="cb"><input type="checkbox" data-stream="${s.id}" ${checked}>
+      <span class="cb-label">${escapeHtml(STREAM_LABELS[s.id]||s.id)}</span>
+      <span class="cb-meta">${fmtNum(s.lines_total)}</span></label>`;
+  }).join("");
+  $("cnt-stream").textContent = streams.length + "";
+
+  // Vendors (auto-derived from events)
+  const vendorCount = new Map();
+  for (const e of events){
+    const v = vendorOf(e);
+    vendorCount.set(v, (vendorCount.get(v) || 0) + 1);
+  }
+  const vendors = [...vendorCount.entries()].sort((a,b) => b[1]-a[1]).slice(0, 30);
+  $("filter-vendor").innerHTML = vendors.map(([v, n]) => {
+    const checked = state.filters.vendors.has(v) ? "checked" : "";
+    const safeV = escapeHtml(v);
+    return `<label class="cb"><input type="checkbox" data-vendor="${safeV}" ${checked}>
+      <span class="cb-label" title="${safeV}">${safeV}</span>
+      <span class="cb-meta">${n}</span></label>`;
+  }).join("") || '<div class="empty" style="padding:14px 0;font-size:11px">no vendors</div>';
+  $("cnt-vendor").textContent = vendors.length + "";
+
+  // Types (auto-derived)
+  const typeCount = new Map();
+  for (const e of events){
+    const t = e.type || "—";
+    typeCount.set(t, (typeCount.get(t) || 0) + 1);
+  }
+  const types = [...typeCount.entries()].sort((a,b) => b[1]-a[1]);
+  $("filter-type").innerHTML = types.map(([t, n]) => {
+    const checked = state.filters.types.has(t) ? "checked" : "";
+    const safeT = escapeHtml(t);
+    return `<label class="cb"><input type="checkbox" data-type="${safeT}" ${checked}>
+      <span class="cb-label">${safeT}</span>
+      <span class="cb-meta">${n}</span></label>`;
+  }).join("") || '<div class="empty" style="padding:14px 0;font-size:11px">no types</div>';
+  $("cnt-type").textContent = types.length + "";
+
+  // Subject input
+  $("filter-subject").value = state.filters.subject;
+
+  // Time presets
+  document.querySelectorAll("#filter-time-presets .preset").forEach(b => {
+    b.classList.toggle("is-active", b.dataset.time === state.filters.time);
+  });
+
+  // Receipt toggle
+  $("filter-receipt").checked = state.filters.receipt;
+}
+
+/* ───── rendering: count bar ───── */
+function renderCountBar(){
+  $("stat-events").textContent = fmtNum(state.events.length);
+  const subjects = new Set(state.events.map(e => e.subject)).size;
+  const streams = new Set(state.events.map(e => e.stream)).size;
+  $("stat-subjects").textContent = fmtNum(subjects);
+  $("stat-streams").textContent  = fmtNum(streams);
+  $("updated-meta").textContent = "updated " + ago(state.feed?.generated_at) + " ago";
+}
+
+/* ───── pedagogy: per-mode explainer card ───── */
+const MODE_EXPLAIN = {
+  timeline: {
+    icon: "⏱",
+    title: "Timeline",
+    body: "<strong>Every signed event in chronological order.</strong> Each card is a real entry from the cron-fed observatory feed (omissions, ledger, wayback, arxiv, robots.txt, seals). <span class='accent'>Click any event</span> to open its citable permalink page with the underlying signed receipt. Use the filters on the left to narrow by stream, vendor, time, or text.",
+  },
+  table: {
+    icon: "≡",
+    title: "Table",
+    body: "<strong>Same data as Timeline, dense tabular form.</strong> Click any column header to sort. Useful for analyst workflows: scan many events at once, copy/paste rows, or <span class='accent'>export the filtered set as CSV</span> at the bottom.",
+  },
+  graph: {
+    icon: "◉",
+    title: "Graph",
+    body: "<strong>The signed evidence layer as a network.</strong> Nodes are subjects (models, vendors, papers, datasets); edges are predecessor / witness / citation relationships taken from the lineage graph. Color = severity. <span class='accent'>Drag a node</span> to rearrange, <span class='accent'>click a node</span> to load its full dossier. The filter rail does not apply here — the graph always shows the whole corpus.",
+  },
+  dossier: {
+    icon: "§",
+    title: "Dossier",
+    body: "<strong>Per-subject deep-dive.</strong> Type a model, vendor, or paper in the <span class='accent'>Subject</span> filter on the left and the dossier cross-correlates 5 data layers for that subject — forensic verdict, TPA receipts, compliance ranking, temporal pressure, lineage neighborhood — in a single page. Every card here pulls live from cron-regenerated JSON.",
+  },
+};
+
+function renderExplainer(mode){
+  const m = MODE_EXPLAIN[mode];
+  if (!m) return "";
+  return `<div class="explain"><div class="explain-icon">${m.icon}</div><div class="explain-body"><strong>${m.title}</strong> — ${m.body}</div></div>`;
+}
+
+/* ───── rendering: timeline mode ───── */
+function renderTimeline(){
+  const evts = state.events;
+  if (!evts.length){
+    return '<div class="empty">no events match the current filter — try widening the time range or clearing filters</div>';
+  }
+  // Group by day
+  const buckets = new Map();
+  for (const e of evts){
+    const d = dayOf(e.ts);
+    if (!buckets.has(d)) buckets.set(d, []);
+    buckets.get(d).push(e);
+  }
+  const days = [...buckets.keys()].sort().reverse();
+
+  return renderExplainer("timeline") + '<div class="events">' + days.map(d => {
+    const evs = buckets.get(d);
+    return `
+      <div class="day-bucket">
+        <div class="day-head">
+          <span>${d}</span>
+          <span class="count">${evs.length} event${evs.length === 1 ? "" : "s"}</span>
+        </div>
+        ${evs.map(e => {
+          const link = e.permalink || ("/registry/e/?id=" + (e.id||""));
+          return `<a class="event" href="${link}">
+            <div class="event-time">
+              <span class="ago">${ago(e.ts)} ago</span>
+              <span class="abs">${shortAbs(e.ts)}</span>
+            </div>
+            <div class="event-body">
+              <div class="event-row1">
+                <span class="stream-tag stream-${e.stream}">${STREAM_LABELS[e.stream]||e.stream}</span>
+                <span class="event-type">${escapeHtml(e.type||"")}</span>
+              </div>
+              <div class="event-subject" title="${escapeHtml(e.subject)}">${escapeHtml(e.subject)}</div>
+              <div class="event-headline">${escapeHtml(e.headline)}</div>
+            </div>
+          </a>`;
+        }).join("")}
+      </div>
+    `;
+  }).join("") + "</div>";
+}
+
+/* ───── rendering: table mode ───── */
+function renderTable(){
+  const evts = state.events;
+  if (!evts.length){
+    return '<div class="empty">no events match the current filter</div>';
+  }
+  // Sort
+  const c = state.sort.col;
+  const d = state.sort.dir === "asc" ? 1 : -1;
+  const sorted = [...evts].sort((a, b) => {
+    const va = (c === "vendor" ? vendorOf(a) : a[c]) || "";
+    const vb = (c === "vendor" ? vendorOf(b) : b[c]) || "";
+    if (va < vb) return -1*d;
+    if (va > vb) return 1*d;
+    return 0;
+  });
+  const cls = (col) => col === c ? `sort-${state.sort.dir}` : "";
+  const rows = sorted.slice(0, 500).map(e => `
+    <tr>
+      <td class="col-ts">${escapeHtml(e.ts.slice(0,16).replace("T"," "))}</td>
+      <td><span class="stream-tag stream-${e.stream}">${STREAM_LABELS[e.stream]||e.stream}</span></td>
+      <td class="col-subject" title="${escapeHtml(e.subject)}">${escapeHtml(e.subject)}</td>
+      <td>${escapeHtml(vendorOf(e))}</td>
+      <td>${escapeHtml(e.type||"")}</td>
+      <td title="${escapeHtml(e.headline)}">${escapeHtml(e.headline)}</td>
+      <td class="col-conf">${e.ref ? '<span title="'+escapeHtml(e.ref)+'">✓</span>' : ''}</td>
+      <td><a href="${e.permalink||('/registry/e/?id='+(e.id||''))}">open</a></td>
+    </tr>
+  `).join("");
+  return `
+    <div class="table-wrap">
+      <table class="tbl">
+        <thead><tr>
+          <th class="${cls('ts')}"      data-sort="ts">Timestamp</th>
+          <th class="${cls('stream')}"  data-sort="stream">Stream</th>
+          <th class="${cls('subject')}" data-sort="subject">Subject</th>
+          <th class="${cls('vendor')}"  data-sort="vendor">Vendor</th>
+          <th class="${cls('type')}"    data-sort="type">Type</th>
+          <th>Headline</th>
+          <th>Receipt</th>
+          <th>Detail</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div style="padding:12px 4px;font:500 11px var(--mono);color:var(--muted)">
+      ${sorted.length > 500 ? "Showing 500 of " + fmtNum(sorted.length) + " — narrow the filter to see more · " : ""}
+      <a href="#" id="btn-csv">Export CSV</a>
+    </div>
+  `;
+}
+
+function exportCsv(){
+  const cols = ["ts","stream","subject","vendor","type","headline","ref","permalink"];
+  const lines = [cols.join(",")].concat(state.events.map(e => {
+    return cols.map(c => {
+      const v = c === "vendor" ? vendorOf(e) : (e[c]||"");
+      const s = String(v).replace(/"/g, '""');
+      return /[",\n]/.test(s) ? '"'+s+'"' : s;
+    }).join(",");
+  }));
+  const blob = new Blob([lines.join("\n")], { type: "text/csv" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "crovia-explore-" + new Date().toISOString().slice(0,10) + ".csv";
+  a.click();
+}
+
+/* ───── rendering: dossier (real, multi-source) ───── */
+async function renderDossier(){
+  let subject = (state.filters.subject || "").trim();
+  let isExample = false;
+
+  $("result").innerHTML = `<div class="skeleton">loading dossier${subject ? " for " + escapeHtml(subject) : " (example)"}…</div>`;
+
+  let forensic, tpaLatest, ranking, pressure, lineage;
+  try {
+    [forensic, tpaLatest, ranking, pressure, lineage] = await Promise.all([
+      loadCache("forensic"),
+      loadCache("tpaLatest"),
+      loadCache("ranking"),
+      loadCache("pressure"),
+      loadCache("lineage"),
+    ]);
+  } catch (e){
+    return `<div class="empty">could not load dossier data: ${escapeHtml(e.message)}</div>`;
+  }
+
+  // Smarter empty state: pick the highest-pressure model so the user sees a real,
+  // populated example instead of a wall of explanatory text.
+  if (!subject){
+    const top = (pressure?.top_pressure || pressure?.all_models || [])[0];
+    if (top && top.model_id){
+      subject = top.model_id;
+      isExample = true;
+    }
+  }
+
+  if (!subject){
+    return renderExplainer("dossier") + `
+      <div class="placeholder">
+        <h3>Dossier mode <span class="accent">needs a subject</span></h3>
+        <p>Type a model, vendor, or paper in the <strong>Subject</strong> field on the left.</p>
+      </div>`;
+  }
+
+  const html = buildDossierHtml(subject, { forensic, tpaLatest, ranking, pressure, lineage });
+  if (isExample){
+    const exampleBanner = `
+      <div class="explain" style="border-left-color:#f59e0b;background:linear-gradient(90deg,rgba(245,158,11,0.07),rgba(245,158,11,0.02));border-color:rgba(245,158,11,0.22)">
+        <div class="explain-icon" style="background:rgba(245,158,11,0.13);color:#fcd34d">★</div>
+        <div class="explain-body">
+          <strong>Example dossier</strong> — showing <span class="accent">${escapeHtml(subject)}</span>, currently the highest-pressure model in the index. Type a different subject in the <span class="accent">Subject</span> filter on the left to query any other model, vendor, or paper.
+        </div>
+      </div>`;
+    return renderExplainer("dossier") + exampleBanner + html;
+  }
+  return renderExplainer("dossier") + html;
+}
+
+function buildDossierHtml(subject, d){
+  const q = subject.toLowerCase();
+  const matches = (arr, getKey, max) => (arr || []).filter(x => (getKey(x) || "").toLowerCase().includes(q)).slice(0, max || Infinity);
+
+  const forensicHits = matches(d.forensic.models, m => m.model_id, 1);
+  const tpaHits      = matches(d.tpaLatest.tpas, t => t.model_id, 6);
+  const rankingHits  = matches(d.ranking.model_ranking, r => r.model_id, 12);
+  const orgHits      = matches(d.ranking.org_ranking,   r => r.org,       4);
+  const pressureHits = matches(d.pressure.all_models,   p => p.model_id,  12);
+  const lineageNodes = matches(d.lineage.nodes, n => (n.label || "") + " " + (n.id || ""), 30);
+
+  const sevClass = (sev) => "sev-" + ((sev || "none").toLowerCase());
+
+  const sections = [];
+
+  // 1. Forensic verdict (the headline summary)
+  if (forensicHits.length){
+    const f = forensicHits[0];
+    const conf = (typeof f.primary_confidence === "number")
+      ? (f.primary_confidence * 100).toFixed(1) + "%" : "—";
+    const evScore = (key) => {
+      const v = f[key];
+      if (v == null) return null;
+      if (typeof v === "number") return v;
+      if (typeof v === "object" && typeof v.score === "number") return v.score;
+      return null;
+    };
+    sections.push(`
+      <div class="dossier-card">
+        <div class="h">Forensic dossier <span class="badge">v${escapeHtml(d.forensic.version || "")}</span></div>
+        <div class="dossier-grid">
+          <div class="kv"><span class="k">Model</span><span class="v">${escapeHtml(f.model_id || "")}</span></div>
+          <div class="kv"><span class="k">Organization</span><span class="v">${escapeHtml(f.organization || "—")}</span></div>
+          <div class="kv"><span class="k">Stage</span><span class="v">${escapeHtml(f.stage || "—")}</span></div>
+          <div class="kv"><span class="k">Verdict</span><span class="v"><strong>${escapeHtml(f.primary_verdict || "—")}</strong></span></div>
+          <div class="kv"><span class="k">Confidence</span><span class="v">${conf}</span></div>
+          <div class="kv"><span class="k">Layers</span><span class="v">${escapeHtml(String(f.evidence_layers || "—"))}</span></div>
+        </div>
+        <div class="ev-scores">${["sonar","dc","rp","cds","gene_y"].map(k => {
+          const score = evScore(k);
+          const dim = score == null ? " dim" : "";
+          const display = score == null ? "—" : (typeof score === "number" ? score.toFixed(2) : String(score));
+          return `<div class="ev-score"><div class="ev-score-label">${k.replace("_", "-")}</div><div class="ev-score-val${dim}">${display}</div></div>`;
+        }).join("")}</div>
+        <div class="kv"><span class="k">Dossier hash</span><span class="v mono">${escapeHtml((f.dossier_hash || "").slice(0, 64))}${(f.dossier_hash || "").length > 64 ? "…" : ""}</span></div>
+      </div>
+    `);
+  }
+
+  // 2. TPA receipts
+  if (tpaHits.length){
+    sections.push(`
+      <div class="dossier-card">
+        <div class="h">TPA receipts <span class="badge">${tpaHits.length} match${tpaHits.length === 1 ? "" : "es"}</span></div>
+        ${tpaHits.map(t => {
+          const ja = (t.jurisdiction_exposures || []).slice(0, 4).map(x => escapeHtml(x.jurisdiction_code || x.jurisdiction_name || "")).filter(Boolean).join(" · ");
+          return `
+            <div class="tpa-row">
+              <div class="tpa-head">
+                <span class="tier">${escapeHtml(t.tier || "—")}</span>
+                ${escapeHtml(t.model_id || "")}
+                <span class="${sevClass(t.highest_severity)}" style="font:600 10px var(--mono);letter-spacing:.06em;text-transform:uppercase">· ${escapeHtml(t.highest_severity || "—")}</span>
+              </div>
+              <div class="tpa-meta"><strong>${t.absent_count || 0}</strong> absent · <strong>${t.present_count || 0}</strong> present · obs ${escapeHtml((t.observation_timestamp || "").slice(0, 19).replace("T", " "))}Z${ja ? " · jurisdictions: " + ja : ""}</div>
+              <div class="tpa-meta mono">tpa_id ${escapeHtml(t.tpa_id || "")} · merkle ${escapeHtml((t.merkle_root || "").slice(0, 24))}… · chain_height ${escapeHtml(String(t.temporal_anchor && t.temporal_anchor.chain_height || "—"))}</div>
+            </div>`;
+        }).join("")}
+      </div>
+    `);
+  }
+
+  // 3. Compliance ranking
+  if (rankingHits.length){
+    sections.push(`
+      <div class="dossier-card">
+        <div class="h">Compliance ranking <span class="badge">${rankingHits.length} model${rankingHits.length === 1 ? "" : "s"}</span></div>
+        <table class="dossier-tbl">
+          <thead><tr><th class="numeric">#</th><th>Model</th><th class="numeric">Score</th><th>Severity</th><th class="numeric">Present</th><th class="numeric">Absent</th></tr></thead>
+          <tbody>
+            ${rankingHits.map(r => `
+              <tr>
+                <td class="numeric">${r.rank != null ? r.rank : "—"}</td>
+                <td><strong>${escapeHtml(r.model_id || "")}</strong></td>
+                <td class="numeric">${r.score != null ? r.score : "—"}</td>
+                <td class="${sevClass(r.severity)}">${escapeHtml(r.severity || "—")}</td>
+                <td class="numeric">${r.present || 0}</td>
+                <td class="numeric" style="color:#fca5a5">${r.absent || 0}</td>
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    `);
+  }
+
+  // 4. Temporal Pressure Index
+  if (pressureHits.length){
+    sections.push(`
+      <div class="dossier-card">
+        <div class="h">Temporal Pressure Index <span class="badge">${pressureHits.length} model${pressureHits.length === 1 ? "" : "s"}</span></div>
+        <table class="dossier-tbl">
+          <thead><tr><th>Model</th><th class="numeric">Pressure</th><th>Urgency</th><th>Severity</th><th class="numeric">Days obs.</th></tr></thead>
+          <tbody>
+            ${pressureHits.map(p => `
+              <tr>
+                <td>${escapeHtml(p.model_id || "")}</td>
+                <td class="numeric"><span class="${sevClass(p.severity)}">${typeof p.pressure === "number" ? p.pressure.toFixed(2) : "—"}</span></td>
+                <td>${escapeHtml(p.urgency || "—")}</td>
+                <td class="${sevClass(p.severity)}">${escapeHtml(p.severity || "—")}</td>
+                <td class="numeric">${p.days_observed || "—"}</td>
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    `);
+  }
+
+  // 5. Lineage neighborhood
+  if (lineageNodes.length){
+    sections.push(`
+      <div class="dossier-card">
+        <div class="h">Lineage neighborhood <span class="badge">${lineageNodes.length} node${lineageNodes.length === 1 ? "" : "s"}</span></div>
+        ${lineageNodes.slice(0, 18).map(n => `
+          <div class="tpa-row">
+            <div class="tpa-head"><strong>${escapeHtml(n.label || n.id || "")}</strong></div>
+            <div class="tpa-meta">${escapeHtml(n.type || "—")} · org ${escapeHtml(n.org || "—")} · compliance ${n.compliance_score != null ? n.compliance_score : "—"} · severity <span class="${sevClass(n.severity)}">${escapeHtml(n.severity || "—")}</span></div>
+          </div>`).join("")}
+        ${lineageNodes.length > 18 ? `<div class="tpa-meta" style="text-align:right;margin-top:8px">+ ${lineageNodes.length - 18} more nodes</div>` : ""}
+      </div>
+    `);
+  }
+
+  // 6. Org-level rollup
+  if (orgHits.length){
+    sections.push(`
+      <div class="dossier-card">
+        <div class="h">Organization rollup <span class="badge">${orgHits.length} org${orgHits.length === 1 ? "" : "s"}</span></div>
+        <table class="dossier-tbl">
+          <thead><tr><th>Organization</th><th class="numeric">Models</th><th class="numeric">Avg score</th><th>Worst severity</th><th class="numeric">Downloads</th></tr></thead>
+          <tbody>
+            ${orgHits.map(o => `
+              <tr>
+                <td><strong>${escapeHtml(o.org || "")}</strong></td>
+                <td class="numeric">${o.models || 0}</td>
+                <td class="numeric">${o.avg_score != null ? Number(o.avg_score).toFixed(1) : "—"}</td>
+                <td class="${sevClass(o.worst_severity)}">${escapeHtml(o.worst_severity || "—")}</td>
+                <td class="numeric">${o.total_downloads != null ? Number(o.total_downloads).toLocaleString() : "—"}</td>
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    `);
+  }
+
+  if (!sections.length){
+    return `<div class="empty">No data found for "${escapeHtml(subject)}". Try a partial match — for example "EleutherAI" instead of an exact model name.</div>`;
+  }
+
+  const eventsCount = state.events.length;
+  return `
+    <div class="dossier-head">
+      <div class="dossier-eyebrow">cross-stream dossier · ${sections.length} signed evidence layers · subject filter <code>${escapeHtml(subject)}</code></div>
+      <h2>Evidence dossier · <span class="accent">${escapeHtml(subject)}</span></h2>
+      <div style="font:500 12px var(--mono);color:var(--text-dim);margin-top:8px">
+        ${eventsCount} matching events in current time range · forensic, TPA, compliance, pressure, lineage cross-correlated client-side
+      </div>
+    </div>
+    ${sections.join("")}
+  `;
+}
+
+/* ───── rendering: graph (force-directed Canvas, no deps) ───── */
+async function renderGraph(){
+  $("result").innerHTML = `<div class="skeleton">loading lineage graph (109 KB)…</div>`;
+  let lineage;
+  try {
+    lineage = await loadCache("lineage");
+  } catch (e){
+    return `<div class="empty">could not load lineage graph: ${escapeHtml(e.message)}</div>`;
+  }
+  // Defer the canvas init: the HTML must be in the DOM first.
+  setTimeout(() => initGraph(lineage), 16);
+  return renderExplainer("graph") + buildGraphShell(lineage);
+}
+
+function buildGraphShell(lineage){
+  const m = lineage.metrics || {};
+  return `
+    <div class="graph-head">
+      <div class="graph-stats">
+        <span><strong>${(lineage.nodes || []).length}</strong>nodes</span>
+        <span><strong>${(lineage.edges || []).length}</strong>edges</span>
+        <span><strong>${m.total_models || "—"}</strong>models</span>
+        <span><strong>${m.total_organizations || "—"}</strong>orgs</span>
+        <span><strong>${m.total_finetuning_chains || "—"}</strong>finetuning chains</span>
+      </div>
+      <div class="graph-legend">
+        <span><span class="ld critical"></span>critical</span>
+        <span><span class="ld high"></span>high</span>
+        <span><span class="ld medium"></span>medium</span>
+        <span><span class="ld low"></span>low</span>
+        <span><span class="ld none"></span>none</span>
+      </div>
+    </div>
+    <div class="graph-canvas-wrap">
+      <canvas id="graph-canvas"></canvas>
+      <div class="graph-tooltip" id="graph-tooltip"></div>
+      <div class="graph-help">drag a node · click → load its dossier · ${(lineage.nodes || []).length} nodes</div>
+    </div>
+  `;
+}
+
+/* simulation state lives on the closure; killed when the result pane is replaced */
+let __graphRaf = 0;
+
+function initGraph(lineage){
+  cancelAnimationFrame(__graphRaf);
+  const canvas = document.getElementById("graph-canvas");
+  const wrap   = canvas && canvas.parentElement;
+  const tip    = document.getElementById("graph-tooltip");
+  if (!canvas || !wrap || !tip) return;
+
+  const ctx = canvas.getContext("2d");
+  const dpr = window.devicePixelRatio || 1;
+  const W = wrap.clientWidth;
+  const H = 540;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + "px";
+  canvas.style.height = H + "px";
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  // Build nodes/edges
+  const idToNode = new Map();
+  const allNodes = (lineage.nodes || []);
+  // Cap at 220 for smooth O(n²) repulsion
+  const NODE_CAP = 220;
+  // Fibonacci-spiral initial layout — each node lands on a stable polar
+  // position in the central area. The simulation then refines from a
+  // sane starting point instead of converging from random chaos.
+  const cx = W / 2, cy = H / 2;
+  const maxR = Math.min(W, H) * 0.35;
+  const golden = Math.PI * (3 - Math.sqrt(5));   // ≈ 2.39996
+  const cap = Math.min(NODE_CAP, allNodes.length);
+  const nodes = allNodes.slice(0, cap).map((n, i) => {
+    const t = i / Math.max(cap - 1, 1);
+    const r = maxR * Math.sqrt(t);
+    const a = i * golden;
+    const node = {
+      id: n.id,
+      label: n.label || n.id || "",
+      type: n.type || "",
+      org: n.org || "",
+      severity: (n.severity || "none").toLowerCase(),
+      score: n.compliance_score,
+      degree: 0,
+      x: cx + r * Math.cos(a),
+      y: cy + r * Math.sin(a),
+      vx: 0, vy: 0,
+    };
+    idToNode.set(n.id, node);
+    return node;
+  });
+  const edges = (lineage.edges || [])
+    .filter(e => idToNode.has(e.source) && idToNode.has(e.target))
+    .map(e => ({ s: idToNode.get(e.source), t: idToNode.get(e.target), w: e.weight || 1, type: e.type || "" }));
+
+  // Compute node degree → label the top 6 most-connected nodes always.
+  for (const e of edges){ e.s.degree++; e.t.degree++; }
+  const topLabeled = new Set([...nodes].sort((a, b) => b.degree - a.degree).slice(0, 6).map(n => n.id));
+
+  // Force params (tuned 2026-05-09 to fix corner-pinning bug)
+  const SPRING_K     = 0.030;
+  const SPRING_LEN   = 70;
+  const REPEL        = 900;       // halved: less explosive
+  const CENTER_K     = 0.012;     // 3× stronger pull to center → no edge clinging
+  const BOUNDARY_K   = 0.06;      // soft inward push from edges
+  const BOUNDARY_PAD = 36;
+  const DAMP         = 0.84;
+  const NODE_R       = 5;
+
+  const COLOR = { critical: "#f87171", high: "#fcd34d", medium: "#7dd3fc", low: "#86efac", none: "#64748b" };
+
+  let dragNode = null, hoverNode = null;
+  let cooling = 1200;             // simulation steps before settling (doubled)
+
+  function step(){
+    // Repulsion (O(n²), fine for n ≤ 220)
+    for (let i = 0; i < nodes.length; i++){
+      const a = nodes[i];
+      for (let j = i + 1; j < nodes.length; j++){
+        const b = nodes[j];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const d2 = dx * dx + dy * dy + 0.01;
+        const f = REPEL / d2;
+        const d  = Math.sqrt(d2);
+        const fx = (dx / d) * f, fy = (dy / d) * f;
+        a.vx += fx; a.vy += fy;
+        b.vx -= fx; b.vy -= fy;
+      }
+    }
+    // Springs (edges)
+    for (const e of edges){
+      const dx = e.t.x - e.s.x, dy = e.t.y - e.s.y;
+      const d  = Math.sqrt(dx * dx + dy * dy) + 0.01;
+      const f  = SPRING_K * (d - SPRING_LEN);
+      const fx = (dx / d) * f, fy = (dy / d) * f;
+      e.s.vx += fx; e.s.vy += fy;
+      e.t.vx -= fx; e.t.vy -= fy;
+    }
+    // Center gravity
+    for (const n of nodes){
+      n.vx += (cx - n.x) * CENTER_K;
+      n.vy += (cy - n.y) * CENTER_K;
+    }
+    // Soft boundary push (replaces hard clamp — no more corner-pinning)
+    for (const n of nodes){
+      if (n.x < BOUNDARY_PAD)         n.vx += (BOUNDARY_PAD - n.x) * BOUNDARY_K;
+      if (n.x > W - BOUNDARY_PAD)     n.vx -= (n.x - (W - BOUNDARY_PAD)) * BOUNDARY_K;
+      if (n.y < BOUNDARY_PAD)         n.vy += (BOUNDARY_PAD - n.y) * BOUNDARY_K;
+      if (n.y > H - BOUNDARY_PAD)     n.vy -= (n.y - (H - BOUNDARY_PAD)) * BOUNDARY_K;
+    }
+    // Integrate (no hard clamp — boundaries are forces above)
+    for (const n of nodes){
+      if (n === dragNode){ n.vx = n.vy = 0; continue; }
+      n.vx *= DAMP; n.vy *= DAMP;
+      // Velocity cap to keep simulation calm
+      const v2 = n.vx * n.vx + n.vy * n.vy;
+      if (v2 > 36){ const k = 6 / Math.sqrt(v2); n.vx *= k; n.vy *= k; }
+      n.x += n.vx; n.y += n.vy;
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0, 0, W, H);
+    // Edges
+    ctx.lineWidth = 0.7;
+    ctx.strokeStyle = "rgba(148, 163, 184, 0.18)";
+    ctx.beginPath();
+    for (const e of edges){
+      ctx.moveTo(e.s.x, e.s.y);
+      ctx.lineTo(e.t.x, e.t.y);
+    }
+    ctx.stroke();
+    // Highlight edges of hovered/dragged node
+    if (hoverNode || dragNode){
+      const focus = dragNode || hoverNode;
+      ctx.lineWidth = 1.4;
+      ctx.strokeStyle = "rgba(30, 197, 255, 0.55)";
+      ctx.beginPath();
+      for (const e of edges){
+        if (e.s === focus || e.t === focus){
+          ctx.moveTo(e.s.x, e.s.y);
+          ctx.lineTo(e.t.x, e.t.y);
+        }
+      }
+      ctx.stroke();
+    }
+    // Nodes
+    for (const n of nodes){
+      const isFocus = n === hoverNode || n === dragNode;
+      // Size hint: top-degree nodes are slightly bigger
+      const sizeBoost = topLabeled.has(n.id) ? 2 : 0;
+      const r = NODE_R + sizeBoost + (isFocus ? 3 : 0);
+      ctx.fillStyle = COLOR[n.severity] || COLOR.none;
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, r, 0, Math.PI * 2);
+      ctx.fill();
+      if (isFocus){
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#1ec5ff";
+        ctx.stroke();
+      }
+    }
+    // Always-on labels for the top-6 most-connected nodes
+    ctx.fillStyle = "rgba(226, 232, 240, 0.9)";
+    ctx.font = '600 11px "Inter", system-ui, sans-serif';
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    for (const n of nodes){
+      if (!topLabeled.has(n.id)) continue;
+      const label = n.label.length > 22 ? n.label.slice(0, 21) + "…" : n.label;
+      // subtle outline so labels read on busy edges
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "rgba(5, 10, 18, 0.85)";
+      ctx.strokeText(label, n.x, n.y + NODE_R + 6);
+      ctx.fillText(label, n.x, n.y + NODE_R + 6);
+    }
+  }
+
+  function loop(){
+    if (cooling > 0 || dragNode){
+      step();
+      if (!dragNode) cooling--;
+    }
+    draw();
+    __graphRaf = requestAnimationFrame(loop);
+  }
+  loop();
+
+  function findNode(mx, my){
+    // Iterate in reverse so top-rendered nodes have hit priority
+    for (let i = nodes.length - 1; i >= 0; i--){
+      const n = nodes[i];
+      const dx = mx - n.x, dy = my - n.y;
+      if (dx * dx + dy * dy < (NODE_R + 5) * (NODE_R + 5)) return n;
+    }
+    return null;
+  }
+
+  canvas.addEventListener("mousemove", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    if (dragNode){
+      dragNode.x = mx; dragNode.y = my;
+      cooling = Math.max(cooling, 80);
+    } else {
+      hoverNode = findNode(mx, my);
+      if (hoverNode){
+        tip.style.display = "block";
+        tip.style.left = Math.min(mx + 14, W - 270) + "px";
+        tip.style.top  = Math.min(my + 14, H - 80) + "px";
+        tip.innerHTML = `<strong>${escapeHtml(hoverNode.label)}</strong><br>` +
+          `<span style="color:var(--text-dim)">${escapeHtml(hoverNode.type)}${hoverNode.org ? " · " + escapeHtml(hoverNode.org) : ""}</span><br>` +
+          `severity: <span style="color:${COLOR[hoverNode.severity]}">${escapeHtml(hoverNode.severity)}</span>` +
+          (hoverNode.score != null ? ` · score ${hoverNode.score}` : "");
+        canvas.style.cursor = "pointer";
+      } else {
+        tip.style.display = "none";
+        canvas.style.cursor = "grab";
+      }
+    }
+  });
+  canvas.addEventListener("mouseleave", () => { hoverNode = null; tip.style.display = "none"; });
+  canvas.addEventListener("mousedown", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const n = findNode(e.clientX - rect.left, e.clientY - rect.top);
+    if (n){ dragNode = n; canvas.style.cursor = "grabbing"; cooling = 200; }
+  });
+  window.addEventListener("mouseup", () => {
+    if (dragNode){ dragNode = null; canvas.style.cursor = "grab"; cooling = Math.max(cooling, 80); }
+  });
+  canvas.addEventListener("click", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const n = findNode(e.clientX - rect.left, e.clientY - rect.top);
+    if (n){
+      // Switch to dossier mode for this node
+      state.filters.subject = n.label || n.id;
+      $("filter-subject").value = state.filters.subject;
+      state.mode = "dossier";
+      render();
+    }
+  });
+}
+
+/* ───── orchestration ───── */
+async function render(){
+  applyFilters();
+  renderCountBar();
+  document.querySelectorAll(".mode-btn").forEach(b => {
+    b.classList.toggle("is-active", b.dataset.mode === state.mode);
+  });
+
+  // Cancel any prior graph animation when switching away.
+  if (state.mode !== "graph") cancelAnimationFrame(__graphRaf);
+
+  let html;
+  switch (state.mode){
+    case "timeline": html = renderTimeline(); break;
+    case "table":    html = renderTable(); break;
+    case "graph":    html = await renderGraph(); break;
+    case "dossier":  html = await renderDossier(); break;
+    default: html = renderTimeline();
+  }
+  $("result").innerHTML = html;
+
+  // wire mode-specific events
+  if (state.mode === "table"){
+    document.querySelectorAll(".tbl th[data-sort]").forEach(th => {
+      th.addEventListener("click", () => {
+        const col = th.dataset.sort;
+        if (state.sort.col === col){
+          state.sort.dir = state.sort.dir === "asc" ? "desc" : "asc";
+        } else {
+          state.sort.col = col;
+          state.sort.dir = col === "ts" ? "desc" : "asc";
+        }
+        render();
+      });
+    });
+    const csvBtn = $("btn-csv");
+    if (csvBtn) csvBtn.addEventListener("click", (e) => { e.preventDefault(); exportCsv(); });
+  }
+
+  // Re-init graph canvas on resize so it stays sharp.
+  if (state.mode === "graph"){
+    // re-run init after innerHTML replaced our canvas reference.
+    if (state.cache.lineage) setTimeout(() => initGraph(state.cache.lineage), 16);
+  }
+
+  pushUrl();
+}
+
+function rerenderAll(){
+  renderFilterRail();
+  render();
+}
+
+/* ───── event wiring ───── */
+function wireRail(){
+  // Stream
+  $("filter-stream").addEventListener("change", (e) => {
+    if (e.target.dataset.stream){
+      const s = e.target.dataset.stream;
+      e.target.checked ? state.filters.streams.add(s) : state.filters.streams.delete(s);
+      render();
+    }
+  });
+  // Vendor
+  $("filter-vendor").addEventListener("change", (e) => {
+    if (e.target.dataset.vendor){
+      const v = e.target.dataset.vendor;
+      e.target.checked ? state.filters.vendors.add(v) : state.filters.vendors.delete(v);
+      render();
+    }
+  });
+  // Type
+  $("filter-type").addEventListener("change", (e) => {
+    if (e.target.dataset.type){
+      const t = e.target.dataset.type;
+      e.target.checked ? state.filters.types.add(t) : state.filters.types.delete(t);
+      render();
+    }
+  });
+  // Subject (debounced)
+  let tSub;
+  $("filter-subject").addEventListener("input", (e) => {
+    clearTimeout(tSub);
+    tSub = setTimeout(() => {
+      state.filters.subject = e.target.value;
+      render();
+    }, 200);
+  });
+  // Time
+  document.querySelectorAll("#filter-time-presets .preset").forEach(b => {
+    b.addEventListener("click", () => {
+      state.filters.time = b.dataset.time;
+      document.querySelectorAll("#filter-time-presets .preset").forEach(x => x.classList.toggle("is-active", x === b));
+      render();
+    });
+  });
+  // Receipt
+  $("filter-receipt").addEventListener("change", (e) => {
+    state.filters.receipt = e.target.checked;
+    render();
+  });
+  // Reset
+  $("btn-reset").addEventListener("click", () => {
+    state.filters = { streams: new Set(), subject: "", vendors: new Set(), time: "30d", types: new Set(), receipt: false };
+    state.mode = "timeline";
+    rerenderAll();
+  });
+  // Permalink
+  $("btn-permalink").addEventListener("click", () => {
+    navigator.clipboard.writeText(location.origin + buildUrl()).then(() => {
+      const btn = $("perma-btn");
+      btn.classList.add("is-copied");
+      btn.textContent = "Copied";
+      setTimeout(() => { btn.classList.remove("is-copied"); btn.textContent = "Copy"; }, 1200);
+    });
+  });
+  $("perma-btn").addEventListener("click", () => $("btn-permalink").click());
+  // Mode
+  document.querySelectorAll(".mode-btn").forEach(b => {
+    b.addEventListener("click", () => {
+      state.mode = b.dataset.mode;
+      render();
+    });
+  });
+}
+
+/* ───── boot ───── */
+async function boot(){
+  readUrl();
+  wireRail();
+  try {
+    const r = await fetch(FEED_URL + "?_=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    state.feed = await r.json();
+  } catch (err){
+    $("result").innerHTML = '<div class="empty">feed unavailable: '+escapeHtml(err.message)+'</div>';
+    return;
+  }
+  rerenderAll();
+}
+
+boot();
+</script>
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c" defer></script>
+</body>
+</html>

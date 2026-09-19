@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Crovia on Hugging Face — Silence overlay</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Inject Crovia Silence Index on any Hugging Face model page. One click. Live ledger data. No extension store.">
+<link rel="icon" type="image/png" href="https://croviatrust.com/logo.png">
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  .hf-pill{display:inline-flex;padding:6px 14px;border:1px solid rgba(30,197,255,.35);background:rgba(30,197,255,.08);color:var(--accent);font:600 11px var(--mono);letter-spacing:.18em;text-transform:uppercase;border-radius:999px;margin-bottom:20px}
+  .hf-hero h1{font:700 36px var(--sans);color:#fff;letter-spacing:-.02em;line-height:1.1;margin-bottom:14px}
+  .hf-hero h1 em{color:#ffd21e;font-style:normal}
+  .hf-steps{counter-reset:step;margin:32px 0;display:grid;gap:14px}
+  .hf-step{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 22px;display:flex;gap:16px;align-items:flex-start}
+  .hf-step::before{counter-increment:step;content:counter(step);font:700 14px var(--mono);color:var(--accent);background:rgba(30,197,255,.1);border:1px solid rgba(30,197,255,.25);width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex:none}
+  .hf-step h3{font:600 15px var(--sans);color:#fff;margin-bottom:6px}
+  .hf-step p{font-size:13px;color:var(--text-soft);line-height:1.6}
+  .hf-bookmark{display:inline-block;margin:16px 0;padding:14px 24px;background:#ffd21e;color:#000;font:700 14px var(--sans);border-radius:10px;text-decoration:none;cursor:move}
+  .hf-bookmark:hover{background:#ffe566}
+  .hf-code{background:#060810;border:1px solid var(--border);border-radius:8px;padding:14px;font:400 11px var(--mono);color:var(--text-faint);overflow-x:auto;margin-top:10px;word-break:break-all}
+  .hf-demo{margin-top:40px;padding:24px;background:var(--bg-card);border:1px solid var(--border);border-radius:12px}
+  .hf-demo iframe{border:0;border-radius:8px;width:100%;max-width:420px;height:220px}
+</style>
+</head>
+<body>
+
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="https://croviatrust.com/" class="cv-brand-link"><img src="https://croviatrust.com/logo.png" alt="" class="cv-brand-mark"><span class="cv-brand-name">CROVIA</span></a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+    <div class="cv-nav-status" id="cv-nav-status"><span class="dot"></span><span data-cv-status>connecting</span></div>
+  </div>
+</nav>
+
+<main class="cv-main">
+
+  <section class="hf-hero">
+    <span class="hf-pill">viral · zero install · live ledger</span>
+    <h1>Crovia on<br><em>Hugging Face</em>.</h1>
+    <p class="cv-lede">Every model card is a claim. Crovia shows how long that claim has gone <strong>without verifiable disclosure</strong> — pulled from 270k+ signed ledger envelopes. Drag one bookmark. Done.</p>
+  </section>
+
+  <div class="hf-steps">
+    <div class="hf-step">
+      <div><h3>Drag this to your bookmarks bar</h3>
+      <p>On any <code>huggingface.co/*</code> model page, click the bookmark. A live Silence Index panel appears in the corner.</p>
+      <a class="hf-bookmark" id="bookmarklet" href="#">Crovia · HF Silence</a>
+      <p style="font-size:11px;color:var(--text-faint);margin-top:8px">Or right-click → Bookmark link</p></div>
+    </div>
+    <div class="hf-step">
+      <div><h3>Open a model page</h3>
+      <p>Try <a href="https://huggingface.co/meta-llama/Llama-3.1-8B" style="color:var(--accent)" target="_blank" rel="noopener">meta-llama/Llama-3.1-8B</a>, click the bookmark, watch the silence counter load from Crovia's live index.</p></div>
+    </div>
+    <div class="hf-step">
+      <div><h3>Embed on your site instead</h3>
+      <p>Same data, iframe form — paste on blogs, papers, regulator filings:</p>
+      <div class="hf-code">&lt;iframe src="https://croviatrust.com/registry/embed/silence.html?target=meta-llama/Llama-3.1-8B" width="420" height="220" style="border:0"&gt;&lt;/iframe&gt;</div></div>
+    </div>
+  </div>
+
+  <div class="hf-demo">
+    <div style="font:600 11px var(--mono);color:var(--text-muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px">Live preview · Llama 3.1-8B</div>
+    <iframe src="/registry/embed/silence.html?target=meta-llama/Llama-3.1-8B" title="Silence Index embed"></iframe>
+  </div>
+
+  <p style="margin-top:40px;font-size:13px;color:var(--text-soft);max-width:640px;line-height:1.65">
+    Need a <strong>formal LACUNA certificate</strong> for litigation or regulatory filing?
+    <a href="/registry/lacuna/" style="color:var(--accent)">Public LACUNA hub →</a>
+    · Signed PDF from €2,500.
+  </p>
+
+</main>
+
+<footer class="cv-foot">
+  <div class="cv-foot-inner">
+    <div class="cv-foot-links">
+      <a href="https://croviatrust.com/#watch">Watch</a>
+      <a href="/registry/lacuna/">LACUNA</a>
+      <a href="/registry/embed/silence.html">Silence embed</a>
+      <a href="mailto:info@croviatrust.com">Contact</a>
+    </div>
+    <div class="cv-foot-meta">&copy; 2026 Crovia Trust · Facts from signed observations only.</div>
+  </div>
+</footer>
+
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c"></script>
+<script>
+(function(){
+  var js = "(function(){if(document.getElementById('cv-hf-overlay'))return;var m=location.pathname.match(/^\\/([^/]+\\/[^/]+)/);if(!m)return;var t=decodeURIComponent(m[1]);var d=document.createElement('div');d.id='cv-hf-overlay';d.style.cssText='position:fixed;bottom:20px;right:20px;z-index:99999;width:420px;max-width:calc(100vw - 24px);box-shadow:0 20px 60px rgba(0,0,0,.6);border-radius:12px;overflow:hidden';d.innerHTML='<iframe src=\"https://croviatrust.com/registry/embed/silence.html?target='+encodeURIComponent(t)+'\" width=\"420\" height=\"220\" style=\"border:0;display:block\" title=\"Crovia Silence Index\"></iframe><button onclick=\"this.parentElement.remove()\" style=\"position:absolute;top:6px;right:8px;background:rgba(0,0,0,.7);border:0;color:#fff;width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:14px\">×</button>';document.body.appendChild(d);})();";
+  document.getElementById('bookmarklet').href = 'javascript:' + encodeURIComponent(js);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verify Crovia — live cryptographic proof, in your browser</title>
+<meta name="description" content="Don't trust Crovia — verify it. This page downloads Crovia's real signed ledger seal and checks the Ed25519 signature entirely in your browser. No Crovia server takes part in the verification.">
+<link rel="canonical" href="https://croviatrust.com/proof.html">
+<link rel="icon" type="image/png" href="https://croviatrust.com/logo.png">
+<meta property="og:title" content="Verify Crovia — live cryptographic proof">
+<meta property="og:description" content="We don't ask for trust. We hand you the math. Verify Crovia's Ed25519-signed ledger seal live, in your own browser.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://croviatrust.com/proof.html">
+<meta property="og:image" content="https://croviatrust.com/logo.png">
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  .pf-wrap{max-width:860px;margin:0 auto;padding:56px 22px 90px}
+  .pf-kicker{font:600 12px var(--mono,monospace);letter-spacing:.14em;text-transform:uppercase;color:var(--accent,#5b8cff)}
+  .pf-h1{font:700 34px/1.1 var(--sans,system-ui);color:#fff;letter-spacing:-.02em;margin:14px 0 12px}
+  .pf-lede{font:400 17px/1.6 var(--sans,system-ui);color:var(--text-muted,#9aa0a6);max-width:640px}
+  .pf-card{background:var(--bg-card,#12151a);border:1px solid var(--border,#242830);border-radius:14px;padding:26px;margin-top:34px}
+  .pf-status{display:flex;align-items:center;gap:14px}
+  .pf-dot{width:14px;height:14px;border-radius:50%;background:var(--text-muted,#9aa0a6);flex:none}
+  .pf-dot.ok{background:#22c55e;box-shadow:0 0 16px 2px rgba(34,197,94,.5)}
+  .pf-dot.bad{background:#ef4444;box-shadow:0 0 16px 2px rgba(239,68,68,.5)}
+  .pf-dot.busy{background:#eab308;animation:pf-pulse 1s infinite}
+  @keyframes pf-pulse{0%,100%{opacity:.35}50%{opacity:1}}
+  .pf-verdict{font:600 20px var(--sans,system-ui);color:#fff}
+  .pf-sub{font:400 13px var(--mono,monospace);color:var(--text-muted,#9aa0a6);margin-top:3px}
+  .pf-grid{display:grid;grid-template-columns:160px 1fr;gap:10px 18px;margin-top:24px;font:400 13px var(--mono,monospace)}
+  .pf-grid dt{color:var(--text-muted,#9aa0a6)}
+  .pf-grid dd{color:#e8eaed;margin:0;word-break:break-all}
+  .pf-steps{margin-top:26px;border-top:1px solid var(--border,#242830);padding-top:18px}
+  .pf-step{display:flex;gap:12px;align-items:flex-start;padding:6px 0;font:400 13px/1.5 var(--mono,monospace);color:var(--text-muted,#9aa0a6)}
+  .pf-step .m{flex:none;width:16px;text-align:center}
+  .pf-step.done .m{color:#22c55e}
+  .pf-btn{display:inline-block;margin-top:26px;background:var(--accent,#5b8cff);color:#001;font:600 14px var(--sans,system-ui);border:none;border-radius:10px;padding:12px 22px;cursor:pointer}
+  .pf-btn:disabled{opacity:.5;cursor:default}
+  details{margin-top:20px;border:1px solid var(--border,#242830);border-radius:10px;padding:12px 16px;background:#0d0f12}
+  summary{cursor:pointer;font:600 13px var(--mono,monospace);color:var(--accent,#5b8cff)}
+  pre{white-space:pre-wrap;word-break:break-all;font:400 12px/1.55 var(--mono,monospace);color:#c7ccd1;margin:12px 0 0}
+  .pf-links{margin-top:30px;display:flex;flex-wrap:wrap;gap:10px 22px;font:400 13px var(--mono,monospace)}
+  .pf-links a{color:var(--accent,#5b8cff);text-decoration:none}
+  .pf-links a:hover{text-decoration:underline}
+  .pf-note{margin-top:26px;font:400 13px/1.6 var(--sans,system-ui);color:var(--text-muted,#9aa0a6);border-left:2px solid var(--border,#242830);padding-left:16px}
+  code{background:#0d0f12;border:1px solid var(--border,#242830);border-radius:5px;padding:1px 6px;font:400 12px var(--mono,monospace);color:#e8eaed}
+</style>
+</head>
+<body>
+<div class="pf-wrap">
+  <div class="pf-kicker">Independent verification</div>
+  <h1 class="pf-h1">Don&rsquo;t trust Crovia. Verify it.</h1>
+  <p class="pf-lede">
+    Below, your browser downloads Crovia&rsquo;s real, signed ledger seal and checks its
+    Ed25519 signature <strong>locally, on your device</strong>. No Crovia server takes part in
+    the check &mdash; the cryptography runs in the page you are reading. If the signature is valid,
+    it proves Crovia&rsquo;s signing key attested to this exact ledger state, and that not one of
+    its records can be altered without breaking the seal.
+  </p>
+
+  <div class="pf-card">
+    <div class="pf-status">
+      <span id="dot" class="pf-dot busy"></span>
+      <div>
+        <div id="verdict" class="pf-verdict">Verifying&hellip;</div>
+        <div id="subverdict" class="pf-sub">fetching the signed seal</div>
+      </div>
+    </div>
+
+    <div class="pf-steps" id="steps">
+      <div class="pf-step" data-s="fetch"><span class="m">&middot;</span><span>Download the signed seal &amp; trust root</span></div>
+      <div class="pf-step" data-s="canon"><span class="m">&middot;</span><span>Rebuild the exact signed message (canonical JSON, sorted keys)</span></div>
+      <div class="pf-step" data-s="key"><span class="m">&middot;</span><span>Import Crovia&rsquo;s Ed25519 public key</span></div>
+      <div class="pf-step" data-s="verify"><span class="m">&middot;</span><span>Verify the Ed25519 signature over the message</span></div>
+      <div class="pf-step" data-s="match"><span class="m">&middot;</span><span>Confirm the key matches the published trust root</span></div>
+    </div>
+
+    <dl class="pf-grid" id="facts" style="display:none">
+      <dt>signature</dt><dd id="f-sig"></dd>
+      <dt>public key</dt><dd id="f-pk"></dd>
+      <dt>key id</dt><dd id="f-kid"></dd>
+      <dt>merkle root</dt><dd id="f-root"></dd>
+      <dt>records sealed</dt><dd id="f-leaves"></dd>
+      <dt>sealed at (UTC)</dt><dd id="f-at"></dd>
+      <dt>algorithm</dt><dd id="f-alg"></dd>
+      <dt>verified by</dt><dd id="f-engine"></dd>
+    </dl>
+
+    <button class="pf-btn" id="rerun" disabled>Run it again</button>
+
+    <details>
+      <summary>Show the exact bytes that were signed</summary>
+      <pre id="msg"></pre>
+    </details>
+  </div>
+
+  <p class="pf-note">
+    This is the same check anyone can run offline with the open-source tool
+    (<code>python3 -m collectors.substrate_seal verify</code>). The seal covers the entire
+    append-only ledger: each new seal re-attests every prior record, so any retroactive edit
+    would break this and every later signature. The signed Merkle root is periodically anchored
+    to the Bitcoin blockchain via OpenTimestamps for independent, third-party dating.
+  </p>
+
+  <div class="pf-links">
+    <a href="https://croviatrust.com/registry/data/substrate/latest_seal.json">the signed seal (JSON)</a>
+    <a href="https://croviatrust.com/registry/data/substrate/trust_root.json">trust root</a>
+    <a href="https://croviatrust.com/registry/canon/TRUST_ROOT.md">trust root doc</a>
+    <a href="https://croviatrust.com/registry/data/substrate/ots_anchors.json">Bitcoin anchors</a>
+    <a href="https://croviatrust.com/">&larr; back to Crovia</a>
+  </div>
+</div>
+
+<script>
+const SEAL_URL = "https://croviatrust.com/registry/data/substrate/latest_seal.json";
+const TRUST_URL = "https://croviatrust.com/registry/data/substrate/trust_root.json";
+
+const $ = s => document.querySelector(s);
+function stepDone(name){ const el = document.querySelector('.pf-step[data-s="'+name+'"]'); if(el){ el.classList.add('done'); el.querySelector('.m').textContent = '\u2713'; } }
+function hexToBytes(h){ const a = new Uint8Array(h.length/2); for(let i=0;i<a.length;i++) a[i]=parseInt(h.substr(i*2,2),16); return a; }
+
+// Canonical JSON identical to Python json.dumps(sort_keys=True, separators=(',',':'), ensure_ascii=False)
+function canonical(v){
+  if(Array.isArray(v)) return '['+v.map(canonical).join(',')+']';
+  if(v && typeof v === 'object') return '{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}';
+  return JSON.stringify(v);
+}
+
+async function ed25519Verify(sig, msg, pub){
+  // 1) Native WebCrypto Ed25519 (no network, correct by construction)
+  try{
+    if(window.crypto && crypto.subtle){
+      const key = await crypto.subtle.importKey('raw', pub, {name:'Ed25519'}, false, ['verify']);
+      const ok = await crypto.subtle.verify({name:'Ed25519'}, key, sig, msg);
+      return {ok, engine:'WebCrypto (native Ed25519)'};
+    }
+  }catch(e){ /* fall through */ }
+  // 2) Fallback: audited pure-JS @noble/ed25519
+  try{
+    const ed = await import('https://cdn.jsdelivr.net/npm/@noble/ed25519@2/+esm');
+    const ok = await ed.verifyAsync(sig, msg, pub);
+    return {ok, engine:'@noble/ed25519 (pure JS)'};
+  }catch(e){
+    return {ok:null, engine:'unavailable', error:e};
+  }
+}
+
+function fail(msg, sub){
+  $('#dot').className = 'pf-dot bad';
+  $('#verdict').textContent = msg;
+  $('#subverdict').textContent = sub || '';
+}
+
+async function run(){
+  $('#rerun').disabled = true;
+  $('#dot').className = 'pf-dot busy';
+  $('#verdict').textContent = 'Verifying\u2026';
+  $('#subverdict').textContent = 'fetching the signed seal';
+  document.querySelectorAll('.pf-step').forEach(el=>{el.classList.remove('done');el.querySelector('.m').textContent='\u00b7';});
+
+  let seal, trust;
+  try{
+    const [sr, tr] = await Promise.all([fetch(SEAL_URL,{cache:'no-store'}), fetch(TRUST_URL,{cache:'no-store'})]);
+    seal = await sr.json();
+    trust = await tr.json();
+  }catch(e){ return fail('Could not load the seal', String(e)); }
+  stepDone('fetch');
+
+  const payload = {}; Object.keys(seal).forEach(k=>{ if(k!=='signature' && k!=='sig_algorithm') payload[k]=seal[k]; });
+  const msgStr = canonical(payload);
+  const msg = new TextEncoder().encode(msgStr);
+  $('#msg').textContent = msgStr;
+  stepDone('canon');
+
+  let pub, sig;
+  try{ pub = hexToBytes(seal.public_key_hex); sig = hexToBytes(seal.signature); }
+  catch(e){ return fail('Malformed key or signature', String(e)); }
+  stepDone('key');
+
+  const res = await ed25519Verify(sig, msg, pub);
+  if(res.ok === null){
+    fail('Your browser can\u2019t run Ed25519 here', 'Use the offline CLI to verify (see note below)');
+    $('#f-engine').textContent = 'not available in this browser';
+  } else if(res.ok){
+    stepDone('verify');
+    $('#dot').className = 'pf-dot ok';
+    $('#verdict').textContent = 'Signature valid';
+    $('#subverdict').textContent = 'Crovia\u2019s key attested to this exact ledger state';
+  } else {
+    $('#dot').className = 'pf-dot bad';
+    $('#verdict').textContent = 'Signature INVALID';
+    $('#subverdict').textContent = 'do not trust this seal';
+  }
+
+  const keyMatch = trust && trust.public_key_hex && trust.public_key_hex.toLowerCase() === seal.public_key_hex.toLowerCase();
+  if(keyMatch) stepDone('match');
+
+  $('#f-sig').textContent = seal.signature;
+  $('#f-pk').textContent = seal.public_key_hex + (keyMatch ? '  \u2713 matches trust root' : '  \u26a0 differs from trust root');
+  $('#f-kid').textContent = seal.key_id || '\u2014';
+  $('#f-root').textContent = seal.merkle_root;
+  $('#f-leaves').textContent = (seal.leaf_count||0).toLocaleString('en-US');
+  $('#f-at').textContent = seal.sealed_at || '\u2014';
+  $('#f-alg').textContent = seal.sig_algorithm || 'ed25519';
+  $('#f-engine').textContent = res.engine;
+  $('#facts').style.display = 'grid';
+  $('#rerun').disabled = false;
+}
+
+$('#rerun').addEventListener('click', run);
+run();
+</script>
+</body>
+</html>

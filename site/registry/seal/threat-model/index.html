@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Crovia Seal Threat Model &mdash; THREAT_MODEL.md</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="The threat model that the Crovia Seal protocol is designed to resist — attackers, attacks, mitigations.">
+<link rel="icon" type="image/png" href="https://croviatrust.com/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<style>
+:root {
+  --ink:#000; --panel:#0a1018; --line:rgba(30,197,255,0.16);
+  --line-hi:rgba(30,197,255,0.36); --accent:#1ec5ff;
+  --text:#d9e4ee; --text-dim:#6c7988; --text-ghost:#39424d;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --serif:'Fraunces','Times New Roman',serif;
+  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{background:radial-gradient(ellipse at 50% 20%,#07121c 0%,#000 70%);color:var(--text);font-family:var(--sans);min-height:100vh}
+.topbar{padding:22px 32px;display:flex;justify-content:space-between;align-items:center;font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--line)}
+.topbar a{color:var(--text);text-decoration:none;display:inline-flex;align-items:center;gap:10px}
+.topbar a img{height:22px}
+.topbar .right a{color:var(--text-dim);margin-left:24px}
+.topbar .right a:hover{color:var(--accent)}
+.wrap{max-width:880px;margin:0 auto;padding:60px 32px 96px}
+.eyebrow{display:inline-block;padding:6px 16px;border:1px solid var(--line-hi);border-radius:999px;color:var(--accent);font:600 11px var(--mono);letter-spacing:.22em;text-transform:uppercase;margin-bottom:24px}
+.title{font-family:var(--serif);font-weight:300;font-size:48px;line-height:1.08;color:#fff;letter-spacing:-.02em;margin-bottom:14px}
+.title em{font-style:italic;background:linear-gradient(90deg,var(--accent),#85e3ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.subtitle{color:var(--text-dim);font:400 16px/1.5 var(--sans);margin-bottom:48px}
+article{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:48px 56px;font:400 15px/1.7 var(--sans)}
+article h1{font-family:var(--serif);font-weight:400;font-size:30px;color:#fff;margin:36px 0 16px;border-bottom:1px solid var(--line);padding-bottom:10px}
+article h1:first-child{margin-top:0}
+article h2{font-family:var(--serif);font-weight:400;font-size:24px;color:#fff;margin:36px 0 12px}
+article h3{font-weight:600;font-size:17px;color:var(--accent);margin:24px 0 10px;font-family:var(--sans)}
+article p{margin-bottom:14px;color:var(--text)}
+article a{color:var(--accent);text-decoration:underline dotted}
+article a:hover{text-decoration:underline}
+article code{background:#020608;border:1px solid var(--line);border-radius:3px;padding:1px 6px;font:500 13px var(--mono);color:#85e3ff}
+article pre{background:#020608;border:1px solid var(--line);border-radius:6px;padding:16px;overflow-x:auto;margin:16px 0;font:500 12.5px/1.55 var(--mono)}
+article pre code{background:transparent;border:0;padding:0;color:var(--text)}
+article ul,article ol{padding-left:28px;margin-bottom:14px}
+article li{margin-bottom:6px}
+article blockquote{border-left:3px solid var(--accent);padding-left:18px;margin:18px 0;color:var(--text-dim);font-style:italic}
+article hr{border:0;border-top:1px solid var(--line);margin:32px 0}
+article strong{color:#fff}
+.loading{color:var(--text-ghost);text-align:center;padding:48px;font-style:italic}
+.foot{margin-top:32px;padding:18px 22px;border:1px solid var(--line);border-radius:8px;background:#020608;font:500 12px var(--mono);color:var(--text-dim)}
+.foot a{color:var(--accent);text-decoration:none}
+.foot a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="https://croviatrust.com/" class="cv-brand-link"><img src="https://croviatrust.com/logo.png" alt="" class="cv-brand-mark"><span class="cv-brand-name">CROVIA</span></a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+    <div class="cv-nav-status" id="cv-nav-status"><span class="dot"></span><span data-cv-status>connecting</span></div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <span class="eyebrow">THREAT MODEL &middot; v0.5 &middot; CC0</span>
+  <h1 class="title">The Crovia Seal <em>Threat Model</em></h1>
+  <p class="subtitle">Adversaries the protocol resists, the attacks they can mount, and the documented mitigations &mdash; with explicit out-of-scope claims.</p>
+
+  <article id="md"><div class="loading">Loading threat model&hellip;</div></article>
+
+  <div class="foot">
+    Source: <a href="/registry/seal/threat-model/THREAT_MODEL.md">THREAT_MODEL.md</a>
+    &middot; <a href="/registry/seal/spec/">Specification</a>
+    &middot; <a href="/registry/seal/verify/">Try the verifier</a>
+    &middot; report at <a href="mailto:security@croviatrust.com">security@croviatrust.com</a>
+  </div>
+</main>
+
+<script type="module">
+import { marked } from 'https://cdn.jsdelivr.net/npm/marked@12.0.2/+esm';
+const r = await fetch('/registry/seal/threat-model/THREAT_MODEL.md', { cache: 'no-cache' });
+const md = await r.text();
+document.getElementById('md').innerHTML = marked.parse(md);
+</script>
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c" defer></script>
+</body>
+</html>

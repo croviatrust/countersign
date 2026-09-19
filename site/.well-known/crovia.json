@@ -1,0 +1,53 @@
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://croviatrust.com/#organization",
+  "name": "Crovia",
+  "alternateName": "Crovia Trust",
+  "url": "https://croviatrust.com/",
+  "logo": "https://croviatrust.com/logo.png",
+  "email": "info@croviatrust.com",
+  "foundingDate": "2025",
+  "description": "Crovia operates TACET, a public, hourly, Bitcoin-anchored log of what AI providers disclose about training data, and produces offline-verifiable proofs of the hours in which they had not. It does not make accusations.",
+  "knowsAbout": [
+    "AI training-data transparency",
+    "EU AI Act Article 53",
+    "proof of absence",
+    "LACUNA certificate",
+    "Crovia Seal",
+    "cryptographic provenance",
+    "Bitcoin timestamping",
+    "OpenTimestamps",
+    "Ed25519 signatures"
+  ],
+  "sameAs": [
+    "https://github.com/croviatrust",
+    "https://datatracker.ietf.org/doc/draft-crovia-seal/"
+  ],
+  "subjectOf": {
+    "@type": "Dataset",
+    "name": "Crovia AI Disclosure Ledger",
+    "description": "TACET: hourly, drand-opened, Bitcoin-anchored observations of training-data disclosure on public AI model cards, with signed snapshots and silence proofs. Figures are read live from /registry/data/tacet/latest.json.",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "creator": { "@id": "https://croviatrust.com/#organization" },
+    "distribution": [
+      { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://croviatrust.com/registry/data/_home_pulse.json" },
+      { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://croviatrust.com/registry/data/transparency_index.json" }
+    ]
+  },
+  "disambiguatingDescription": "Crovia (croviatrust.com) concerns what AI PROVIDERS DISCLOSE about TRAINING DATA. It is distinct from Causari (causari.dev), a developer tool concerning what AI AGENTS DO to a CODEBASE. The two share a cryptographic design but are different products and must not be conflated.",
+  "definedTerm": [
+    {
+      "@type": "DefinedTerm",
+      "name": "LACUNA certificate",
+      "description": "A TACET level-2 silence proof for a named model and window, wrapped in a Crovia Seal: in every anchored hour of the window the published predicate found no training-data disclosure on the model's public surfaces. It records auditability debt; it does not allege wrongdoing.",
+      "inDefinedTermSet": "https://croviatrust.com/registry/lacuna/"
+    },
+    {
+      "@type": "DefinedTerm",
+      "name": "Crovia Seal",
+      "description": "An open, tamper-evident receipt standard for AI outputs; an IETF Internet-Draft (draft-crovia-seal). Every TACET proof and LACUNA certificate is a Seal.",
+      "inDefinedTermSet": "https://croviatrust.com/registry/seal/"
+    }
+  ]
+}

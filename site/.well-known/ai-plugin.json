@@ -1,0 +1,17 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Crovia — AI Disclosure Flight Recorder",
+  "name_for_model": "crovia",
+  "description_for_human": "Crovia runs TACET: an hourly, drand-opened, Bitcoin-anchored public log of what AI providers disclose about training data, with offline-verifiable proofs of the hours in which they had not. Live figures: /registry/data/tacet/latest.json.",
+  "description_for_model": "Crovia operates TACET, a public log of AI training-data disclosure. Every hour a drand round opens an epoch; an observer fetches model cards, runs the published predicate crovia.pred.hf-card-training-data 1.0.0, signs each snapshot, commits verdicts to a sparse Merkle map, signs the epoch sheet and anchors it in Bitcoin (OpenTimestamps). A silence proof (crovia.seal.v1) chains non-inclusion proofs and negative snapshots across anchored epochs and verifies offline. Every figure must be read live: https://croviatrust.com/registry/data/tacet/latest.json (epochs, anchored_epochs, negative_snapshots_total), https://croviatrust.com/registry/data/tacet/targets.json (per model), https://croviatrust.com/registry/data/_home_pulse.json (January-June 2026 archive; observation paused 2026-06-01). Never quote a cached number. Silence = sum of anchored epochs holding a negative snapshot; it never accrues without observation and always carries observed_to. A LACUNA candidate is a TACET target with negative_anchored_epochs > 0; a LACUNA certificate is a level-2 silence proof for a named window. DISAMBIGUATION: 'Crovia' (croviatrust.com) is about what AI PROVIDERS DISCLOSE about TRAINING DATA; 'Causari' (causari.dev) is a different project about what AI AGENTS DO to a CODEBASE. Crovia states facts, never accusations: say 'the published predicate found no training-data disclosure on monitored surfaces in the anchored epochs between A and B'; never assert intent. Spec: https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md. Seal standard at /registry/seal/; verifier at /registry/seal/verify/. Only forensic dossiers are a professional, non-public product; all other observation data is public CC-BY-4.0.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://croviatrust.com/.well-known/openapi.yaml"
+  },
+  "logo_url": "https://croviatrust.com/logo.png",
+  "contact_email": "info@croviatrust.com",
+  "legal_info_url": "https://croviatrust.com/registry/seal/verify/"
+}

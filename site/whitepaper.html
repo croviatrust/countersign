@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Crovia Whitepaper v3 — TACET: Verifiable Silence for AI Training Disclosure</title>
+<meta name="description" content="Crovia whitepaper v3.0 (September 2026). TACET: a public, hourly, drand-opened and Bitcoin-anchored log of what AI providers disclose about training data — and a way to prove, offline, that they did not. Crovia Seal, LACUNA certificates, the 2026 archive, threat model, business model, roadmap.">
+<link rel="canonical" href="https://croviatrust.com/whitepaper.html">
+<link rel="icon" type="image/png" href="https://croviatrust.com/logo.png">
+<meta property="og:title" content="Crovia Whitepaper v3 — Verifiable Silence">
+<meta property="og:description" content="How to prove, in a way that survives cross-examination, that an AI provider had not disclosed its training data during a given window.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://croviatrust.com/whitepaper.html">
+<meta property="og:image" content="https://croviatrust.com/og-card.png">
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  .wp{max-width:860px;margin:0 auto;padding:56px 24px 80px}
+  .wp-header{border-bottom:1px solid var(--border);padding-bottom:28px;margin-bottom:34px}
+  .wp-eyebrow{font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  .wp-header h1{font:700 clamp(32px,4.5vw,48px)/1.08 var(--sans);letter-spacing:-.03em;margin:12px 0 10px}
+  .wp-header .sub{font-size:18px;color:var(--text-soft)}
+  .wp-header .meta{margin-top:14px;font:400 12px var(--mono);color:var(--text-muted)}
+  .wp-header .meta span{margin:0 8px;color:var(--text-faint)}
+  .wp-header .meta a{color:var(--accent)}
+  .toc{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:40px}
+  .toc h3{font:600 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:28px;font-size:13.5px}
+  .toc li{margin:4px 0}
+  .toc a{color:var(--text-soft)}.toc a:hover{color:var(--accent)}
+  @media(max-width:640px){.toc ol{columns:1}}
+  .wp h2{font:700 24px/1.2 var(--sans);letter-spacing:-.02em;margin:56px 0 16px;padding-top:8px;border-top:1px solid var(--border)}
+  .wp h3{font:600 16px var(--sans);margin:26px 0 10px;color:#fff}
+  .wp p{font-size:15px;line-height:1.75;color:var(--text-soft);margin:0 0 14px}
+  .wp p strong,.wp li strong{color:#fff}
+  .wp ul,.wp ol{margin:0 0 16px 22px;color:var(--text-soft);font-size:15px;line-height:1.7}
+  .wp li{margin:4px 0}
+  .wp code{font:500 12.5px var(--mono);color:var(--accent);background:rgba(30,197,255,.08);padding:2px 6px;border-radius:4px}
+  .wp pre{background:#05070d;border:1px solid var(--border);border-radius:10px;padding:16px 18px;font:400 12.5px/1.7 var(--mono);color:var(--text-soft);overflow-x:auto;margin:0 0 18px}
+  .wp pre .c{color:var(--text-faint)}.wp pre .a{color:var(--accent)}
+  .wp table{width:100%;border-collapse:collapse;font-size:13.5px;margin:0 0 20px}
+  .wp th{text-align:left;font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);padding:8px 10px;border-bottom:1px solid var(--border)}
+  .wp td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--text-soft)}
+  .wp td:first-child{color:#fff;font-weight:500}
+  .badge{display:inline-block;font:600 10px var(--mono);letter-spacing:.08em;padding:2px 8px;border-radius:999px;text-transform:uppercase}
+  .badge-live{background:rgba(61,220,132,.12);color:#3ddc84;border:1px solid rgba(61,220,132,.35)}
+  .badge-arch{background:rgba(107,118,134,.15);color:var(--text-muted);border:1px solid var(--border-hi)}
+  .badge-plan{background:rgba(245,196,81,.12);color:#f5c451;border:1px solid rgba(245,196,81,.35)}
+  .badge-off{background:rgba(239,105,97,.12);color:#ff9b94;border:1px solid rgba(239,105,97,.35)}
+  .callout{background:var(--bg-card);border:1px solid var(--accent-line);border-left:3px solid var(--accent);border-radius:10px;padding:16px 20px;margin:0 0 20px}
+  .callout p{margin:0}
+  .sandwich{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:center;margin:8px 0 22px;font:500 12px var(--mono)}
+  .sandwich .b{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center;color:var(--text)}
+  .sandwich .b small{display:block;color:var(--text-muted);margin-top:6px;font-weight:400}
+  .sandwich .ar{color:var(--accent)}
+  @media(max-width:640px){.sandwich{grid-template-columns:1fr}.sandwich .ar{text-align:center;transform:rotate(90deg)}}
+  .wp .fine{font:400 12px var(--mono);color:var(--text-faint)}
+</style>
+</head>
+<body>
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="https://croviatrust.com/" class="cv-brand-link"><img src="https://croviatrust.com/logo.png" alt="" class="cv-brand-mark"><span class="cv-brand-name">CROVIA</span></a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+    <div class="cv-nav-status" id="cv-nav-status"><span class="dot"></span><span data-cv-status>connecting</span></div>
+  </div>
+</nav>
+
+<main class="wp">
+  <header class="wp-header">
+    <div class="wp-eyebrow">Whitepaper · v3.0 · September 2026</div>
+    <h1>Verifiable Silence for AI Training Disclosure</h1>
+    <div class="sub">TACET, the Crovia Seal, LACUNA certificates — and how to prove a negative in a way that survives cross-examination.</div>
+    <div class="meta">Crovia Trust<span>·</span><a href="mailto:info@croviatrust.com">info@croviatrust.com</a><span>·</span>supersedes <a href="/whitepaper-v2-2026-03.html">v2.0 (March 2026)</a><span>·</span>normative text: <a href="https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md" target="_blank" rel="noopener">TACET SPEC</a>, <a href="https://datatracker.ietf.org/doc/draft-crovia-seal/" target="_blank" rel="noopener">draft-crovia-seal</a></div>
+  </header>
+
+  <nav class="toc" aria-label="Contents">
+    <h3>Contents</h3>
+    <ol>
+      <li><a href="#abstract">Abstract</a></li>
+      <li><a href="#problem">The problem: absence has no witness</a></li>
+      <li><a href="#tacet">TACET in one page</a></li>
+      <li><a href="#sandwich">The temporal sandwich</a></li>
+      <li><a href="#map">The verifiable map</a></li>
+      <li><a href="#predicate">Surfaces and the public predicate</a></li>
+      <li><a href="#proofs">Silence proofs and strength levels</a></li>
+      <li><a href="#seal">Crovia Seal: the envelope</a></li>
+      <li><a href="#lacuna">LACUNA certificates</a></li>
+      <li><a href="#vendors">Commit-then-reveal for providers</a></li>
+      <li><a href="#archive">The 2026 archive</a></li>
+      <li><a href="#status">Operational status (honest table)</a></li>
+      <li><a href="#threats">Threat model</a></li>
+      <li><a href="#claims">What Crovia does and does not claim</a></li>
+      <li><a href="#business">Public, professional, and money</a></li>
+      <li><a href="#roadmap">Roadmap</a></li>
+      <li><a href="#verify">How to verify this document's claims</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="abstract">1. Abstract</h2>
+  <p>Regulators, courts and the public increasingly need to establish not what an AI provider <em>said</em> about its training data, but <strong>what it had not said, and for how long</strong>. Presence is easy to prove: a disclosure is published, hashed, timestamped. Absence is hard: an absence has no document, no author and no date, and the party who could produce one has every incentive not to.</p>
+  <p>Crovia runs <strong>TACET</strong>, a protocol and a live public service that turns the absence of disclosure into a verifiable object. Every hour a public randomness beacon opens an <em>epoch</em>. An observer fetches the public model cards of the AI systems under watch, runs a versioned, published predicate over the bytes (<em>does this card name its training data?</em>), signs each result, and commits all of them to one sparse Merkle map. The map root, the beacon and the Merkle root of the hour's snapshots are signed into an <em>epoch sheet</em> whose hash is timestamped in Bitcoin. A <strong>silence proof</strong> is the chain of non-inclusion proofs for one model across a range of anchored epochs, together with the negative snapshots that justify each hour. Anyone can verify it offline; nobody has to trust Crovia.</p>
+  <div class="callout"><p><strong>The claim TACET makes is narrow and defensible:</strong> "between these beacon rounds and these Bitcoin blocks, on these public surfaces, the published predicate returned <em>false</em> in every hour we observed, and here are the signed bytes." It never says why, and it never says what the provider knew.</p></div>
+
+  <h2 id="problem">2. The problem: absence has no witness</h2>
+  <p>Article 53 of the EU AI Act requires providers of general-purpose models to publish a sufficiently detailed summary of training content. Similar duties are emerging in other jurisdictions and in private contracts (licences, indemnities, M&amp;A warranties). Every such duty produces the same evidentiary question in dispute: <em>when did the disclosure appear, and what was there before?</em></p>
+  <ul>
+    <li><strong>The provider's own history is theirs to rewrite.</strong> A git history, a CMS, a model-hub README can be edited or force-pushed. Web archives are voluntary, sparse, and not designed to be adversarially robust.</li>
+    <li><strong>Third-party indices measure presence.</strong> Transparency indices score what companies choose to publish. They do not preserve, hour by hour, what was not there.</li>
+    <li><strong>A screenshot is not evidence of a negative.</strong> It shows one moment, from one vantage point, with no lower time bound and no proof of what was fetched.</li>
+  </ul>
+  <p>What is missing is an <strong>independent, continuous, tamper-evident witness of absence</strong> whose output can be checked by the party it is used against. That is the specification TACET was written to.</p>
+
+  <h2 id="tacet">3. TACET in one page</h2>
+  <table>
+    <tr><th>Element</th><th>What it is</th><th>Why it is there</th></tr>
+    <tr><td>Epoch</td><td>One hour, numbered from genesis <code>2026-09-19T18:00:00Z</code>.</td><td>Time is quantised so proofs are about intervals, not instants.</td></tr>
+    <tr><td>Beacon</td><td>A <a href="https://drand.love" target="_blank" rel="noopener">drand</a> quicknet round fetched at epoch start; chain hash pinned in the trust root.</td><td>Unpredictable randomness that did not exist before the hour began — a lower time bound.</td></tr>
+    <tr><td>Snapshot</td><td>Signed record of one fetch: URL, HTTP status, body SHA-256, TLS certificate SHA-256, IP, timing, predicate id + code hash, verdict, beacon round.</td><td>Binds the observation to the bytes and to the hour.</td></tr>
+    <tr><td>Predicate</td><td>A pure function <code>bytes → bool</code>, versioned and hashed. Current: <code>crovia.pred.hf-card-training-data</code> 1.0.0.</td><td>Removes judgement from the observer. Anyone can re-run it on the archived bytes.</td></tr>
+    <tr><td>Map</td><td>A 256-deep sparse Merkle map, key = SHA-256 of the canonical target id, value = the latest disclosure/commitment object or empty.</td><td>Efficient non-inclusion proofs; one root commits to the state of every model at once.</td></tr>
+    <tr><td>Epoch sheet</td><td>Signed object: map root, previous sheet hash, beacon, snapshots root, size.</td><td>Chains hours together; the thing that gets anchored.</td></tr>
+    <tr><td>Anchor</td><td>OpenTimestamps attestation of the sheet hash, confirmed in a Bitcoin block.</td><td>Upper time bound. Only anchored epochs count toward silence.</td></tr>
+    <tr><td>Silence proof</td><td>Delta-encoded chain of non-inclusion paths plus negative snapshots, for one target over a range of epochs, wrapped in a Crovia Seal.</td><td>The portable object a court or regulator receives.</td></tr>
+  </table>
+
+  <h2 id="sandwich">4. The temporal sandwich</h2>
+  <p>Every epoch is bounded on both sides by things Crovia does not control.</p>
+  <div class="sandwich">
+    <div class="b">drand round <em>r</em><small>public randomness · did not exist before epoch start</small></div>
+    <div class="ar">→</div>
+    <div class="b">epoch sheet<small>root · snapshots root · operator signature</small></div>
+    <div class="ar">→</div>
+    <div class="b">Bitcoin block <em>h</em><small>OpenTimestamps · sheet existed before this block</small></div>
+  </div>
+  <p>The beacon value is included in the signed region of the sheet and in every snapshot; the sheet hash is what the OpenTimestamps proof commits to. A verifier checks that the beacon round corresponds to the epoch's start time using drand's published genesis and period, and checks the OTS proof against the Bitcoin block header independently. Crovia cannot move an observation earlier than the beacon nor later than the block; it can only <em>omit</em> hours, and omitted hours contribute nothing to silence (§7).</p>
+
+  <h2 id="map">5. The verifiable map</h2>
+  <p>The map is a sparse Merkle tree of depth 256 with canonical empty-subtree hashes, domain-separated leaf and node hashing, and CSC-1 canonical JSON for all values. Slot transitions are <strong>forward-only</strong>: <code>empty → commitment → disclosure</code> or <code>empty → disclosure</code>. A disclosure is never removed. The map therefore answers, for any target and any epoch, exactly one of three states: <em>never-committed</em>, <em>committed-unrevealed</em>, <em>revealed</em>.</p>
+  <p>Non-inclusion across consecutive epochs is delta-encoded: the proof carries a full path for the first epoch and, for each later epoch, only the siblings that changed. For a map of a few thousand targets this keeps a month-long proof in the tens of kilobytes.</p>
+
+  <h2 id="predicate">6. Surfaces and the public predicate</h2>
+  <p>The primary surface for a Hugging Face model is <code>https://huggingface.co/&lt;org&gt;/&lt;model&gt;/raw/main/README.md</code>; the rendered model page is the fallback. The predicate examines YAML front-matter (<code>datasets:</code>), headings that name training data, and lead phrases in prose. It is deliberately <strong>permissive</strong>: a thin disclosure counts as present. TACET records absence; it does not grade quality.</p>
+  <p>The predicate's source is published in the <code>countersign</code> repository with real-card conformance vectors; its SHA-256 is recorded in every snapshot. A disagreement about a verdict is a disagreement about public code on public bytes — reproducible by either party.</p>
+
+  <h2 id="proofs">7. Silence proofs and strength levels</h2>
+  <table>
+    <tr><th>Level</th><th>Name</th><th>What is proven</th></tr>
+    <tr><td>1</td><td><code>map-silence</code></td><td>The slot was empty in every epoch of the range. Says nothing about the world; displayed only as "map silence".</td></tr>
+    <tr><td>2</td><td><code>surface-silence</code></td><td>Level 1, and for every counted epoch a negative snapshot exists, is included under that epoch's snapshots root, and carries the epoch's beacon. Only anchored epochs count. <strong>Minimum for any public statement.</strong></td></tr>
+    <tr><td>3</td><td><code>witnessed-silence (k/n)</code></td><td>Level 2, and every sheet carries at least <em>k</em> countersignatures from an independent witness set of size <em>n</em>.</td></tr>
+  </table>
+  <h3>The monotonicity rule</h3>
+  <pre>observed_epochs = #{ e : sheet(e).closed.status == "bitcoin" ∧ ∃ negative snapshot for target in e }
+silence_seconds = Σ over observed epochs of (epoch_end − epoch_start)
+silence_days    = silence_seconds / 86400</pre>
+  <p>Hours without a negative snapshot — observer down, surface unreachable, predicate error — contribute <strong>nothing</strong>. Unanchored hours contribute nothing. Operator downtime contributes nothing. Silence cannot grow while observation is paused, and any verifier can recompute the figure from the proof alone. Every displayed silence figure carries its <code>observed_to</code>.</p>
+
+  <h2 id="seal">8. Crovia Seal: the envelope</h2>
+  <p>Every TACET proof and every certificate is delivered as a <code>crovia.seal.v1</code> object — the tamper-evident receipt format specified in IETF Internet-Draft <a href="https://datatracker.ietf.org/doc/draft-crovia-seal/" target="_blank" rel="noopener">draft-crovia-seal</a>: CSC-1 canonicalization, Ed25519 signature, issuer identity, hash of the payload, optional hash-chain and countersignatures. The draft is frozen; TACET uses it unmodified, as a <em>profile</em>. The same envelope is used by <a href="https://causari.dev" target="_blank" rel="noopener">Causari</a> for a different payload, which is the point of a standard.</p>
+  <pre><span class="c"># three lines, offline</span>
+from crovia_seal import verify_seal
+seal = json.load(open("mistralai__Mistral-7B-v0.1.seal.json"))
+print(verify_seal(seal, trust_root))   <span class="c"># signature, canonical form, payload hash</span></pre>
+
+  <h2 id="lacuna">9. LACUNA certificates</h2>
+  <p>A <strong>LACUNA</strong> (loss-of-auditability) certificate is a TACET level-2 silence proof for a named model and a named window, wrapped in a Seal that Crovia signs as issuer, delivered with the archived surface bytes, the predicate source at the recorded hash, and a counsel-facing narrative that states exactly what is and is not asserted. Public candidates — every model with anchored negative hours — are listed live at <a href="/registry/lacuna/">/registry/lacuna/</a>; the proofs themselves are free under CC-BY-4.0. The certificate service is the paid, human part: window selection, packaging, declaration, and availability to explain the method.</p>
+  <p>A LACUNA certificate is not a fraud finding, not a statement that evidence never existed, not a claim of bad faith, not a compliance certification and not a quality grade. It is a record of what an independent observer saw, when, bounded by two public clocks.</p>
+
+  <h2 id="vendors">10. Commit-then-reveal for providers</h2>
+  <p>TACET is symmetric. A provider that wants protection against silence claims can <strong>pre-register</strong> a training-data summary: publish a Seal over <code>H(summary ‖ salt)</code>, have it inserted into its slot as a commitment, and reveal the summary at release. The temporal sandwich then proves timely, unchanged publication without depending on Crovia's honesty, and a silence proof for that slot becomes impossible by construction. The three states — never-committed, committed-unrevealed, revealed — are reported as such.</p>
+
+  <h2 id="archive">11. The 2026 archive</h2>
+  <p>From January to June 2026 Crovia operated a first-generation stack (the "AXIOM ledger": autonomous collectors, signed envelopes, batch Merkle seals, OpenTimestamps anchors) and a set of derived products — a transparency index, provenance graph, per-model passports, compliance timelines. Observation on that ledger <strong>paused on 2026-06-01</strong>. Its data remains public and verifiable under <code>/registry/data/substrate/</code> and is browsable through <a href="/registry/explore/">Explore</a>, <a href="/registry/verify/">Verify</a>, <a href="/registry/compliance/">Compliance</a> and <a href="/registry/provenance/">Provenance</a>. Its silence figures are observation-bounded and stop at the last observation.</p>
+  <p>The archive is why TACET exists in its current form. Three lessons from it are now normative: silence must not accrue without observation; headline numbers must be recomputable from public files; and every product name must map to exactly one object. The <a href="/whitepaper-v2-2026-03.html">March 2026 whitepaper</a> describes that stack and is kept for the record.</p>
+
+  <h2 id="status">12. Operational status</h2>
+  <p class="fine">As of 2026-09-19. This table is maintained together with the site canon; a component is "live" only if its output file on this domain is updating on schedule.</p>
+  <table>
+    <tr><th>Component</th><th>Status</th><th>Public output</th></tr>
+    <tr><td>TACET operator (hourly epochs, drand, OTS)</td><td><span class="badge badge-live">live</span></td><td><code>/registry/data/tacet/</code> — sheets, snapshots, values, changes, ots, latest.json, targets.json</td></tr>
+    <tr><td>TACET predicate <code>hf-card-training-data</code> 1.0.0</td><td><span class="badge badge-live">live</span></td><td>source + vectors in <code>countersign</code></td></tr>
+    <tr><td>Featured silence proofs (daily rebuild)</td><td><span class="badge badge-live">live</span></td><td><code>/registry/data/tacet/proofs/</code></td></tr>
+    <tr><td>Witness countersignatures (level 3)</td><td><span class="badge badge-plan">planned</span></td><td>—</td></tr>
+    <tr><td>Crovia Seal reference implementation (Python)</td><td><span class="badge badge-live">live</span></td><td><code>crovia-seal</code> on GitHub / PyPI; in-browser verifier</td></tr>
+    <tr><td>seal.croviatrust.com signing service + transparency log</td><td><span class="badge badge-live">live</span></td><td><code>/registry/data/seal/transparency_log.json</code></td></tr>
+    <tr><td>AXIOM ledger collectors</td><td><span class="badge badge-arch">archive</span></td><td>paused 2026-06-01; data public and anchored</td></tr>
+    <tr><td>Substrate root anchoring (OTS)</td><td><span class="badge badge-live">live</span></td><td><code>/registry/data/substrate/ots_anchors.json</code> — distinct roots only</td></tr>
+    <tr><td>Transparency index, provenance graph, passports, compliance hub</td><td><span class="badge badge-arch">archive</span></td><td>derived from the ledger; read-only</td></tr>
+    <tr><td>Outreach to model maintainers</td><td><span class="badge badge-off">stopped</span></td><td>voluntarily suspended; no automated contact is made</td></tr>
+    <tr><td>Forensic dossiers, memorization probes</td><td><span class="badge badge-live">on request</span></td><td>professional; engagement letter first</td></tr>
+  </table>
+
+  <h2 id="threats">13. Threat model</h2>
+  <ul>
+    <li><strong>Dishonest operator (Crovia).</strong> Cannot backdate (beacon), cannot postdate (Bitcoin), cannot remove a disclosure (forward-only slots), cannot fabricate a negative without producing bytes and a predicate verdict that anyone can re-run. <em>Can</em> omit hours; omitted hours count as nothing. <em>Can</em> stop; silence stops with it.</li>
+    <li><strong>Surface manipulation by the provider.</strong> A provider may serve different bytes to different clients. Snapshots record TLS certificate and IP; level 3 adds independent witnesses from different vantage points. Until then, a level-2 proof is a proof about what was served to Crovia's observer.</li>
+    <li><strong>Predicate disagreement.</strong> The predicate is public and hashed; a challenger can show a specific byte string on which it disagrees with human reading. That is a bug report, not a dispute about facts, and it is why the predicate is permissive.</li>
+    <li><strong>Beacon or Bitcoin failure.</strong> drand outage → the epoch is not opened and is skipped. OTS/Bitcoin delay → the epoch stays <em>pending</em> and does not count until confirmed.</li>
+    <li><strong>Key compromise.</strong> Operator, observer and issuer are separate Ed25519 keys published in the trust root; rotation is a new trust root entry with the previous key signing the next. Historical sheets remain verifiable against the key that was valid at the time.</li>
+  </ul>
+
+  <h2 id="claims">14. What Crovia does and does not claim</h2>
+  <table>
+    <tr><th>Crovia says</th><th>Crovia does not say</th></tr>
+    <tr><td>"The predicate returned false on these bytes, fetched at these times, from this URL."</td><td>"The provider hid its training data."</td></tr>
+    <tr><td>"These hours are bounded by beacon round <em>r</em> and Bitcoin block <em>h</em>."</td><td>"The provider knew it was non-compliant."</td></tr>
+    <tr><td>"This is the sum of anchored, observed hours; here is how to recompute it."</td><td>"This model is unsafe / low quality / infringing."</td></tr>
+    <tr><td>"Here are the exact bytes; run the predicate yourself."</td><td>"No disclosure existed anywhere in the world."</td></tr>
+  </table>
+
+  <h2 id="business">15. Public, professional, and money</h2>
+  <ul>
+    <li><strong>Public, free, CC-BY-4.0:</strong> every observation, sheet, snapshot, anchor and silence proof; every headline number and the file it is read from; the specifications, reference implementations and conformance vectors (Apache-2.0 / CC0).</li>
+    <li><strong>Professional, paid:</strong> signed LACUNA certificates for a named model and window (from €2,500); forensic dossiers and memorization probes for litigation and regulatory work; EU AI Act monitoring for a named portfolio; witness operation for organisations that want to countersign the log.</li>
+    <li><strong>No vendor money.</strong> Crovia does not accept payment from the providers it observes to alter targets, predicates or the log. Providers may use commit-then-reveal at no cost.</li>
+    <li><strong>Sustain:</strong> individual supporters fund observer and anchor costs; every contribution is receipted as a Seal.</li>
+  </ul>
+
+  <h2 id="roadmap">16. Roadmap</h2>
+  <table>
+    <tr><th>Item</th><th>Effect</th><th>Status</th></tr>
+    <tr><td>Independent witnesses (countersign protocol)</td><td>Level-3 proofs; removes the single-vantage-point limitation</td><td><span class="badge badge-plan">next</span></td></tr>
+    <tr><td>Second predicate: EU AI Act Art. 53 summary template</td><td>Distinguishes "some disclosure" from "the required summary" without grading</td><td><span class="badge badge-plan">planned</span></td></tr>
+    <tr><td>Additional surfaces (GitHub READMEs, provider documentation pages)</td><td>Same protocol, more of the world</td><td><span class="badge badge-plan">planned</span></td></tr>
+    <tr><td>Provider commitments in production</td><td>Commit-then-reveal available to any provider through the Seal service</td><td><span class="badge badge-plan">planned</span></td></tr>
+    <tr><td>Browser verifier for TACET proofs</td><td>Drag a <code>.seal.json</code>, verify without installing anything</td><td><span class="badge badge-plan">planned</span></td></tr>
+  </table>
+
+  <h2 id="verify">17. How to verify this document's claims</h2>
+  <pre><span class="c"># reference + operator (Python ≥ 3.10)</span>
+git clone https://github.com/croviatrust/countersign
+git clone https://github.com/croviatrust/crovia-seal
+pip install -e countersign/tacet/reference/python -e crovia-seal/reference/python -e countersign/tacet/operator
+pip install opentimestamps-client
+
+<span class="c"># the live log</span>
+curl -s https://croviatrust.com/registry/data/tacet/latest.json
+curl -s https://croviatrust.com/registry/data/tacet/trust_root.json
+
+<span class="c"># a proof, verified offline (recomputes roots, checks drand round, OTS anchors, signatures, silence)</span>
+curl -sO https://croviatrust.com/registry/data/tacet/proofs/<span class="a">mistralai__Mistral-7B-v0.1</span>.seal.json
+tacet-operator verify <span class="a">mistralai__Mistral-7B-v0.1</span>.seal.json</pre>
+  <p>The live pages at <a href="/registry/tacet/">/registry/tacet/</a> and <a href="/registry/lacuna/">/registry/lacuna/</a> read the same files. If a number on this site cannot be recomputed from a public file, it is a bug: <a href="mailto:info@croviatrust.com">info@croviatrust.com</a>.</p>
+  <p class="fine">Crovia Trust · Whitepaper v3.0 · 2026-09-19 · Text CC-BY-4.0 · Prior version: <a href="/whitepaper-v2-2026-03.html">v2.0, March 2026</a>.</p>
+</main>
+
+<footer class="cv-foot">
+  <div class="cv-foot-inner">
+    <div class="cv-foot-links">
+      <a href="https://croviatrust.com/">Verify</a>
+      <a href="/registry/tacet/">TACET</a>
+      <a href="/registry/lacuna/">LACUNA</a>
+      <a href="/registry/seal/">Seal</a>
+      <a href="/registry/api/">Data &amp; API</a>
+      <a href="mailto:info@croviatrust.com">Contact</a>
+    </div>
+    <div class="cv-foot-meta">&copy; 2026 Crovia Trust · observation facts only · all observation data CC-BY-4.0</div>
+  </div>
+</footer>
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c" defer></script>
+</body>
+</html>

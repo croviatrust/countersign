@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Seal Transparency Log · Crovia</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Public append-only log of Crovia Seal receipts. Download the chain, verify offline, prove a seal was issued — or was not.">
+<link rel="icon" type="image/png" href="https://croviatrust.com/logo.png">
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  .tlog-pill{display:inline-flex;padding:6px 14px;border:1px solid rgba(168,123,250,.35);background:rgba(168,123,250,.08);color:#c4b5fd;font:600 11px var(--mono);letter-spacing:.18em;text-transform:uppercase;border-radius:999px;margin-bottom:20px}
+  .tlog-hero h1{font:700 38px var(--sans);color:#fff;letter-spacing:-.02em;line-height:1.08;margin-bottom:14px}
+  .tlog-hero h1 em{color:var(--accent);font-style:normal}
+  .tlog-banner{background:rgba(91,140,255,.06);border:1px solid rgba(91,140,255,.28);border-radius:12px;padding:16px 20px;margin:4px 0 8px;font:400 13px/1.65 var(--sans);color:var(--text-soft)}
+  .tlog-banner strong{color:#fff}
+  .tlog-banner code{font:500 11px var(--mono);color:var(--accent)}
+  .tlog-banner a{color:var(--accent)}
+  .tlog-vok{color:#4ade80;margin-right:6px}
+  .tlog-vbad{color:#f87171;margin-right:6px}
+  .tlog-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:32px 0 40px}
+  .tlog-stat{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+  .tlog-stat .k{font:600 10px var(--mono);color:var(--text-muted);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px}
+  .tlog-stat .v{font:700 24px var(--mono);color:#fff}
+  .tlog-stat .v.ok{color:var(--accent)}
+  .tlog-stat .f{font:400 11px var(--mono);color:var(--text-faint);margin-top:4px}
+  .tlog-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px}
+  .tlog-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:9px;border:1px solid var(--border);background:var(--bg-card);color:#fff;font:600 13px var(--sans);text-decoration:none;cursor:pointer}
+  .tlog-btn:hover{border-color:var(--accent-line)}
+  .tlog-btn.primary{background:var(--accent);color:#000;border-color:var(--accent)}
+  .tlog-chain{padding:14px 18px;border-radius:10px;margin-bottom:28px;font:500 13px var(--sans);display:flex;align-items:center;gap:10px}
+  .tlog-chain.ok{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.3);color:#4ade80}
+  .tlog-chain.bad{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);color:#f87171}
+  .tlog-table{width:100%;border-collapse:collapse;font:400 12px var(--mono)}
+  .tlog-table th{text-align:left;padding:10px 12px;color:var(--text-muted);border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:.12em}
+  .tlog-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text-soft);vertical-align:top}
+  .tlog-table tr:hover td{background:rgba(255,255,255,.02)}
+  .tlog-table .sid{color:var(--accent);cursor:pointer;text-decoration:none}
+  .tlog-table .sid:hover{text-decoration:underline}
+  .tlog-issuers{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin-top:48px}
+  .tlog-issuer{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:18px}
+  .tlog-issuer .role{font:600 10px var(--mono);color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:8px}
+  .tlog-issuer h3{font:600 15px var(--sans);color:#fff;margin-bottom:6px}
+  .tlog-issuer p{font-size:12px;color:var(--text-faint);line-height:1.55}
+  .tlog-issuer code{font-size:10px;word-break:break-all;color:var(--text-muted)}
+</style>
+</head>
+<body>
+
+<nav class="cv-topbar">
+  <div class="cv-topbar-inner">
+    <a href="https://croviatrust.com/" class="cv-brand-link"><img src="https://croviatrust.com/logo.png" alt="" class="cv-brand-mark"><span class="cv-brand-name">CROVIA</span></a>
+    <button class="cv-nav-burger" data-cv-burger aria-label="Menu"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    <div class="cv-nav-links" id="cv-nav-links"></div>
+    <div class="cv-nav-status" id="cv-nav-status"><span class="dot"></span><span data-cv-status>connecting</span></div>
+  </div>
+</nav>
+
+<main class="cv-main">
+
+  <section class="tlog-hero">
+    <span class="tlog-pill">RFC 9162-style · append-only · verifiable</span>
+    <h1>The receipts<br><em>cannot be un-issued</em>.</h1>
+    <p class="cv-lede">Every Crovia Seal that enters this log is a permanent, signed commitment. Download the chain as <span style="font-family:var(--mono);color:var(--accent)">public_log.jsonl</span>, verify offline, and prove inclusion — or prove a seal was never submitted. No account. No trust us.</p>
+  </section>
+
+  <div class="tlog-banner">
+    <strong>What you are looking at.</strong> This log currently carries Crovia&rsquo;s <em>normative conformance vectors</em> &mdash; a reference chain of Seals from <code>crovia-seal/conformance</code>, <strong>not production traffic</strong>. That is deliberate: their Ed25519 signatures are real, and your browser verifies every one of them <strong>live below</strong> (CSC-1 canonicalization + Ed25519, no server in the loop). Production issuer traffic &mdash; <a href="https://causari.dev">Causari</a> first &mdash; is appended here as issuers onboard. Section 5 of <a href="https://datatracker.ietf.org/doc/draft-crovia-seal/">draft-crovia-seal-01</a> defines the RFC&nbsp;9162-style log this mirrors.
+  </div>
+
+  <div class="tlog-stats" id="stats">
+    <div class="tlog-stat"><div class="k">Seals in log</div><div class="v" id="s-total">—</div></div>
+    <div class="tlog-stat"><div class="k">Head sequence</div><div class="v ok" id="s-seq">—</div></div>
+    <div class="tlog-stat"><div class="k">Issuers</div><div class="v" id="s-issuers">—</div></div>
+    <div class="tlog-stat"><div class="k">Updated</div><div class="v" id="s-upd" style="font-size:14px">—</div></div>
+  </div>
+
+  <div class="tlog-chain ok" id="chain-status">Loading chain integrity…</div>
+
+  <div class="tlog-bar">
+    <a class="tlog-btn primary" href="/registry/data/seal/public_log.jsonl" download>Download full log (.jsonl)</a>
+    <a class="tlog-btn" href="/registry/seal/verify/">Verify any seal</a>
+    <button class="tlog-btn" id="btnCopyLog">Copy log URL</button>
+    <a class="tlog-btn" href="mailto:info@croviatrust.com?subject=Submit%20seals%20to%20transparency%20log">Submit your issuer's seals</a>
+  </div>
+
+  <div class="cv-sec-head">
+    <h2>Log entries</h2>
+    <span class="cv-sec-meta">newest first · click seal id to verify</span>
+  </div>
+
+  <table class="tlog-table">
+    <thead><tr><th>#</th><th>Seal ID</th><th>Issuer</th><th>Generator</th><th>Modality</th><th>Emitted</th></tr></thead>
+    <tbody id="tbody"><tr><td colspan="6" style="color:var(--text-faint)">Loading…</td></tr></tbody>
+  </table>
+
+  <div class="tlog-issuers" id="issuers"></div>
+
+  <p style="margin-top:48px;font-size:13px;color:var(--text-soft);max-width:680px;line-height:1.65">
+    <strong style="color:#fff">Production issuers:</strong> run <a href="https://causari.dev" style="color:var(--accent)">Causari</a> with <code style="color:var(--accent)">re proxy --seal</code>, then submit your append-only <code>seals.jsonl</code> for inclusion. A full RFC&nbsp;9162-style Merkle log service is the subject of a companion profile to <a href="https://datatracker.ietf.org/doc/draft-crovia-seal/" style="color:var(--accent)">draft-crovia-seal</a> (Section&nbsp;5, Informative); today this page is the human-readable mirror and every entry is independently verifiable — here, or offline with the <a href="/registry/seal/verify/" style="color:var(--accent)">reference verifier</a>.
+  </p>
+
+</main>
+
+<footer class="cv-foot">
+  <div class="cv-foot-inner">
+    <div class="cv-foot-links">
+      <a href="/registry/seal/">Seal standard</a>
+      <a href="/registry/seal/verify/">Verifier</a>
+      <a href="/registry/seal/log/">Transparency log</a>
+      <a href="mailto:info@croviatrust.com">Contact</a>
+    </div>
+    <div class="cv-foot-meta">&copy; 2026 Crovia Trust · Append-only. Verifiable. No takebacks.</div>
+  </div>
+</footer>
+
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c"></script>
+<script>
+(function(){
+  var LOG = '/registry/data/seal/public_log.jsonl';
+  var META = '/registry/data/seal/transparency_log.json';
+
+  function esc(s){ return String(s||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  /* CSC-1 canonicalization + Ed25519 verification, ported verbatim from the
+     Crovia Seal reference verifier (/registry/seal/verify/). draft-crovia-seal-01 3.7. */
+  var _enc = new TextEncoder();
+  function canonString(s){ var out='"'; for(const ch of s){ var c=ch.codePointAt(0);
+    if(ch==='"')out+='\\"'; else if(ch==='\\')out+='\\\\'; else if(c===8)out+='\\b';
+    else if(c===12)out+='\\f'; else if(c===10)out+='\\n'; else if(c===13)out+='\\r';
+    else if(c===9)out+='\\t'; else if(c<0x20)out+='\\u'+c.toString(16).padStart(4,'0'); else out+=ch; }
+    return out+'"'; }
+  function csc1(value){ if(value===null)return 'null'; var t=typeof value;
+    if(t==='boolean')return value?'true':'false';
+    if(t==='number'){ if(!Number.isInteger(value))throw new Error('float in signed payload'); return String(value); }
+    if(t==='string')return canonString(value);
+    if(Array.isArray(value))return '['+value.map(csc1).join(',')+']';
+    if(t==='object'){ var keys=Object.keys(value).sort(); return '{'+keys.map(function(k){return canonString(k)+':'+csc1(value[k]);}).join(',')+'}'; }
+    throw new Error('unsupported type '+t); }
+  function hexToBytes(hex){ var out=new Uint8Array(hex.length/2); for(var i=0;i<out.length;i++)out[i]=parseInt(hex.substr(i*2,2),16); return out; }
+  function payloadOf(seal){ var stripped={}; Object.keys(seal).forEach(function(k){ if(k!=='signature'&&k!=='witnesses')stripped[k]=seal[k]; });
+    var canonBytes=_enc.encode(csc1(stripped));
+    var payload=new Uint8Array(15+canonBytes.length);
+    payload.set(_enc.encode('CROVIA-SEAL-v1'),0); payload[14]=0x0A; payload.set(canonBytes,15);
+    return payload; }
+  var _noble=null;
+  async function ed25519Verify(sigBytes,msgBytes,pubBytes){
+    try{ var key=await crypto.subtle.importKey('raw',pubBytes,{name:'Ed25519'},false,['verify']);
+      return await crypto.subtle.verify('Ed25519',key,sigBytes,msgBytes); }
+    catch(_){ if(!_noble)_noble=await import('https://cdn.jsdelivr.net/npm/@noble/ed25519@2/+esm'); return await _noble.verifyAsync(sigBytes,msgBytes,pubBytes); } }
+  async function verifySealSig(seal){
+    try{ var payload=payloadOf(seal);
+      var sig=hexToBytes(((seal.signature||{}).sig_hex)||'');
+      var pub=hexToBytes((((seal.issuer||{}).pubkey)||{}).key_hex||'');
+      return await ed25519Verify(sig,payload,pub); }
+    catch(e){ return false; } }
+
+  document.getElementById('btnCopyLog').addEventListener('click', function(){
+    var url = location.origin + LOG;
+    navigator.clipboard.writeText(url).then(function(){ window.cvToast && cvToast('log URL copied'); });
+  });
+
+  Promise.all([
+    fetch(LOG, {cache:'no-store'}).then(function(r){ return r.text(); }),
+    fetch(META, {cache:'no-store'}).then(function(r){ return r.json(); }).catch(function(){ return {}; })
+  ]).then(async function(res){
+    var text = res[0], meta = res[1];
+    var lines = text.trim().split('\n').filter(Boolean);
+    var seals = lines.map(function(l){ return JSON.parse(l); });
+
+    document.getElementById('s-total').textContent = meta.stats ? meta.stats.total_seals : seals.length;
+    document.getElementById('s-seq').textContent = meta.stats ? meta.stats.head_sequence : (seals[seals.length-1].chain||{}).sequence;
+    document.getElementById('s-issuers').textContent = meta.issuers ? meta.issuers.length : '—';
+    document.getElementById('s-upd').textContent = (meta.updated_at||'').slice(0,10) || 'live';
+
+    var el = document.getElementById('chain-status');
+    el.className = 'tlog-chain';
+    el.textContent = '⧗ Verifying ' + seals.length + ' Ed25519 signatures in your browser…';
+    var results = {}, okCount = 0;
+    for (var vi=0; vi<seals.length; vi++){
+      var v = await verifySealSig(seals[vi]);
+      results[seals[vi].seal_id] = v;
+      if (v) okCount++;
+    }
+    var allOk = okCount === seals.length;
+    el.className = 'tlog-chain ' + (allOk ? 'ok' : 'bad');
+    el.textContent = (allOk ? '✓ ' : '✗ ') + okCount + '/' + seals.length + ' signatures verified live in this browser · CSC-1 + Ed25519, no server · download the log and re-check offline';
+
+    var tbody = document.getElementById('tbody');
+    tbody.innerHTML = '';
+    seals.slice().reverse().forEach(function(s){
+      var tr = document.createElement('tr');
+      var seq = (s.chain||{}).sequence;
+      var sid = s.seal_id||'';
+      var verifyHref = '/registry/seal/verify/?seal=' + encodeURIComponent(JSON.stringify(s));
+      var vok = results[sid];
+      var badge = vok ? '<span class="tlog-vok" title="signature verified live">✓</span>' : '<span class="tlog-vbad" title="signature check failed">✗</span>';
+      tr.innerHTML =
+        '<td>' + esc(seq) + '</td>' +
+        '<td>' + badge + '<a class="sid" href="' + esc(verifyHref) + '">' + esc(sid.slice(0,22)) + '…</a></td>' +
+        '<td>' + esc((s.issuer||{}).id||'').replace('urn:crovia:seal-issuer:','') + '</td>' +
+        '<td>' + esc((s.generator||{}).id||'') + '</td>' +
+        '<td>' + esc((s.subject||{}).modality||'') + '</td>' +
+        '<td>' + esc((s.timestamp||{}).emitted_at||'').slice(0,19) + '</td>';
+      tbody.appendChild(tr);
+    });
+
+    var iss = document.getElementById('issuers');
+    (meta.issuers||[]).forEach(function(i){
+      var d = document.createElement('div');
+      d.className = 'tlog-issuer';
+      d.innerHTML = '<div class="role">' + esc(i.role) + '</div><h3>' + esc(i.label) + '</h3><p>' + esc(i.note||'') + '</p>' +
+        (i.pubkey_hex ? '<p style="margin-top:8px"><code>' + esc(i.pubkey_hex) + '</code></p>' : '') +
+        (i.url ? '<p style="margin-top:8px"><a href="' + esc(i.url) + '" style="color:var(--accent)">' + esc(i.url) + ' ↗</a></p>' : '');
+      iss.appendChild(d);
+    });
+  }).catch(function(e){
+    document.getElementById('chain-status').className = 'tlog-chain bad';
+    document.getElementById('chain-status').textContent = 'Failed to load log: ' + e.message;
+  });
+})();
+</script>
+</body>
+</html>

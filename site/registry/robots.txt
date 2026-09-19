@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+Allow: /registry/
+Allow: /registry/tpa
+Allow: /registry/verify
+Allow: /registry/compliance
+Allow: /registry/omissions
+Allow: /registry/provenance/
+Allow: /registry/ranking
+Allow: /registry/outreach
+Allow: /registry/forensics
+Allow: /registry/cep/
+
+# Data files: allow index pages, disallow raw JSON bulk download
+Disallow: /registry/data/
+Disallow: /data/
+Disallow: /api/targets/summary
+Disallow: /api/ledger/
+
+# Sitemap
+Sitemap: https://registry.croviatrust.com/sitemap.xml

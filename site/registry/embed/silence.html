@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Crovia Silence Index — embed</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root {
+    --bg: #000; --surface: #0a1018; --border: rgba(30,197,255,.18);
+    --accent: #1ec5ff; --red: #ef4444; --text: #e8e8e8; --muted: #6c7988;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --sans: Inter, system-ui, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: transparent; color: var(--text); font-family: var(--sans); }
+  .si {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    max-width: 420px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .si-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .si-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .si-label { font: 600 10px var(--mono); letter-spacing: .18em; text-transform: uppercase; color: var(--red); }
+  .si-target { font: 600 15px var(--sans); color: #fff; margin-bottom: 4px; word-break: break-all; }
+  .si-num { font: 800 42px/1 var(--mono); color: #fff; letter-spacing: -1px; }
+  .si-unit { font: 500 13px var(--muted); margin-top: 4px; }
+  .si-meta { margin-top: 14px; font: 400 11px var(--mono); color: var(--muted); }
+  .si-meta strong { color: var(--accent); font-weight: 600; }
+  .si-foot { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .si-brand { font: 600 10px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+  .si-brand a { color: var(--accent); text-decoration: none; }
+  .si-loading { color: var(--muted); font-style: italic; padding: 24px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="si" id="widget">
+  <div class="si-loading">Loading Silence Index…</div>
+</div>
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var target = params.get('target') || '';
+  var el = document.getElementById('widget');
+  var DATA = '/registry/data/silence_index.json';
+
+  fetch(DATA, { cache: 'no-store' })
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      var row = null;
+      if (target) {
+        row = (d.top_100 || []).find(function (x) { return x.target_id === target; });
+      }
+      if (!row) row = d.top_silent || (d.top_100 && d.top_100[0]);
+      if (!row) { el.innerHTML = '<div class="si-loading">No data</div>'; return; }
+
+      var name = row.target_id.replace('/', ' / ');
+      el.innerHTML =
+        '<div class="si-head"><span class="si-dot"></span><span class="si-label">Unexplained AI silence</span></div>' +
+        '<div class="si-target">' + esc(name) + '</div>' +
+        '<div class="si-num">' + row.silence_days + '</div>' +
+        '<div class="si-unit">days without verifiable disclosure update on public surfaces Crovia monitors</div>' +
+        '<div class="si-meta">Observed <strong>' + fmt(row.first_seen) + '</strong> → last check <strong>' + fmt(row.last_seen) + '</strong> · ledger <strong>' + (d.ledger_lines_scanned || '—').toLocaleString() + '</strong> envelopes</div>' +
+        '<div class="si-foot">' +
+          '<span class="si-brand"><a href="https://croviatrust.com/#watch" target="_blank" rel="noopener">Crovia</a> · Silence Index</span>' +
+          '<span class="si-brand"><a href="https://croviatrust.com/registry/lacuna/" target="_blank" rel="noopener">LACUNA →</a></span>' +
+        '</div>';
+    })
+    .catch(function () {
+      el.innerHTML = '<div class="si-loading">Silence Index offline</div>';
+    });
+
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function fmt(iso) {
+    if (!iso) return '—';
+    return iso.slice(0, 10);
+  }
+})();
+</script>
+</body>
+</html>
