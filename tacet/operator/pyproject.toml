@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "crovia-tacet-operator"
-version = "0.1.0"
+version = "0.1.1"
 description = "Production operator for TACET: hourly epochs, signed surface snapshots, OTS anchoring, silence proofs as crovia.seal.v1"
 readme = "README.md"
 license = { text = "Apache-2.0" }

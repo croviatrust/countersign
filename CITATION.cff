@@ -9,7 +9,7 @@ authors:
 repository-code: https://github.com/croviatrust/countersign
 url: https://croviatrust.com/registry/tacet/
 license: Apache-2.0
-version: 0.1.0
+version: 0.1.1
 date-released: 2026-09-19
 keywords:
   - AI transparency
