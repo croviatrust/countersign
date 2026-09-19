@@ -97,7 +97,8 @@ def main(argv=None) -> int:
         from .publish import publish_all
         from .runner import refresh_anchors
         counts = refresh_anchors(s)
-        publish_all(s, load_all(s.paths.keys))
+        # A newly closed sheet changes every silence figure; re-issue the featured proofs at once.
+        publish_all(s, load_all(s.paths.keys), with_proofs=counts.get("closed", 0) > 0)
         print(json.dumps(counts))
         return 0
 
