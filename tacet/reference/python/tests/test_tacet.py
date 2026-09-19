@@ -229,3 +229,24 @@ def test_wrapped_proof_is_a_valid_seal(proof3, sc):
 def test_silence_days_is_truncated_two_decimals(seconds, expected):
     from tacet.silence import format_silence_days
     assert format_silence_days(seconds) == expected
+
+
+def test_ots_live_anchor_vectors_parse_and_verify():
+    import hashlib
+    import json
+    from pathlib import Path
+
+    from tacet import ots
+    vec = json.loads((Path(__file__).resolve().parents[3] / "conformance" / "vectors" / "v1" / "ots_001_live_anchors.json").read_text())
+    for c in vec["cases"]:
+        data = bytes.fromhex(c["ots_hex"])
+        sh = bytes.fromhex(c["sheet_hash"][7:])
+        p = ots.parse(data)
+        assert p.file_hash_op == ots.OP_SHA256 and p.file_digest == hashlib.sha256(sh).digest()
+        assert c["merkle_root"] in ots.expected_merkle_roots(data)[c["block_height"]]
+        assert ots.verify_sheet_anchor(data, sh, c["block_height"], lambda h, c=c: c["merkle_root"])[0] is True
+        assert ots.verify_sheet_anchor(data, sh, c["block_height"], lambda h: "00" * 32)[0] is False
+        assert ots.verify_sheet_anchor(data, sh, c["block_height"], None)[0] is None
+        assert ots.verify_sheet_anchor(data, b"\x01" * 32, c["block_height"], lambda h, c=c: c["merkle_root"])[0] is False
+    with pytest.raises(ots.OTSError):
+        ots.parse(b"not a proof")

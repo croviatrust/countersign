@@ -181,7 +181,9 @@ signs an epoch sheet:
 - `closed` is an OpenTimestamps attestation of `sheet_hash` confirmed in a
   Bitcoin block. The sheet existed before that block. **Upper time bound.**
   The `closed` field is filled in after confirmation and is outside the
-  signed region; verifiers check it independently against the OTS proof.
+  signed region; verifiers check it independently against the OTS proof
+  (§8.6). `anchored_digest` MUST equal `sheet_hash`; `proof_ref` locates the
+  `.ots` file; `block_height` is the Bitcoin block carrying the attestation.
 - `snapshots_root` is the Merkle root (RFC 6962 tree) of all snapshot hashes
   taken during the epoch (§7), so that every observation is bound to the
   epoch's temporal sandwich.
@@ -341,6 +343,29 @@ every displayed silence figure.
    bitcoin`) verify the OTS proof of `sheet_hash` and record the block time.
 3. Reconstruct the path per epoch from `paths`; for each epoch recompute the
    root from `EMPTY[0]`; require equality with `sheets[i].root`.
+
+### 8.6 Checking the Bitcoin anchor without a Bitcoin node
+
+The `.ots` file at `closed.proof_ref` is a standard OpenTimestamps proof
+(magic `\x00OpenTimestamps\x00\x00Proof\x00\xbf\x89\xe2\xe8\x84\xe8\x92\x94`,
+version 1). Its *file digest* is `SHA-256(raw_bytes(sheet_hash))`, the 32
+sheet-hash bytes stamped as a file, so a verifier first checks
+
+```
+ots.file_hash_op == sha256  ∧  ots.file_digest == SHA-256(unhex(sheet_hash))
+```
+
+then walks the operation tree (`append`, `prepend`, `sha256`, `ripemd160`,
+`sha1`, `reverse`, `hexlify`) from that digest. Every leaf that is a
+`BitcoinBlockHeaderAttestation(height)` states that the 32-byte message at
+that leaf **is the merkle root of block `height`** (internal byte order; block
+explorers display it byte-reversed). The anchor verifies iff at least one such
+leaf has `height == closed.block_height` and its message equals the merkle
+root in that block's header, obtained from any header source the verifier
+trusts — a full node, a headers file, or a public explorer. `PendingAttestation`
+leaves (calendar URLs) are ignored. A verifier that cannot reach a header
+source MUST report the anchor as *unchecked*, never as failed, and MUST print
+the height and expected merkle root so a human can check them elsewhere.
 4. Level ≥ 2: verify each snapshot's observer signature, `beacon_round`,
    `result == false`, `target_id`, and its inclusion in the epoch's
    `snapshots_root`. Recompute `silence` per §8.4 and require equality with
@@ -450,7 +475,12 @@ An implementation is conformant if it passes the vectors in
 proofs, delta-chain reconstruction, sheet signature and chaining, silence
 computation under paused observation, rejection of a proof with a missing
 sheet, rejection of a proof whose silence block overstates observed epochs,
-and round-trip of the Seal wrapper against the Crovia Seal reference verifier.
+round-trip of the Seal wrapper against the Crovia Seal reference verifier, and
+the §8.6 anchor check over real OpenTimestamps proofs of live sheets (parse,
+file-digest binding, Bitcoin attestation at the recorded height, merkle-root
+match, and the three ways it must fail plus the one way it must stay unchecked).
+Two implementations pass them today: `tacet/reference/python` and the browser
+verifier in `site/registry/seal/verify/`.
 
 ---
 

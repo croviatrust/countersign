@@ -225,7 +225,7 @@ print(verify_seal(seal, trust_root))   <span class="c"># signature, canonical fo
     <tr><td>Second predicate: EU AI Act Art. 53 summary template</td><td>Distinguishes "some disclosure" from "the required summary" without grading</td><td><span class="badge badge-plan">planned</span></td></tr>
     <tr><td>Additional surfaces (GitHub READMEs, provider documentation pages)</td><td>Same protocol, more of the world</td><td><span class="badge badge-plan">planned</span></td></tr>
     <tr><td>Provider commitments in production</td><td>Commit-then-reveal available to any provider through the Seal service</td><td><span class="badge badge-plan">planned</span></td></tr>
-    <tr><td>Browser verifier for TACET proofs</td><td>Drag a <code>.seal.json</code>, verify without installing anything</td><td><span class="badge badge-plan">planned</span></td></tr>
+    <tr><td>Browser verifier for TACET proofs</td><td>Load a <code>.seal.json</code> by URL or paste; verifies signatures, roots, snapshots, silence and the Bitcoin anchors (SPEC §8.6) without installing anything</td><td><span class="badge badge-live">live</span></td></tr>
   </table>
 
   <h2 id="verify">17. How to verify this document's claims</h2>
@@ -239,7 +239,7 @@ pip install opentimestamps-client
 curl -s https://croviatrust.com/registry/data/tacet/latest.json
 curl -s https://croviatrust.com/registry/data/tacet/trust_root.json
 
-<span class="c"># a proof, verified offline (recomputes roots, checks drand round, OTS anchors, signatures, silence)</span>
+<span class="c"># a proof, verified (recomputes roots, checks drand rounds, parses the OTS proofs and matches Bitcoin headers, signatures, silence)</span>
 curl -sO https://croviatrust.com/registry/data/tacet/proofs/<span class="a">mistralai__Mistral-7B-v0.1</span>.seal.json
 tacet-operator verify <span class="a">mistralai__Mistral-7B-v0.1</span>.seal.json</pre>
   <p>The live pages at <a href="/registry/tacet/">/registry/tacet/</a> and <a href="/registry/lacuna/">/registry/lacuna/</a> read the same files. If a number on this site cannot be recomputed from a public file, it is a bug: <a href="mailto:info@croviatrust.com">info@croviatrust.com</a>.</p>

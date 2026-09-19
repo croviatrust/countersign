@@ -38,23 +38,23 @@ epoch in Bitcoin. When a lab stays silent, the silence stops being an opinion.
 
 ## Verify a live proof in 30 seconds
 
-**In the browser, nothing to install:**
-[croviatrust.com/registry/seal/verify/?url=…mistralai__Mistral-7B-v0.1.seal.json](https://croviatrust.com/registry/seal/verify/?url=https%3A%2F%2Fcroviatrust.com%2Fregistry%2Fdata%2Ftacet%2Fproofs%2Fmistralai__Mistral-7B-v0.1.seal.json)
-— `site/registry/seal/verify/tacet-verify.js` is a second, independent implementation of
-SPEC §8.5 (under 300 lines of plain JS on WebCrypto) and runs against the same
-conformance vectors in CI. The only step it leaves to the command line is the
-OpenTimestamps attestation.
+**In the browser, nothing to install, including the Bitcoin anchors:**
+[croviatrust.com/registry/seal/verify/?url=…Qwen__Qwen3-32B.seal.json](https://croviatrust.com/registry/seal/verify/?url=https%3A%2F%2Fcroviatrust.com%2Fregistry%2Fdata%2Ftacet%2Fproofs%2FQwen__Qwen3-32B.seal.json)
+— `site/registry/seal/verify/tacet-verify.js` + `ots-verify.js` are a second, independent
+implementation of SPEC §8.5–8.6 in plain JS on WebCrypto. With network checks on, the page
+parses every OpenTimestamps proof itself and compares its merkle root with the Bitcoin
+block header from a public explorer. No Bitcoin node, no `ots` client, no Crovia server
+trusted.
 
-**On the command line, everything including the Bitcoin anchors:**
+**On the command line, same checks, pure Python, standard library only for the anchors:**
 
 ```bash
 git clone https://github.com/croviatrust/countersign
 git clone https://github.com/croviatrust/crovia-seal
 pip install -e countersign/tacet/reference/python -e crovia-seal/reference/python -e countersign/tacet/operator
-pip install opentimestamps-client   # optional: verifies the Bitcoin anchors too
 
-curl -sO https://croviatrust.com/registry/data/tacet/proofs/mistralai__Mistral-7B-v0.1.seal.json
-tacet-operator verify mistralai__Mistral-7B-v0.1.seal.json
+curl -sO https://croviatrust.com/registry/data/tacet/proofs/Qwen__Qwen3-32B.seal.json
+tacet-operator verify Qwen__Qwen3-32B.seal.json
 ```
 
 ```json
@@ -62,22 +62,28 @@ tacet-operator verify mistralai__Mistral-7B-v0.1.seal.json
  "ok": true,
  "seal_ok": true,
  "issuer_id": "urn:crovia:seal-issuer:tacet",
- "seal_id": "cs_2026_RNJ7YAYIYQATT4CSBMVB5RJYNY",
  "strength_verified": 2,
- "silence": { "map_epochs": 2, "observed_epochs": 0, "observed_to": null, "silence_days": "0.00" },
- "errors": []
+ "silence": { "map_epochs": 3, "observed_epochs": 3,
+              "observed_from": "2026-09-19T18:00:00Z", "observed_to": "2026-09-19T21:00:00Z",
+              "silence_seconds": 10800, "silence_days": "0.12" },
+ "anchors": [
+  "block 967736 merkle root a27c668a4d320942f8cb3906efbfefefaedda9d760d5d52bdb74f7a7e0f1a0d4 matches the proof",
+  "block 967736 merkle root a27c668a4d320942f8cb3906efbfefefaedda9d760d5d52bdb74f7a7e0f1a0d4 matches the proof",
+  "block 967740 merkle root a41b0f50275c48922c27d6335434b5afb91ddc4bb4f80e9d96edd1e9f3b16af7 matches the proof"
+ ],
+ "errors": [], "warnings": []
 }
 ```
 
-(Output from the first day of the log: two epochs in the map, none yet confirmed in
-Bitcoin, so `observed_epochs` is 0 and the silence figure is 0.00 — by construction.
-The featured proofs are rebuilt daily; the numbers grow only as anchors confirm.)
+(Output from the first three hours of the log, all three confirmed in Bitcoin blocks
+967736 and 967740. `silence_days` is truncated, never rounded: 10 800 s is `0.12`.)
 
 The verifier recomputes every map root from the empty tree, checks the chain of
-sheets, checks that each drand round matches its epoch start, fetches each
-OpenTimestamps proof and verifies it against the sheet hash, verifies the observer
-signature on every negative snapshot and its Merkle inclusion in the hour, and
-recomputes the silence figure. No Crovia server is trusted at any step.
+sheets, checks that each drand round matches its epoch start, parses each
+OpenTimestamps proof and matches its merkle root to the Bitcoin block header,
+verifies the observer signature on every negative snapshot and its Merkle inclusion
+in the hour, and recomputes the silence figure. Run a node? Pass your own header
+source to `tacet.ots.verify_sheet_anchor`; the explorer is only the default.
 
 ## How an hour becomes evidence
 
@@ -123,7 +129,7 @@ summary (SPEC §11). A committed slot can never yield a silence proof.
 ```
 tacet/SPEC.md                    The protocol, v0.1-draft (CC0)
 tacet/reference/python/          Reference implementation: SMT, epoch sheets, snapshots, proofs, Seal wrapping
-tacet/conformance/               Deterministic vectors + 34-case runner (Python) + Node runner for the browser verifier — port this to other languages
+tacet/conformance/               Deterministic vectors + real Bitcoin-anchored .ots vectors; 47-case runner (Python) + 20-case Node runner for the browser verifier — port this to other languages
 tacet/operator/                  Production operator: run-epoch, refresh-anchors, publish, prove, verify
 tacet/operator/tacet_operator/predicates/   Public predicates with real-card vectors
 CANON.md, canon/canon.json       Single source of truth for every Crovia surface: names, formats, numbers, endpoints
@@ -135,8 +141,8 @@ src/countersign/                 Original countersign: CT-style Merkle log + sig
 ```bash
 cd tacet/reference/python && python -m pytest -q      # reference: 28 passed
 cd tacet/operator          && python -m pytest -q      # operator: predicate vectors, fake-network epochs, proof round-trip
-python tacet/conformance/run_conformance.py            # 34 passed, 0 failed
-node   tacet/conformance/run_conformance_js.cjs        # browser verifier against the same vectors: 10 passed
+python tacet/conformance/run_conformance.py            # 47 passed, 0 failed
+node   tacet/conformance/run_conformance_js.cjs        # browser verifier against the same vectors: 20 passed
 ```
 
 ## Public data
@@ -167,7 +173,7 @@ open an issue if you want to run one.
 |---|---|
 | Live operator | croviatrust.com, hourly, since 2026-09-19 18:00 UTC |
 | Predicate | `crovia.pred.hf-card-training-data` 1.0.0 (Hugging Face model cards) |
-| Anchoring | OpenTimestamps → Bitcoin; refreshed every 6 h |
+| Anchoring | OpenTimestamps → Bitcoin; refreshed every 2 h; verifiable without a node (SPEC §8.6) |
 | Proof strength in production | 2 (level 3 needs independent witnesses — planned) |
 | Seal format | `crovia.seal.v1`, IETF `draft-crovia-seal`, unmodified |
 

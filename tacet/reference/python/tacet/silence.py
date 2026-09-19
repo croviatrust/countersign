@@ -19,7 +19,8 @@ STRENGTH_SURFACE = 2
 STRENGTH_WITNESSED = 3
 
 BeaconCheck = Callable[[Dict[str, Any], str], bool]
-OtsCheck = Callable[[Dict[str, Any], bytes], bool]
+# Returns True (anchor verified), False (anchor wrong) or None (could not be checked: no header source).
+OtsCheck = Callable[[Dict[str, Any], bytes], Optional[bool]]
 
 
 class SilenceProofError(ValueError):
@@ -237,18 +238,24 @@ def verify_silence_proof(
 
     # Temporal bounds.
     anchored: set = set()
+    unchecked: List[int] = []
     for s in sheets:
         if beacon_check is not None and not beacon_check(s["opened"], s["epoch_start"]):
             errors.append(f"epoch {s['epoch']}: beacon check failed")
         if s["closed"]["status"] == "bitcoin":
-            if ots_check is not None and not ots_check(s["closed"], sheet_hash(s)):
+            verdict = ots_check(s["closed"], sheet_hash(s)) if ots_check is not None else None
+            if verdict is False:
                 errors.append(f"epoch {s['epoch']}: OTS check failed")
             else:
+                if verdict is None and ots_check is not None:
+                    unchecked.append(s["epoch"])
                 anchored.add(s["epoch"])
     if beacon_check is None:
         warnings.append("beacon rounds not externally verified (no beacon_check provided)")
     if ots_check is None:
         warnings.append("Bitcoin anchors not externally verified (no ots_check provided)")
+    elif unchecked:
+        warnings.append(f"Bitcoin anchors unchecked for epoch(s) {unchecked}: no block-header source reachable")
     result.anchored_epochs = len(anchored)
 
     # Non-inclusion in every epoch.

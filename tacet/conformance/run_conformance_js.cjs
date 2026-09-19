@@ -17,11 +17,11 @@ const ROOT = path.resolve(__dirname, "..", "..");
 const VEC = path.join(__dirname, "vectors", "v1");
 const SITE = path.join(ROOT, "site", "registry", "seal", "verify");
 
-const ctx = { crypto: globalThis.crypto, TextEncoder, console, BigInt, URL, fetch: undefined };
+const ctx = { crypto: globalThis.crypto, TextEncoder, TextDecoder, console, BigInt, URL, Number, fetch: undefined };
 ctx.window = ctx;
 ctx.globalThis = ctx;
 vm.createContext(ctx);
-for (const f of ["seal-core.js", "tacet-verify.js"]) vm.runInContext(fs.readFileSync(path.join(SITE, f), "utf8"), ctx, { filename: f });
+for (const f of ["seal-core.js", "ots-verify.js", "tacet-verify.js"]) vm.runInContext(fs.readFileSync(path.join(SITE, f), "utf8"), ctx, { filename: f });
 
 const load = name => JSON.parse(fs.readFileSync(path.join(VEC, name), "utf8"));
 let passed = 0, failed = 0;
@@ -47,7 +47,7 @@ const failing = steps => steps.filter(s => !s.ok).map(s => s.label).join("; ");
   report(r.ok && r.result.verified === w.proof.strength, "browser verifier: wrapped_001 accepted at claimed strength", r.error || (r.ok ? `verified ${r.result.verified}` : ""));
   if (r.ok) {
     report(r.result.silence.silence_seconds === w.proof.silence.silence_seconds, "browser verifier: silence_seconds recomputed", String(r.result.silence.silence_seconds));
-    report(Math.abs(r.result.silence.silence_days - parseFloat(w.proof.silence.silence_days)) <= 0.005, "browser verifier: silence_days within 0.005 of the proof", String(r.result.silence.silence_days));
+    report(r.result.silence.silence_days === w.proof.silence.silence_days, "browser verifier: silence_days byte-identical to the proof (SPEC §9 truncation)", String(r.result.silence.silence_days));
   }
 
   for (const [name, vec] of Object.entries(load("wrapped_002_invalid.json"))) {
@@ -60,6 +60,27 @@ const failing = steps => steps.filter(s => !s.ok).map(s => s.label).join("; ");
   t.seal.signature.sig_hex = (t.seal.signature.sig_hex[0] === "0" ? "1" : "0") + t.seal.signature.sig_hex.slice(1);
   r = await run(t);
   report(!r.ok && !sealValid(r.steps), "browser verifier: tampered outer signature rejected", r.error || "");
+
+  // SPEC §8.6 — OpenTimestamps anchors of live sheets, parsed in JS and matched to the recorded block header.
+  const unhex = h => Uint8Array.from(h.match(/../g), x => parseInt(x, 16));
+  const ov = load("ots_001_live_anchors.json");
+  const byName = Object.fromEntries(ov.cases.map(c => [c.name, c]));
+  for (const c of ov.cases) {
+    const data = unhex(c.ots_hex), sh = unhex(c.sheet_hash.slice(7));
+    const roots = await ctx.tacetOts.expectedMerkleRoots(data);
+    report((roots[c.block_height] || []).includes(c.merkle_root), `browser ots/${c.name}: attestation at block ${c.block_height} names the recorded merkle root`, JSON.stringify(roots));
+    const res = await ctx.tacetOts.verifySheetAnchor(data, sh, c.block_height, async h => (h === c.block_height ? c.merkle_root : null));
+    report(res.verdict === true, `browser ots/${c.name}: anchor verifies against the block header`, res.detail);
+  }
+  for (const n of ov.negative) {
+    const c = byName[n.case];
+    let data = unhex(c.ots_hex);
+    if (n.truncate_bytes) data = data.subarray(0, data.length - n.truncate_bytes);
+    const sh = unhex((n.sheet_hash || c.sheet_hash).slice(7));
+    const src = ("header_source" in n && n.header_source === null) ? null : (async h => (h === c.block_height ? c.merkle_root : null));
+    const res = await ctx.tacetOts.verifySheetAnchor(data, sh, n.block_height ?? c.block_height, src);
+    report(res.verdict === n.expect, `browser ots/negative/${n.name}: verdict ${n.expect}`, res.detail);
+  }
 
   console.log(`\n${passed} passed, ${failed} failed`);
   process.exit(failed ? 1 : 0);

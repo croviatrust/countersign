@@ -17,7 +17,7 @@ from .keys import SigningKey
 from .silence import SilenceVerifyResult, verify_silence_proof
 
 GENERATOR_ID = "crovia/tacet"
-TACET_VERSION = "0.1.2"
+TACET_VERSION = "0.2.0"
 
 
 def _seal_module():

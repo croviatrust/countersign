@@ -32,6 +32,11 @@ def case(name: str, ok: bool, detail: str = "") -> None:
     print(f"  [{'PASS' if ok else 'FAIL'}] {name}{(' — ' + detail) if detail and not ok else ''}")
 
 
+def hashlib_sha256(b: bytes) -> bytes:
+    import hashlib
+    return hashlib.sha256(b).digest()
+
+
 def load(name: str):
     return json.loads((V / name).read_text(encoding="utf-8"))
 
@@ -105,6 +110,31 @@ def main() -> int:
         root_from_path(key, EMPTY[0], CompactPath.from_json(p).to_full()) == unprefixed(sheets[int(e)]["root"])
         for e, p in vb["paths_after_disclosure"].items())
     case("non-inclusion fails from the disclosure epoch onward", after_ok is vb["expect"]["non_inclusion_after_disclosure"])
+
+    # §8.6: real OpenTimestamps proofs of live sheets, checked offline against the recorded block header.
+    from tacet import ots as ots_mod
+    ov = load("ots_001_live_anchors.json")
+    by_name = {c["name"]: c for c in ov["cases"]}
+    for c in ov["cases"]:
+        data = bytes.fromhex(c["ots_hex"])
+        sh = bytes.fromhex(c["sheet_hash"].split(":")[1])
+        p = ots_mod.parse(data)
+        case(f"ots/{c['name']}: file digest is SHA-256(sheet_hash bytes)",
+             p.file_digest.hex() == c["file_digest"].split(":")[1] and p.file_digest == hashlib_sha256(sh))
+        roots = ots_mod.expected_merkle_roots(data)
+        case(f"ots/{c['name']}: Bitcoin attestation at block {c['block_height']} names the recorded merkle root",
+             c["merkle_root"] in roots.get(c["block_height"], []), str(roots))
+        verdict, detail = ots_mod.verify_sheet_anchor(data, sh, c["block_height"], lambda h, c=c: c["merkle_root"] if h == c["block_height"] else None)
+        case(f"ots/{c['name']}: anchor verifies against the block header", verdict is True, detail)
+    for n in ov["negative"]:
+        c = by_name[n["case"]]
+        data = bytes.fromhex(c["ots_hex"])
+        if "truncate_bytes" in n:
+            data = data[:-n["truncate_bytes"]]
+        sh = bytes.fromhex(n.get("sheet_hash", c["sheet_hash"]).split(":")[1])
+        src = None if ("header_source" in n and n["header_source"] is None) else (lambda h, c=c: c["merkle_root"] if h == c["block_height"] else None)
+        verdict, detail = ots_mod.verify_sheet_anchor(data, sh, n.get("block_height", c["block_height"]), src)
+        case(f"ots/negative/{n['name']}: verdict {n['expect']}", verdict is n["expect"], detail)
 
     print(f"\n{passed} passed, {failed} failed")
     return 0 if failed == 0 else 1

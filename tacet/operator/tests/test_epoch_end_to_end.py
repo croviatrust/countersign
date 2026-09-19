@@ -134,7 +134,7 @@ def test_three_epochs_then_proof(env):
 
     out = s.paths.public / "proofs" / "t.seal.json"
     out.write_text(json.dumps(bundle))
-    res = verify_file(out, expected_operator_pubkey_hex=keys["operator"].public_hex, check_beacon=True)
+    res = verify_file(out, expected_operator_pubkey_hex=keys["operator"].public_hex, check_beacon=True, check_ots=False)
     assert res["ok"], res["errors"]
     assert res["strength_verified"] == 2
 

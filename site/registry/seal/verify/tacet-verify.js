@@ -9,8 +9,9 @@
  * the target slot in every epoch, observer signatures and inclusion of every
  * negative snapshot, silence recomputation, witness quorum. Optional network
  * checks: drand round bytes against api.drand.sh, keys against the published
- * trust root. What does not run here: the OpenTimestamps step (needs the
- * Bitcoin block header); `tacet-operator verify` does it.
+ * trust root, and the OpenTimestamps anchors (SPEC §8.6, via ots-verify.js):
+ * each .ots is parsed here and its merkle root compared with the block header
+ * from a public explorer — no Bitcoin node, no ots client.
  */
 "use strict";
 (function () {
@@ -282,6 +283,27 @@
       }
       if (checked) err(mismatch === 0, "drand round bytes match api.drand.sh for " + checked + " sheet(s)" + (sheets.length > 24 ? " (first 24)" : ""), mismatch ? mismatch + " mismatch(es)" : "randomness and BLS signature bytes identical");
       else note("drand API not reachable from this browser", "round times were checked against the chain's genesis and period");
+
+      /* SPEC §8.6 — Bitcoin anchors, without a node: parse each .ots, compare its merkle root with the block header. */
+      if (window.tacetOts) {
+        const anchoredSheets = sheets.filter(s => s.closed && s.closed.status === "bitcoin").slice(0, 24);
+        let okN = 0, badN = 0, unN = 0, src = null; const bad = [], un = [];
+        const headerSource = async h => { const r = await window.tacetOts.explorerMerkleRoot(h); src = src || r.source; return r.root; };
+        for (const s of anchoredSheets) {
+          let verdict = null, detail = "";
+          try {
+            const r = await fetch(s.closed.proof_ref, { cache: "no-store" }); if (!r.ok) throw new Error("HTTP " + r.status);
+            const res = await window.tacetOts.verifySheetAnchor(new Uint8Array(await r.arrayBuffer()), await sheetHash(s), s.closed.block_height, headerSource);
+            verdict = res.verdict; detail = res.detail;
+          } catch (e) { detail = "proof not fetched (" + e.message + ")"; }
+          if (verdict === true) okN++; else if (verdict === false) { badN++; bad.push("epoch " + s.epoch + ": " + detail); } else { unN++; un.push("epoch " + s.epoch + ": " + detail); }
+        }
+        if (anchoredSheets.length) {
+          if (badN) err(false, "OpenTimestamps anchor differs from the Bitcoin block header for " + badN + " sheet(s)", bad.join(" · "));
+          if (okN) step(true, "OpenTimestamps anchors replayed in this browser and matched to Bitcoin block headers for " + okN + " sheet(s)" + (sheets.length > 24 ? " (first 24)" : ""), "merkle roots from " + (src || "explorer") + "; blocks " + [...new Set(anchoredSheets.map(s => s.closed.block_height))].sort().join(", "));
+          if (unN) note("Bitcoin anchors unchecked for " + unN + " sheet(s)", un[0] + (unN > 1 ? " …" : ""));
+        }
+      }
     }
 
     if (errors.length) throw new Error(errors[0]);

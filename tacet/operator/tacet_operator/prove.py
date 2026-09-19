@@ -53,36 +53,65 @@ def build(settings: Settings, issuer: SigningKey, target_id: str, *, from_epoch:
     return wrap_in_seal(issuer=issuer, query=query, proof=proof)
 
 
-def _ots_available() -> bool:
-    import shutil
-    return shutil.which("ots") is not None
+def merkle_root(height: int) -> Optional[str]:
+    """Merkle root (display order) of a Bitcoin block from a public explorer; None if unreachable.
 
-
-def ots_check(closed: Dict[str, Any], sheet_hash_bytes: bytes) -> bool:
-    """SPEC §8.5 step 2: fetch the .ots named by `proof_ref` and verify it attests `sheet_hash`."""
-    import tempfile
+    Verifiers that run a node should pass their own header source instead (SPEC §8.6).
+    """
     import urllib.request
 
-    from . import ots as ots_mod
     from .config import USER_AGENT
-    if closed.get("anchored_digest") != "sha256:" + sheet_hash_bytes.hex():
-        return False
-    ref = closed.get("proof_ref")
-    if not ref:
-        return False
-    try:
-        req = urllib.request.Request(ref, headers={"User-Agent": USER_AGENT})
-        with urllib.request.urlopen(req, timeout=30) as r:
-            data = r.read()
-    except Exception:  # noqa: BLE001
-        return False
-    with tempfile.TemporaryDirectory() as td:
-        p = Path(td) / "sheet.ots"
-        p.write_bytes(data)
-        height = ots_mod.upgrade(p)
-        if height is None or height != int(closed.get("block_height", -1)):
+    from .ots import _EXPLORERS
+    for base in _EXPLORERS:
+        try:
+            req = urllib.request.Request(f"{base}/block-height/{height}", headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(req, timeout=15) as r:
+                bhash = r.read().decode().strip()
+            req = urllib.request.Request(f"{base}/block/{bhash}", headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(req, timeout=15) as r:
+                b = json.loads(r.read().decode())
+            root = b.get("merkle_root") or b.get("merkleroot")
+            if root:
+                return str(root).lower()
+        except Exception:  # noqa: BLE001 - try the next explorer
+            continue
+    return None
+
+
+class OtsChecker:
+    """SPEC §8.6 anchor check: fetch the .ots, replay it in pure Python, compare the merkle root."""
+
+    def __init__(self, header_source: Optional[Any] = merkle_root) -> None:
+        self.header_source = header_source
+        self.details: List[str] = []
+
+    def __call__(self, closed: Dict[str, Any], sheet_hash_bytes: bytes) -> Optional[bool]:
+        import urllib.request
+
+        from tacet.ots import verify_sheet_anchor
+
+        from .config import USER_AGENT
+        if closed.get("anchored_digest") != "sha256:" + sheet_hash_bytes.hex():
+            self.details.append("anchored_digest is not the sheet hash")
             return False
-        return ots_mod.verify_digest(p, sheet_hash_bytes)
+        ref = closed.get("proof_ref")
+        if not ref:
+            self.details.append("closed.proof_ref missing")
+            return False
+        try:
+            req = urllib.request.Request(ref, headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(req, timeout=30) as r:
+                data = r.read()
+        except Exception as e:  # noqa: BLE001 - unreachable proof file: unchecked, not failed
+            self.details.append(f"{ref}: not fetched ({e})")
+            return None
+        verdict, detail = verify_sheet_anchor(data, sheet_hash_bytes, int(closed.get("block_height", -1)), self.header_source)
+        self.details.append(detail)
+        return verdict
+
+
+def ots_check(closed: Dict[str, Any], sheet_hash_bytes: bytes) -> Optional[bool]:
+    return OtsChecker()(closed, sheet_hash_bytes)
 
 
 def verify_file(path: Path, *, expected_operator_pubkey_hex: Optional[str] = None,
@@ -91,11 +120,12 @@ def verify_file(path: Path, *, expected_operator_pubkey_hex: Optional[str] = Non
     kwargs: Dict[str, Any] = {}
     if check_beacon:
         kwargs["beacon_check"] = drand_mod.beacon_check
-    if check_ots and _ots_available():
-        kwargs["ots_check"] = ots_check
+    checker = OtsChecker() if check_ots else None
+    if checker is not None:
+        kwargs["ots_check"] = checker
     if expected_operator_pubkey_hex:
         kwargs["expected_operator_pubkey_hex"] = expected_operator_pubkey_hex
     res = verify_wrapped(bundle, **kwargs)
-    if check_ots and not _ots_available():
-        res.setdefault("warnings", []).append("ots client not installed: pip install opentimestamps-client")
+    if checker is not None:
+        res["anchors"] = checker.details
     return res

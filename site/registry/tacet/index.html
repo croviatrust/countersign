@@ -153,7 +153,7 @@
   </section>
 
   <section class="tc-section" id="verify">
-    <div class="tc-head"><div><h2>Don't trust the page. Verify the file.</h2><p class="sub">Two independent verifiers. <a href="/registry/seal/verify/">In your browser</a>: operator signatures and chaining, the empty slot under every depth-256 root, observer signatures and inclusion of each negative snapshot, the silence block, optional drand and trust-root checks against the network. Offline, with the reference implementation below: all of that plus the <span class="mono">.ots</span> Bitcoin attestation of every sheet.</p></div></div>
+    <div class="tc-head"><div><h2>Don't trust the page. Verify the file.</h2><p class="sub">Two independent verifiers, same checks. <a href="/registry/seal/verify/">In your browser</a>: operator signatures and chaining, the empty slot under every depth-256 root, observer signatures and inclusion of each negative snapshot, the silence block — and, with network checks on, every <span class="mono">.ots</span> proof parsed in the page and its merkle root matched to the Bitcoin block header. Or offline, with the reference implementation below. Neither needs a Bitcoin node, an OpenTimestamps client, or a Crovia server.</p></div></div>
     <div class="tc-grid2">
       <div class="tc-code"><span class="c"># reference + operator (Python ≥ 3.10)</span>
 git clone https://github.com/croviatrust/countersign

@@ -119,6 +119,13 @@ def main() -> None:
         "expect": {"ok": True, "non_inclusion_after_disclosure": False},
     })
 
+    # 7. Static vectors captured from the live log (real Bitcoin anchors); indexed, never regenerated.
+    import hashlib
+    for static in ("ots_001_live_anchors.json",):
+        f = OUT / static
+        if f.exists():
+            index["files"][static] = hashlib.sha256(f.read_bytes()).hexdigest()
+
     dump("index.json", index)
     print(f"wrote {len(index['files']) + 1} files to {OUT}")
 
