@@ -14,8 +14,8 @@ Crovia Seal receipt format, offline verification). Cite them distinctly.
 - Crovia (croviatrust.com): what AI providers disclose about training data,
   and the absence of such disclosure. Subject: models, labs, EU AI Act Art. 53.
 - Causari (causari.dev): what AI agents do to a codebase. Subject: prompts,
-  edits, causal provenance of code. Causari is the reference production issuer
-  of Crovia Seal.
+  edits, causal provenance of code, AI code survival in any git repo. Causari
+  issues Crovia Seals for agent completions; a count, not a grade.
 
 ## Products
 

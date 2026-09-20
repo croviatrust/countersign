@@ -15,7 +15,9 @@
   "sibling": {
    "name": "Causari",
    "url": "https://causari.dev",
-   "repo": "https://github.com/croviatrust/causari"
+   "repo": "https://github.com/croviatrust/causari",
+   "canon": "https://github.com/croviatrust/causari/blob/main/canon/canon.json",
+   "one_liner": "AI-written code has no author. It has causes. Causari proves them."
   }
  },
  "seal": {
@@ -252,7 +254,7 @@
    "state": "active"
   },
   "causari": {
-   "role": "Sibling product: code provenance for AI agents; reference Seal issuer.",
+   "role": "Sibling product: proof of cause for AI-written code (audit + local ledger); Seal issuer for agent completions, audit seals in its Phase 2. Has its own canon (canon/canon.json) and surface audit (scripts/audit_surfaces.py).",
    "state": "active"
   },
   "crovia-core": {
@@ -277,7 +279,9 @@
   "continuity grade",
   "Continuity dossier",
   "grade F",
-  "score F"
+  "score F",
+  "first production issuer",
+  "reference production issuer"
  ],
  "smoke_markers": {
   "/": "Silence you can",

@@ -1,6 +1,6 @@
 # Crovia surface audit
 
-- Generated: 2026-09-20T11:24:22+00:00
+- Generated: 2026-09-20T14:00:10+00:00
 - Base: https://croviatrust.com
 - Canon revision: 2026-09-19 (crovia.canon.v1)
 - Requests made: 112
@@ -11,31 +11,30 @@
 | critical | 0 |
 | high | 0 |
 | medium | 0 |
-| low | 2 |
-| info | 31 |
+| low | 1 |
+| info | 32 |
 
-## Low (2)
+## Low (1)
 
 - **[repos]** repo:causari — README does not state canonical role (expected: README contains 'Sibling product: code provenance for AI' or the identity one-liner, observed: <p align="center">)
-- **[repos]** repo:countersign — README does not state canonical role (expected: README contains 'Witness protocol and home of TACET' or the identity one-liner, observed: <p align="center">)
 
-## Info (31)
+## Info (32)
 
 - **[data_files]** https://croviatrust.com/registry/data/search_targets.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/730088)
-- **[data_files]** https://croviatrust.com/registry/data/substrate/chains.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/43520478)
-- **[data_files]** https://croviatrust.com/registry/data/substrate/consensus.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/21579122)
-- **[data_files]** https://croviatrust.com/registry/data/substrate/predecessors_map.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/64641814)
-- **[data_files]** https://croviatrust.com/registry/data/substrate/target_index.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/11468463)
-- **[data_files]** https://croviatrust.com/registry/data/tpa_cep.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/1741156)
-- **[headline_numbers]** https://croviatrust.com/registry/data/_home_pulse.json — LACUNA reconciliation (expected: LACUNA count backed by recent model-target candidates, observed: pulse AX.LAC=0; candidates total=1550, model-target=1550, model-target seen in last 7d=845, newest last_seen=2026-09-20T10:06:39+00:00)
-- **[headline_numbers]** https://croviatrust.com/registry/data/_home_pulse.json — top_silent streak consistent with observations (expected: streak bounded by observation window, observed: anthropic/claude-3-opus: reported 134 days, computed last_seen-first_seen = 134 days, last_seen 2026-06-01)
-- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/lacuna_candidates.json — LACUNA candidates are live (expected: live candidates present, observed: 845 non-stale candidates from ['tacet'])
-- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/ots_anchors.json — anchor reconciliation (expected: bitcoin_confirmed=110 counts distinct roots, observed: anchors=112, distinct merkle_root=45, longest identical-root run=38, newest anchor_date=2026-09-20 (0.5 days old))
-- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/ots_anchors.json — legacy re-anchoring visible in history only (expected: history acknowledged, observed: historical identical-root run of 38 before 2026-09-19; last 14 days: 7 anchors, 7 distinct roots)
-- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/trust_root.json — envelope counts consistent (expected: counts within 2%, observed: pulse n_envelopes_total=499748, trust_root ledger_envelope_count=499748 (0.00% apart))
+- **[data_files]** https://croviatrust.com/registry/data/substrate/chains.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/43547814)
+- **[data_files]** https://croviatrust.com/registry/data/substrate/consensus.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/21579123)
+- **[data_files]** https://croviatrust.com/registry/data/substrate/predecessors_map.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/64697254)
+- **[data_files]** https://croviatrust.com/registry/data/substrate/target_index.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/11468465)
+- **[data_files]** https://croviatrust.com/registry/data/tpa_cep.json — heavy file present; not downloaded (expected: reachable (Range probe only), observed: HTTP 206, bytes 0-0/1741439)
+- **[headline_numbers]** https://croviatrust.com/registry/data/_home_pulse.json — LACUNA reconciliation (expected: LACUNA count backed by recent model-target candidates, observed: pulse AX.LAC=0; candidates total=1688, model-target=1688, model-target seen in last 7d=983, newest last_seen=2026-09-20T13:06:32+00:00)
+- **[headline_numbers]** https://croviatrust.com/registry/data/_home_pulse.json — top_silent streak consistent with observations (expected: streak bounded by observation window, observed: meta-llama/Llama-3.1-8B: reported 89 days, computed last_seen-first_seen = 89 days, last_seen 2026-04-17)
+- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/lacuna_candidates.json — LACUNA candidates are live (expected: live candidates present, observed: 983 non-stale candidates from ['tacet'])
+- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/ots_anchors.json — anchor reconciliation (expected: bitcoin_confirmed=110 counts distinct roots, observed: anchors=113, distinct merkle_root=46, longest identical-root run=38, newest anchor_date=2026-09-20 (0.6 days old))
+- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/ots_anchors.json — legacy re-anchoring visible in history only (expected: history acknowledged, observed: historical identical-root run of 38 before 2026-09-19; last 14 days: 8 anchors, 8 distinct roots)
+- **[headline_numbers]** https://croviatrust.com/registry/data/substrate/trust_root.json — envelope counts consistent (expected: counts within 2%, observed: pulse n_envelopes_total=500185, trust_root ledger_envelope_count=500185 (0.00% apart))
 - **[mcp]** https://croviatrust.com/mcp — MCP tool set matches canon (expected: ["crovia_status", "crovia_vs_causari", "explain", "get_silence_proof", "lookup_model", "search_models", "silence_report", "verify_seal"], observed: ["crovia_status", "crovia_vs_causari", "explain", "get_silence_proof", "lookup_model", "search_models", "silence_report", "verify_seal"])
-- **[mcp]** https://croviatrust.com/mcp — MCP crovia_status response (expected: crovia_status answers, observed: {   "as_of": "2026-09-20T11:17:40Z",   "tacet": {     "map_id": "urn:crovia:tacet:map:disclosure",     "epochs_closed": 18,     "epochs_anchored_in_bitcoin": 13,     "models_on_map": 1322,     "snaps…)
-- **[mcp]** https://croviatrust.com/mcp — featured model confirmed by MCP lookup (expected: lookup_model consistent with pulse, observed: lookup_model(anthropic/claude-3-opus) -> verdict='archive_only', figures=present)
+- **[mcp]** https://croviatrust.com/mcp — MCP crovia_status response (expected: crovia_status answers, observed: {   "as_of": "2026-09-20T13:06:40Z",   "tacet": {     "map_id": "urn:crovia:tacet:map:disclosure",     "epochs_closed": 20,     "epochs_anchored_in_bitcoin": 18,     "models_on_map": 1461,     "snaps…)
+- **[mcp]** https://croviatrust.com/mcp — featured model confirmed by MCP lookup (expected: lookup_model consistent with pulse, observed: lookup_model(meta-llama/Llama-3.1-8B) -> verdict='disclosure_found', figures=present)
 - **[mirror_parity]** https://registry.croviatrust.com/ — mirror serves the same origin file (expected: same origin body, observed: identical after removing Cloudflare email obfuscation)
 - **[mirror_parity]** https://registry.croviatrust.com/lacuna/ — mirror serves the same origin file (expected: same origin body, observed: identical after removing Cloudflare email obfuscation)
 - **[mirror_parity]** https://registry.croviatrust.com/seal/ — mirror serves the same origin file (expected: same origin body, observed: identical after removing Cloudflare email obfuscation)
@@ -43,6 +42,7 @@
 - **[private_files]** https://croviatrust.com/registry/api/ — private file listed as professional, not linked (expected: forensic_report.json not linked, observed: named as a professional-tier product, no link)
 - **[private_files]** https://croviatrust.com/registry/data/forensic_dossiers.json — private file is not served (expected: HTTP 403/404, observed: HTTP 403)
 - **[private_files]** https://croviatrust.com/registry/data/forensic_report.json — private file is not served (expected: HTTP 403/404, observed: HTTP 403)
+- **[repos]** repo:countersign — README states canonical role (expected: README states canonical role or one-liner, observed: present)
 - **[repos]** repo:crovia-core-engine — README states canonical role (expected: README states canonical role or one-liner, observed: present)
 - **[repos]** repo:crovia-evidence-lab — README states canonical role (expected: README states canonical role or one-liner, observed: present)
 - **[repos]** repo:crovia-seal — README states canonical role (expected: README states canonical role or one-liner, observed: present)
@@ -66,7 +66,7 @@
 | `/registry/verify/` | 200 | https://croviatrust.com/registry/verify/ | 70058 | Crovia Passport — CROVIA Registry |
 | `/registry/compliance/` | 200 | https://croviatrust.com/registry/compliance/ | 27406 | Crovia Compliance Hub — global ranking, risk index, sonar r… |
 | `/registry/tacet/` | 200 | https://croviatrust.com/registry/tacet/ | 27016 | TACET — Verifiable silence for AI training disclosure · Cro… |
-| `/registry/tacet/spec/` | 200 | https://croviatrust.com/registry/tacet/spec/ | 66806 | TACET Specification — verifiable silence proofs, PNX profil… |
+| `/registry/tacet/spec/` | 200 | https://croviatrust.com/registry/tacet/spec/ | 67923 | TACET Specification — verifiable silence proofs, PNX profil… |
 | `/registry/lacuna/` | 200 | https://croviatrust.com/registry/lacuna/ | 16859 | LACUNA — Loss-of-Auditability Certificates · Crovia |
 | `/registry/api/` | 200 | https://croviatrust.com/registry/api/ | 28819 | Crovia API · JSON endpoints |
 | `/registry/seal/` | 200 | https://croviatrust.com/registry/seal/ | 27764 | Crovia Seal &mdash; The Open Provenance Receipt for AI Outp… |
@@ -82,8 +82,8 @@
 | `/sitemap.xml` | 200 | https://croviatrust.com/sitemap.xml | 302359 |  |
 | `/.well-known/ai-plugin.json` | 200 | https://croviatrust.com/.well-known/ai-plugin.json | 2443 |  |
 | `/.well-known/openapi.yaml` | 200 | https://croviatrust.com/.well-known/openapi.yaml | 13558 |  |
-| `/m/` | 200 | https://croviatrust.com/m/ | 419592 | Model records — training-data disclosure, model by model · … |
-| `/m/Qwen/Qwen3-32B/` | 200 | https://croviatrust.com/m/Qwen/Qwen3-32B/ | 14308 | Qwen/Qwen3-32B — training-data disclosure on the model card… |
+| `/m/` | 200 | https://croviatrust.com/m/ | 464169 | Model records — training-data disclosure, model by model · … |
+| `/m/Qwen/Qwen3-32B/` | 200 | https://croviatrust.com/m/Qwen/Qwen3-32B/ | 14389 | Qwen/Qwen3-32B — training-data disclosure on the model card… |
 | `/report/` | 200 | https://croviatrust.com/report/ | 8805 | Crovia Silence Report — weekly, verifiable, from published … |
-| `/feed.xml` | 200 | https://croviatrust.com/feed.xml | 13747 |  |
+| `/feed.xml` | 200 | https://croviatrust.com/feed.xml | 13955 |  |
 | `/press/` | 200 | https://croviatrust.com/press/ | 23022 | Crovia press kit — boilerplate, one-liners, logos, facts, n… |
