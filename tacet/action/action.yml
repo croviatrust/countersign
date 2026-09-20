@@ -1,5 +1,5 @@
 name: "PNX — Proof of Non-Exfiltration"
-description: "Prove that secrets, customer data and source files never left your AI agent's run. Offline-verifiable, TACET profile crovia.pnx.v1, delivered as a Crovia Seal."
+description: "Proof of Non-Exfiltration: prove secrets, customer data and source never left an AI agent run. Verifiable offline."
 author: "Crovia Trust"
 branding:
   icon: "shield"
