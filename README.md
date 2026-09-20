@@ -28,7 +28,7 @@
   <img alt="Spec license" src="https://img.shields.io/badge/spec-CC0-lightgrey">
 </p>
 
-**`countersign` is Crovia's witness protocol and the home of TACET** (verifiable map,
+**`countersign` — Witness protocol and home of TACET** (verifiable map,
 epoch sheets, silence proofs), the PNX profile, the `tacet-pnx` CLI and the canon that
 every Crovia surface follows. Specification and Internet-Draft:
 [croviatrust.com/registry/tacet/spec/](https://croviatrust.com/registry/tacet/spec/).
