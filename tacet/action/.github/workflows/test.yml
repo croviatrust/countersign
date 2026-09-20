@@ -73,3 +73,20 @@ jobs:
         run: |
           python3 -c 'import json,sys; b=json.load(open(sys.argv[1])); assert set(b)=={"seal","query","proof"}; assert b["seal"]["seal_version"]=="crovia.seal.v1"; print(b["seal"]["seal_id"], b["seal"]["checks"]["pnx"])' "${{ steps.pnx.outputs.proof }}"
           tacet-pnx verify "${{ steps.pnx.outputs.proof }}" --assets-dir test/protected
+
+  consumer-uses-v1:
+    # what an adopter runs: the published floating tag, not ./
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: pnx
+        uses: croviatrust/pnx-action@v1
+        env:
+          DEMO_API_KEY: sk-demo-0123456789abcdef0123456789abcdef0123456789abcdef
+        with:
+          egress: test/egress/
+          assets: test/protected/
+          asset-env: DEMO_API_KEY
+          artifact-name: pnx-proof-v1
+      - name: Verdict is absent
+        run: test "${{ steps.pnx.outputs.verdict }}" = "absent"
