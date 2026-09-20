@@ -182,22 +182,30 @@ def pnx_query(proof: dict[str, Any]) -> dict[str, Any]:
             "assets": [{"label": a["label"], "asset_sha256": a["asset_sha256"]} for a in proof["assets"]]}
 
 
-def seal_pnx(proof: dict[str, Any], issuer: SigningKey, *, tacet_version: str, anchor: dict[str, Any] | None = None) -> dict[str, Any]:
-    """Wrap a PNX proof in an unmodified crovia.seal.v1: {seal, query, proof}."""
+def seal_pnx(proof: dict[str, Any], issuer: SigningKey, *, tacet_version: str, anchor: dict[str, Any] | None = None,
+             emitted_at: str | None = None, nonce: str | None = None, seal_id: str | None = None,
+             query: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Wrap a PNX proof in an unmodified crovia.seal.v1: {seal, query, proof}.
+
+    Deterministic when ``emitted_at``, ``nonce`` and ``seal_id`` are given (the
+    conformance vectors). ``query`` overrides the derived query; a verifier
+    must then reject the bundle, which is what the invalid vectors exercise.
+    """
     seal_mod, constants = _seal_module()
-    query = pnx_query(proof)
+    query = pnx_query(proof) if query is None else query
     q_bytes, p_bytes = canonicalize(query), canonicalize(proof)
     now = datetime.now(timezone.utc)
     sheet = proof["sheet"]
     unsigned: dict[str, Any] = {
         "seal_version": constants.SEAL_VERSION,
-        "seal_id": f"cs_{now.year}_{_b32()}",
+        "seal_id": seal_id or f"cs_{now.year}_{_b32()}",
         "issuer": {"id": issuer.id, "pubkey": issuer.pubkey_json()},
         "subject": {"input_hash": prefixed(sha256(q_bytes)), "output_hash": prefixed(sha256(p_bytes)),
                     "input_len": len(q_bytes), "output_len": len(p_bytes), "modality": "text"},
         "generator": {"id": GENERATOR_ID, "version": tacet_version, "weights_hash": None,
                       "params": {"profile": PROFILE, "run_id": sheet["run_id"], "verdict": proof["verdict"]}},
-        "timestamp": {"emitted_at": now.strftime("%Y-%m-%dT%H:%M:%S.") + f"{now.microsecond // 1000:03d}Z", "nonce": _b32()},
+        "timestamp": {"emitted_at": emitted_at or now.strftime("%Y-%m-%dT%H:%M:%S.") + f"{now.microsecond // 1000:03d}Z",
+                      "nonce": nonce or _b32()},
         "chain": {"prev_seal_hash": None, "sequence": 0},
         "checks": {"pnx": {"verdict": proof["verdict"], "assets": len(proof["assets"]),
                            "bodies": sheet["egress"]["bodies"], "bytes": sheet["egress"]["bytes"],
