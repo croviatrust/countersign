@@ -10,13 +10,17 @@ come from artifacts other people *want* to embed, cite, run or verify.
 Shipped since the last update (all live, all pushed, CI green):
 
 - `draft-crovia-tacet-00` (TACET core + PNX profile) written in xml2rfc v3,
-  rendered, mirrored with SPEC.md, PNX.md and the 47-test vectors at
+  rendered, mirrored with SPEC.md, PNX.md and the 107-test vectors at
   `/registry/tacet/spec/`; every surface links the hosted spec.
-- `tacet-pnx` CLI in `crovia-tacet` 0.4.0 (PyPI): keygen / witness / prove /
-  verify, sealed delivery as `crovia.seal.v1`, exit codes 0/1/2.
-- `croviatrust/pnx-action` v1.0.0 on GitHub: composite action, job-summary
-  table, artifact upload, three green self-tests (clean run, leaking run,
-  sealed delivery).
+- `tacet-pnx` CLI in `crovia-tacet` 0.4.1 (PyPI): keygen / witness / prove /
+  verify, sealed delivery as `crovia.seal.v1`, exit codes 0/1/2. 0.4.1 adds the
+  `json-strings-v1` normalisation layer (PNX §3): leaks quoted inside JSON
+  request bodies are caught with the full 47-byte guarantee, and the layer is
+  declared in the signed run sheet.
+- `croviatrust/pnx-action` **on the GitHub Marketplace** (v1.0.2, floating
+  `v1`): composite action, job-summary table, artifact upload, four green
+  self-tests (clean run, leaking run, sealed delivery, and a consumer job that
+  runs `uses: croviatrust/pnx-action@v1` exactly as adopters do).
 - MCP server 2.0 (`com.croviatrust/crovia`) in the official MCP Registry;
   weekly Silence Report + RSS + Zenodo + Bluesky; legacy grades retired;
   press kit `/press/` + `press.json`; security.txt, webmanifest, favicon,
@@ -74,9 +78,9 @@ Why this is the lever:
 | # | Artifact | Why it spreads | Human click needed |
 |---|---|---|---|
 | 1 | **Self-witnessed operator.** *(next)* The TACET operator's own outbound HTTP (HF, drand, mempool) goes through the egress witness with its own private keys as protected assets. A public PNX proof every hour: "Crovia's operator never leaked its signing keys." Page `/registry/tacet/agents/`. | A live, self-demonstrating, verifiable demo nobody else has. Screenshots itself. | none |
-| 2 | **PNX conformance vectors + browser verifier.** *(next)* Extend `run_conformance*.py/.cjs` and `tacet-verify.js` to `crovia.pnx.v1`. | Two independent verifiers agreeing byte-for-byte is what standards people look for. | none |
+| 2 | ~~PNX conformance vectors + browser verifier~~ **done: `pnx_001…pnx_004` in `conformance/vectors/v1/`, PNX.md §9, `pnx-verify.js` in the browser verifier; Python runner 107 cases, JS runner 76 cases, both green on the same vectors.** | Two independent verifiers agreeing byte-for-byte is what standards people look for. | none |
 | 3 | ~~`tacet-egress` sidecar~~ **done as `tacet-pnx witness`** (files, directories, `.jsonl` gateway logs). A CONNECT/MITM proxy mode is deferred: it needs a CA in the agent's trust store, which is the customer's decision, not a default. (Python, stdlib + `cryptography`): an HTTP CONNECT/forward proxy that fingerprints request bodies and writes the run sheet; `--assets secrets.txt` produces the proof at exit. | One command turns any agent run into a proof. Works with Cursor, Claude Code, Aider via `HTTPS_PROXY`. | none |
-| 4 | ~~GitHub Action~~ **done: `croviatrust/pnx-action` v1.0.0**: wraps a job step in the sidecar, uploads the sheet, posts the proof as a check. | Every PR of every adopter carries a Crovia-verified receipt with a link back. Marketplace listing = discovery without outreach. | publish to Marketplace (1 click) |
+| 4 | ~~GitHub Action~~ **done: `croviatrust/pnx-action`, on the Marketplace**: wraps a job step in the sidecar, uploads the sheet, posts the proof as a check. | Every PR of every adopter carries a Crovia-verified receipt with a link back. Marketplace listing = discovery without outreach. | — |
 | 5 | ~~Internet-Draft~~ **done: `draft-crovia-tacet-00`** at `/registry/tacet/spec/` (TACET + PNX profile), xml2rfc source in `countersign/ietf/`. | Second I-D beside `draft-crovia-seal`; puts Crovia on datatracker for "verifiable absence". | submit on datatracker (2 clicks) |
 | 6 | **Paper**: "Verifiable Silence: proving absence for AI disclosure and agent egress" (PDF on site, Zenodo DOI). | Citable object; arXiv later with an endorser. | Zenodo token or 1 upload |
 | 7 | ~~MCP server~~ **done: `com.croviatrust/crovia` 2.0.0 in the official registry** (`verify_seal`, `model_record`, `silence_proof`, `pnx_verify`) + `server.json` for the official MCP registry. | Agents are the new search engine; a tool call is a citation. | registry login (1 click) |
@@ -118,10 +122,7 @@ end-to-end by the agent and stop at the one click that must be a human's.
    `tacet/standards/draft-crovia-tacet-00.xml` at
    https://datatracker.ietf.org/submit/ — the .txt/.html renders are next to it
    and mirrored at https://croviatrust.com/registry/tacet/spec/.
-4. **Publish `pnx-action` to the Marketplace** (1 click): on
-   https://github.com/croviatrust/pnx-action/releases/tag/v1.0.0 press
-   "Edit", tick "Publish this Action to the GitHub Marketplace", choose the
-   categories *Security* and *Continuous integration*. `action.yml` already has
-   the branding block the Marketplace requires.
+4. ~~Publish `pnx-action` to the Marketplace~~ done 2026-09-20 (v1.0.1;
+   `v1` now floats on v1.0.2).
 5. HF write token, when convenient: dataset mirror of the epoch sheets under
    the Crovia account (item 8, last piece).
