@@ -82,6 +82,8 @@
   <div class="rg-grid">
     <a class="rg-card" href="/registry/tacet/"><div class="k">TACET <span class="st live">● live</span></div><h3>The verifiable-silence log</h3><p>Hourly epochs opened by drand, closed by Bitcoin. Every model card fetched, every predicate verdict signed, every hour committed to one sparse Merkle map.</p><div class="sub"><span>latest epoch</span><span>snapshots</span><span>proofs</span><span>verify offline</span></div></a>
     <a class="rg-card" href="/registry/lacuna/"><div class="k">LACUNA <span class="st live">● live</span></div><h3>Loss-of-auditability candidates</h3><p>Models whose cards have stayed silent, ranked by anchored hours of silence. A signed certificate is a TACET level-2 proof for a named window.</p><div class="sub"><span>candidates</span><span>featured proof</span><span>request certificate</span></div></a>
+    <a class="rg-card" href="/m/"><div class="k">Model records <span class="st live">● live</span></div><h3>One page per observed model</h3><p>What the Hugging Face card said about training data at every signed check, how many checks are confirmed in Bitcoin, and how to verify it. Live watch list plus the 2026 archive. No grades.</p><div class="sub"><span>all models</span><span>badge</span><span>model_records.json</span></div></a>
+    <a class="rg-card" href="/report/"><div class="k">Silence Report <span class="st live">● weekly</span></div><h3>What Crovia saw this week, and what it verifiably did not</h3><p>Models observed hour by hour, epochs anchored in Bitcoin, the longest verifiable silences with their proofs. One card, one page, one RSS item per week; every number links to a signed file.</p><div class="sub"><span>/report/</span><span>report.json</span><span>RSS</span></div></a>
     <a class="rg-card" href="/registry/embed/silence.html"><div class="k">Silence Index <span class="st live">● live</span></div><h3>One number per model</h3><p>Observation-bounded days of silence. Embed it on any page with one iframe; it reads the public file directly.</p><div class="sub"><span>embed</span><span>silence_index.json</span></div></a>
   </div>
 
@@ -112,7 +114,8 @@
       <tr><td class="f"><a href="/registry/data/silence_index.json">silence_index.json</a></td><td class="d">Observation-bounded silence per model (archive).</td><td class="t">public</td></tr>
       <tr><td class="f"><a href="/registry/data/substrate/">substrate/</a></td><td class="d">AXIOM ledger: latest seal, anchors, collectors, recent envelopes. Browsable.</td><td class="t">public</td></tr>
       <tr><td class="f"><a href="/registry/data/seal/transparency_log.json">seal/transparency_log.json</a></td><td class="d">Seals issued by seal.croviatrust.com, Merkle-logged.</td><td class="t">public</td></tr>
-      <tr><td class="f"><a href="/registry/data/transparency_index.json">transparency_index.json</a> · <a href="/registry/data/global_ranking.json">global_ranking.json</a></td><td class="d">Derived rankings from the archive.</td><td class="t">public</td></tr>
+      <tr><td class="f"><a href="/registry/data/global_ranking.json">global_ranking.json</a></td><td class="d">2026 archive: model-card checklist coverage (20 items) per model and organisation. Counts of what is present and absent, not grades.</td><td class="t">public</td></tr>
+      <tr><td class="f"><a href="/report/report.json">/report/report.json</a> · <a href="/feed.xml">/feed.xml</a></td><td class="d">Weekly Silence Report: models observed, epochs anchored, longest verifiable silences. JSON and RSS.</td><td class="t">public</td></tr>
       <tr><td class="f">forensic_dossiers.json · forensic_report.json</td><td class="d">Court-ready dossiers and memorization probes. Engagement letter first.</td><td class="t pro">professional</td></tr>
     </tbody>
   </table>
@@ -134,7 +137,7 @@
   </div>
 </footer>
 
-<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c" defer></script>
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919g" defer></script>
 <script>
 (function(){
   function $(id){return document.getElementById(id)}

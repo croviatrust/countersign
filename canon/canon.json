@@ -86,9 +86,13 @@
   "/.well-known/ai-plugin.json",
   "/.well-known/openapi.yaml",
   "/m/",
-  "/m/Qwen/Qwen3-32B/"
+  "/m/Qwen/Qwen3-32B/",
+  "/report/",
+  "/feed.xml"
  ],
  "retired_paths": [
+  "/index/",
+  "/card/",
   "/check.html",
   "/how-to-read.html",
   "/absence-clock.html",
@@ -117,7 +121,6 @@
   "/registry/data/lineage_graph.json",
   "/registry/data/observatory/feed.json",
   "/registry/data/pipeline_status.json",
-  "/registry/data/transparency_index.json",
   "/registry/data/seal/public_log.jsonl",
   "/registry/data/seal/transparency_log.json",
   "/registry/data/substrate/collectors.json",
@@ -134,7 +137,8 @@
   "/registry/data/tacet/index.json",
   "/registry/data/tacet/proofs/index.json",
   "/registry/data/global_ranking.json",
-  "/registry/data/model_records.json"
+  "/registry/data/model_records.json",
+  "/report/report.json"
  ],
  "private_files": [
   "/registry/data/forensic_dossiers.json",
@@ -263,7 +267,9 @@
   "Hubble",
   "payout layer",
   "continuity grade",
-  "Continuity dossier"
+  "Continuity dossier",
+  "grade F",
+  "score F"
  ],
  "smoke_markers": {
   "/": "Silence you can",
@@ -278,6 +284,8 @@
   "/registry/tacet/": "TACET"
  },
  "retired_path_targets": {
+  "/index/": "/m/",
+  "/card/": "/report/",
   "/check.html": "/registry/verify/",
   "/how-to-read.html": "/",
   "/absence-clock.html": "/registry/lacuna/",

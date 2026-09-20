@@ -73,6 +73,7 @@ A silence figure without an observed_to date is not a Crovia figure.
 - https://croviatrust.com/registry/tacet/ (TACET live log)
 - https://croviatrust.com/registry/ (registry hub)
 - https://croviatrust.com/m/ (model records: one page per observed model, e.g. https://croviatrust.com/m/Qwen/Qwen3-32B/)
+- https://croviatrust.com/report/ (weekly Silence Report: models observed, epochs anchored, longest verifiable silences; JSON at /report/report.json, RSS at /feed.xml, OG card at /report/latest.png)
 - https://croviatrust.com/registry/explore/ (evidence explorer)
 - https://croviatrust.com/registry/lacuna/ (LACUNA)
 - https://croviatrust.com/registry/seal/ (Crovia Seal)

@@ -198,7 +198,9 @@
   (function injectNavV2() {
     var el = document.getElementById('cv-nav-links');
     if (!el || el.getAttribute('data-nav-v2') === '1') return;
+    // The mirror host serves the registry at its root: normalise so both hosts light up the same item.
     var p = location.pathname;
+    if (location.hostname === 'registry.croviatrust.com' && p.indexOf('/registry/') !== 0) p = '/registry' + (p === '/' ? '/' : p);
     function isActive(href) {
       if (href === 'https://croviatrust.com/') return p === '/' || p === '/index.html';
       if (href === '/registry/seal/verify/') return p.indexOf('/registry/seal/verify') === 0;
@@ -208,6 +210,7 @@
       if (href === '/registry/tacet/') return p.indexOf('/registry/tacet') === 0;
       if (href === '/registry/') return p === '/registry/' || p === '/registry/index.html';
       if (href === '/registry/embed/') return p.indexOf('/registry/embed') === 0;
+      if (href === '/m/') return p.indexOf('/m/') === 0;
       return false;
     }
     function a(href, label, ext) {
@@ -216,16 +219,18 @@
       return '<a href="' + href + '"' + cls + extAttr + '>' + label + '</a>';
     }
     el.innerHTML =
-      a('https://croviatrust.com/', 'Verify') +
       a('/registry/tacet/', 'TACET') +
       a('/registry/lacuna/', 'LACUNA') +
       a('/registry/seal/', 'Seal') +
+      a('/registry/seal/verify/', 'Verify') +
       a('/registry/', 'Registry') +
       a('https://causari.dev', 'Causari &#8599;', true) +
       '<div class="cv-nav-more">' +
       '<button class="cv-nav-more-btn" data-cv-more>More' +
       '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 4.5l3 3 3-3"/></svg></button>' +
       '<div class="cv-nav-dropdown">' +
+      '<a href="/m/">Model records</a>' +
+      '<a href="/report/">Silence Report</a>' +
       '<a href="/registry/explore/">Evidence Explorer</a>' +
       '<a href="/registry/compliance/">Compliance Hub</a>' +
       '<a href="/registry/api/">Data &amp; API</a>' +
@@ -237,7 +242,7 @@
       '<a href="https://croviatrust.com/#about">Forensic &amp; EU AI Act</a>' +
       '<a href="https://croviatrust.com/#sustain">Sustain</a>' +
       '<div class="sep"></div>' +
-      '<a href="/registry/seal/verify/">Seal Verifier</a>' +
+      '<a href="https://croviatrust.com/proof.html">Archive ledger seal</a>' +
       '<a href="/registry/seal/log/">Seal Transparency Log</a>' +
       '<a href="/registry/seal/spec/">Seal spec &#8599;</a>' +
       '<a href="https://datatracker.ietf.org/doc/draft-crovia-seal/" target="_blank" rel="noopener">IETF draft &#8599;</a>' +
