@@ -23,7 +23,7 @@ Last revised: 2026-09-19.
 | Git author for all commits | `Crovia Trust <info@croviatrust.com>` |
 | One-line description | Crovia records what AI providers disclose about training data, and the absence of it, as signed, Bitcoin-anchored facts. |
 | Posture | Observation, not accusation. Crovia records facts about public surfaces; it does not infer intent, allege wrongdoing, or enforce compliance. |
-| Sibling product | **Causari** (`causari.dev`, `github.com/croviatrust/causari`): proof of cause for AI-written code (audit of AI code survival in any git repo; local ledger of prompts, models and edits). Causari issues Seals for agent completions (`re proxy --seal`) and will emit its audit results as Seals (its Phase 2); do not call it "the first production issuer" until a Causari seal is verifiable by a stranger against a public log. Never describe Causari as part of the Crovia ledger. |
+| Sibling product | **Causari** (`causari.dev`, `github.com/croviatrust/causari`): proof of cause for AI-written code (audit of AI code survival in any git repo; local ledger of prompts, models and edits). Causari issues Seals for agent completions (`re proxy --seal`) and, since 0.2.0, for its audit results (`re audit --seal`, verifiable offline at `causari.dev/verify`); do not call it "the first production issuer" until a Causari seal is verifiable by a stranger against a public log. Never describe Causari as part of the Crovia ledger. |
 
 ## 2. Products and their canonical names
 
@@ -54,7 +54,7 @@ There is exactly one thing called a Crovia Seal.
 | Reference | `crovia-seal/reference/python` (`crovia_seal`), `crovia-seal/reference/typescript` |
 | Public verifier | `https://croviatrust.com/registry/seal/verify/` |
 | Issuer trust root | `https://seal.croviatrust.com/trust-root.json` (+ `trust-root.sig.json`) |
-| Issuers | `urn:crovia:seal-issuer:causari` (Causari; seals issued locally by `re proxy --seal`, audit seals in its Phase 2), `urn:crovia:seal-issuer:crovia-trust` (seal-svc, once conformant). No issuer is called "production" until its seals appear in the public log. |
+| Issuers | `urn:crovia:seal-issuer:causari` (Causari; seals issued locally by `re proxy --seal` and `re audit --seal`), `urn:crovia:seal-issuer:crovia-trust` (seal-svc, once conformant). No issuer is called "production" until its seals appear in the public log. |
 
 Consequences (each is a defect until fixed):
 

@@ -254,7 +254,7 @@
    "state": "active"
   },
   "causari": {
-   "role": "Sibling product: proof of cause for AI-written code (audit + local ledger); Seal issuer for agent completions, audit seals in its Phase 2. Has its own canon (canon/canon.json) and surface audit (scripts/audit_surfaces.py).",
+   "role": "Sibling product: proof of cause for AI-written code (audit + local ledger); Seal issuer for agent completions and for its audit results (re audit --seal, since 0.2.0). Has its own canon (canon/canon.json) and surface audit (scripts/audit_surfaces.py).",
    "state": "active"
   },
   "crovia-core": {

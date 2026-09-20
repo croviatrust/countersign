@@ -137,7 +137,8 @@ crovia.seal.v1: an open, tamper-evident receipt for any AI output. IETF
 Internet-Draft draft-crovia-seal (frozen), Apache-2.0 + CC0, verifiable
 offline with `from crovia_seal import verify_seal`. Every TACET proof and every
 LACUNA certificate is a Seal. Causari issues Seals for a different payload
-(AI agent completions; its audit results become Seals in its Phase 2).
+(AI agent completions and, since causari 0.2.0, its audit results:
+`re audit --seal`, verified offline at causari.dev/verify).
 - Spec: https://croviatrust.com/registry/seal/spec/ (canonical text inline, draft-crovia-seal-01 mirrored, 41 conformance vectors with manifest.json)
 - In-browser verifier: https://croviatrust.com/registry/seal/verify/
 - Transparency log: https://croviatrust.com/registry/data/seal/transparency_log.json

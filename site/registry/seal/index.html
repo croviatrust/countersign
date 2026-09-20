@@ -354,7 +354,7 @@ open https://croviatrust.com/registry/seal/log/</pre>
       <div class="path-card">
         <span class="who">05 &middot; Software team</span>
         <h3>Seal every AI-written line of code</h3>
-        <p><a href="https://github.com/croviatrust/causari" target="_blank" rel="noopener" style="color:var(--accent)">Causari</a> is a Rust tool for AI code provenance; its local proxy sits between your coding agent and the model. With <code>--seal</code>, every completion gets a signed receipt in <code>crovia.seal.v1</code> that verifies offline against the normative conformance vectors. Its audit results become Seals next.</p>
+        <p><a href="https://github.com/croviatrust/causari" target="_blank" rel="noopener" style="color:var(--accent)">Causari</a> is a Rust tool for AI code provenance; its local proxy sits between your coding agent and the model. With <code>--seal</code>, every completion gets a signed receipt in <code>crovia.seal.v1</code> that verifies offline against the normative conformance vectors. Since 0.2.0 its audit results are Seals too (<code>re audit --seal</code>), verifiable offline at <a href="https://causari.dev/verify" target="_blank" rel="noopener" style="color:var(--accent)">causari.dev/verify</a>.</p>
         <pre><span class="cmt"># one flag: every completion sealed</span>
 re proxy --seal
 <span class="cmt">#  • gpt-4o  42&rarr;18 tok  &#128272; cs_2026_Q7RM&hellip;</span>
