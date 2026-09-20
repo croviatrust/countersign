@@ -240,7 +240,8 @@ def verify_any(obj: dict[str, Any], assets: dict[str, bytes] | None = None) -> t
                 errs.append("seal.subject.output_hash does not bind the proof")
             if obj.get("query") != pnx_query(proof):
                 errs.append("query does not describe this proof")
-            outer.update({"seal_ok": r.ok and not errs, "seal_errors": errs, "issuer_id": r.issuer_id, "seal_id": r.seal_id})
+            outer.update({"seal_ok": r.ok and not errs, "seal_signature_ok": r.ok, "seal_errors": errs,
+                          "issuer_id": r.issuer_id, "seal_id": r.seal_id})
     res = verify_pnx(proof, assets)
     if outer.get("seal_ok") is False:
         res.ok = False

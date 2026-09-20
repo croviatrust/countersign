@@ -1,0 +1,240 @@
+{
+  "detection_classes": [
+    {
+      "asset_hex": "972f7efd61c5c000027c16d5044656a1abda385998003e7f3f82b94293bf17",
+      "asset_len": 31,
+      "detection": "undetectable",
+      "fingerprints": []
+    },
+    {
+      "asset_hex": "ab36028244a51eaded4ee6dcf390a988339913e1169b25ef4a0983ceed6d3c5d",
+      "asset_len": 32,
+      "detection": "partial",
+      "fingerprints": [
+        "db5049ea8a293503d0fdbb66766d43d5ff759b362f5d0f67aceb0939104d5f3d"
+      ]
+    },
+    {
+      "asset_hex": "dc9418f3507b1a8477810c3e6aef48b682e850f7557f4306667390d279a6f2f512e40f94c3dde85a9f163c5b6fd4",
+      "asset_len": 46,
+      "detection": "partial",
+      "fingerprints": [
+        "0afccd2c01569475c83d866f3748783cdc84fac602e02342d1a80d712502aba2",
+        "10a369c19d916594571683fa63b407577256cfa1941567c048fafe5e26364ca2",
+        "4b107eb0788d75fb7cd5383bf326751b7bea5dc55ed5937aa564ae2baae5f05a",
+        "56d1404c7ef9a2254a4f7286315b564af4374a4c8ddfab13fbfdc7031202c421",
+        "6257d19764cf0fc6ba2766775ab7f847940690a57fbe3d48e04a24f95d562a90",
+        "645de34bf94c1d7b1ac01123b3e374b8b1e01ab93427bc42d4e8e012fcc9ba6d",
+        "70d103dc9ed31062ad85938896175bdc426e530aecc496df3c58c0f00310a420",
+        "8b388e01eb121f176ffced76cf7e68feb65f2e643cd1db1237cbec08c69e01e4",
+        "a732ac9c298a834faeacca7b94e0153a2175cfcbe68146e996bdebe607a37df7",
+        "acd5b06c1ea56b88dec0e557cb9a35d7631f145c6be420101f67299242f7272e",
+        "b576ad469170ff51798f98ede303e21a324c44cfb5b696a7e676d01532f0e454",
+        "be2ce5a94e9dc26f8a9c27894748fa76671548ae027ff6f3d6b7958084f05419",
+        "e2c606df2a1baa12423e7d7413886845e4d446be68c34f6f9bea6d54caf70c73",
+        "e4d1ce8cb23ad1a432b53bb6dfbb625051e09a69980a28f23c4e61985e17be08",
+        "f0e5ca9fc3a7071c02ab4cad8ef8bc092895a1a8a40f327da900ce757f713435"
+      ]
+    },
+    {
+      "asset_hex": "9ce7d5c131a3bb958d80d36a8119779f2a6ecd45340553cf1953409abc1aa5543162cac9583787f21b549c81d806fd",
+      "asset_len": 47,
+      "detection": "guaranteed",
+      "fingerprints": [
+        "0e9973d37b325c1551abb5689badb0e1f3d879950b1fc998913cf99fdc35e815"
+      ]
+    },
+    {
+      "asset_hex": "c651ecca4f08e8baac17218a306c0e205dc47ad2737c1d47d2cd506838d344eb82242aad1d1cb3dc770736c61a80e4ef231c2977bcb1cedab22889faef8723d08ec0492fcd4bc8355af1da794000468b5c40194471459206636cd03c0a92c8b378ae8fbc",
+      "asset_len": 100,
+      "detection": "guaranteed",
+      "fingerprints": [
+        "074b75b86a8da35047b8815c2fa2704c599bc1cd804429b03f01cc970fd3f109",
+        "0cb227c5f2f74cf2973af0aa56e901d48923dd1c2db11d5fc23e265707e21e86",
+        "12a6f68de30503d7b0b6b14758d5ea9df1d170cb2c5afd990c9ae1c8ab54bf08",
+        "1e80315f2305bdfc4ab5cd02e4633cbf8d9160e93c223559ef1de160e14deda2",
+        "206e81cc0fdecfcbaaac5901687630fac239117541a7101dc95e04a1f2dce5f3",
+        "29ce7d0c29b3a60512f0ddf3ce9c8853c213921769961c996cd1226c9e3b1900"
+      ]
+    }
+  ],
+  "domains": {
+    "fingerprint": "CROVIA-PNX-FP-v1\n",
+    "leaf_value": "CROVIA-PNX-PRESENT-v1\n",
+    "sheet": "CROVIA-PNX-SHEET-v1\n"
+  },
+  "epoch_leaf_key": {
+    "key": "f6c8101d72d46a789986a359d479e7a208ddc411fa0e0ff4aaa2fa7f8fa70379",
+    "run_id": "conformance/run-001"
+  },
+  "guarantee": {
+    "expect": "for every offset o, FP(noise[:o] + secret + noise[o:]) shares at least one fingerprint with the secret",
+    "noise_hex": "4ffbf2e586e27c522e7902f5c7426b8146551ae8db346a4e4a9e9dc35114e705a9cb0016c4ec59df42c2693897db811a818b89b11c4ff0192ddd60659c9a7c5fbda348efde593f7c4822bd85047c220b3207fb839d90a0c53cf769167dcacd671554b4ab",
+    "offsets": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      83,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      90,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100
+    ],
+    "secret_fingerprints": [
+      "27a03ed93166840c2eb6c9830653130882e720549db7a8508e0b9c792b07ae7b"
+    ],
+    "secret_hex": "07092276d4308de9abcc0753e77ef2b3fe46f33d220df5ed7aaf9844a0e0f5d97c03c7dfa6c23c7feb03f6398fcaa5"
+  },
+  "json_strings": {
+    "body_hex": "7b226d6f64656c223a20226770742d346f222c20226d65737361676573223a205b7b22726f6c65223a202273797374656d222c2022636f6e74656e74223a2022596f7520617265206120636f64652072657669657765722e227d2c207b22726f6c65223a202275736572222c2022636f6e74656e74223a202252657669657720746869732066696c653a5c6e64617461626173653a5c6e2020686f73743a2064622e696e7465726e616c2e6578616d706c655c6e2020757365723a207376635f6167656e745c6e202070617373776f72643a20703473732d3434666564373835643836625c6e6170693a5c6e2020746f6b656e3a2039373933623831643265346364323338616263645c6e2020726567696f6e3a2065752d776573742d315c6e227d5d2c202274656d7065726174757265223a20307d",
+    "derived_hex": [
+      "52657669657720746869732066696c653a0a64617461626173653a0a2020686f73743a2064622e696e7465726e616c2e6578616d706c650a2020757365723a207376635f6167656e740a202070617373776f72643a20703473732d3434666564373835643836620a6170693a0a2020746f6b656e3a2039373933623831643265346364323338616263640a2020726567696f6e3a2065752d776573742d310a"
+    ],
+    "non_json_body_hex": "504f5354202f76312f636861742f636f6d706c6574696f6e730a1c60ec5c65d86ce492104f7ecc63dbb5a4e21c698af91435824bfaef793f2f4c50b09c468267573f200ad58b034c6484f874d040c8539954274ced28e87a36ab38788310b2b7c0d2988875fc5f4e5d245c769a8aba5cbc2974f0b8d01b263b4f63db90e98b79eaaad13b13acd73fd72183e569c1f41951615cb46b2a8f29c0483a3261ef26a1b6169fb500d845a28766d720455076c3272478da5ca71c97fab6ba79fd6db1a1ac3e81f65f0533c8fa770d0d1bd01d05cda151e901eb817d4508e9cfafa14fb6b4ecaee0025d9cd9d4bffce4b2761f59bf3429b4dfb356b243abccfddd99d2d3ce38a4576161fd5a7e676df5d1bd9f4097d10004ffa2400c687ac87db86d8206d89adfbdc08c4695c155617537af8ec9b89d751919d64587a6b2b2448d5cb9e0bacef2afb1d6736b2d6c6976652d6665383761343432313237383037663665616637633861636566303365366364613731313637353336396661383562383635663539633531646638313731653238636164333337300a",
+    "non_json_derived_hex": []
+  },
+  "kgram_hashes": {
+    "data_hex": "4330ef506e218a8be6098a85ab174972a9946982130c1ae3d6f3d50c6565a8a82df3cd71651cf14c",
+    "hashes": [
+      "f67bb2c7c7a2e1026b90da810cdec1e07fc1040444a32397fb7919a5777c09e8",
+      "bd39761eef2a992d9cad0b8eb8b8f811c4e9245fdb65b360810eae4e458db29d",
+      "daa821cfde77bd411069942ebc0d04d1e9a799ab18e1c625a9f90cb1f7f2b309",
+      "65c471bfa5af63dc402d85b62b825292087efab2dc434fe8fe44bb9ef63be137",
+      "d197cc198bc489e05ecb96a827588c5831c96517fdec828894f893f25533a9ff",
+      "0824fed0fbcb3fca537a4e1195a0bb36170459db06da0b63161c90cb0495ec97",
+      "de0645ad20577851a621addf5dc75d6987ac41491b3a090cf29b952701ef14ed",
+      "b965c06f772013f6cb2f984b1c05d373685b6929c4ca52906e8904fb21249478",
+      "b9f9096fb57048cd05629dfa1194cb060e09ee45bc8bedec398e7fde856d911b"
+    ]
+  },
+  "params": {
+    "hash": "sha256",
+    "k_gram": 32,
+    "threshold": 47,
+    "window": 16
+  },
+  "present_leaf_value": "64d5d5c2ec6a015461360d04bece50de41b1b829936e77e3bc4a5896016b13df",
+  "profile": "crovia.pnx.v1",
+  "salt_hex": "47dfe6cc13a8b4cbef0863bb1891a0a5",
+  "stream": {
+    "construction": "SHA-256(\"tacet-pnx-fixture:<label>:<i>\") for i = 0, 1, ..., concatenated and truncated to n bytes",
+    "example": {
+      "hex": "4330ef506e218a8be6098a85ab174972a9946982130c1ae3d6f3d50c6565a8a82df3cd71651cf14c",
+      "label": "kgrams",
+      "n": 40
+    }
+  },
+  "winnowing": {
+    "data_hex": "ea878be29fa9a92f96359051667d45b4a2cfa2bfd33cdf89dfc8b77d8d6ba7153ac21e9418be3732261d020d86f2c4b889ce178c14bb45acc0020a99b907617cb83ea9b957a4a4d6a99ee3ddaa073dbf3b28fe8b307c281b876dba76b9309575458d4295cf10454e3e5fe08603e20d408ffaf4160a353c8a",
+    "fingerprints": [
+      "005bb7af0d61176134075a241551141364f5d32c06fd7bc2189d65801171bc4b",
+      "013574ee8fe88f40bb45f34a264831eabb430d22abdb1754bcaa32a9d05c231c",
+      "0139f1784d733362ec79bdd46deb3d15282ecaa4476a518101168220c23f7198",
+      "0cb21d91c984811a59b382f2ea8b10f1474fdd9eddc38987fa4cd62b989f267b",
+      "10c92a18503baba45718cfa785a3bcd951cc9356fea14cedbb582febd7b9ec74",
+      "1323790ddaa5c1d66b2fbf8306824d58a1903b1c692aaf6117e7e1b9993a381f",
+      "19a70ef37802a7d639f1e895bb28cd610fcacc4e34d2835269a1003b0a4efd48",
+      "2442def4b148322b71694558175e49f5589dd07c00042ad1516d2ec20f695ede"
+    ]
+  },
+  "winnowing_short": {
+    "data_hex": "4e44aea3929625505141d27bb70e2ddaf32b6f0ecd621f7a0ffa731d89a217c30542ad302f2298bd",
+    "fingerprints": [
+      "089cc7993f0dd02b3022f90a73da2b782fe349cf0b59199d822bd7901ee77be1"
+    ],
+    "note": "fewer k-grams than one window: the single minimum is selected"
+  }
+}

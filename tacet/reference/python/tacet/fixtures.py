@@ -10,9 +10,10 @@ first_seen → now computation would report.
 from __future__ import annotations
 
 import hashlib
+import json
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from . import merkle
 from .epoch import build_sheet, close_sheet, witness_sign
@@ -141,3 +142,94 @@ def build_scenario() -> Scenario:
 
 def witness_set(sc: Scenario, k: int = 2) -> Dict[str, Any]:
     return {"k": k, "n": len(sc.witnesses), "ids": [w.id for w in sc.witnesses]}
+
+
+# --------------------------------------------------------------------------- PNX (crovia.pnx.v1)
+
+def pnx_stream(label: str, n: int) -> bytes:
+    """Deterministic pseudo-random bytes: SHA-256 in counter mode over a label.
+
+    Language-independent, so a runner in any language can rebuild the bodies
+    of the PNX vectors from the labels instead of storing them.
+    """
+    out = b""
+    i = 0
+    while len(out) < n:
+        out += hashlib.sha256(f"tacet-pnx-fixture:{label}:{i}".encode()).digest()
+        i += 1
+    return out[:n]
+
+
+PNX_RUN_ID = "conformance/run-001"
+PNX_SALT = pnx_stream("salt", 16)
+PNX_CLOSED_AT = "2026-09-20T12:00:00Z"
+PNX_WITNESS_ID = "urn:crovia:pnx-witness:fixture"
+PNX_ISSUER_ID = "urn:crovia:seal-issuer:fixture-pnx"
+
+#: 80 bytes, above the 47-byte guarantee; appears verbatim in body 1.
+PNX_LEAKED_KEY = b"sk-live-" + pnx_stream("openai_key", 36).hex().encode()
+#: 64 bytes, never sent.
+PNX_SAFE_KEY = b"AKIA" + pnx_stream("aws_key", 30).hex().encode()
+#: A config file whose lines are all shorter than one k-gram (32 bytes incl. newline): it shares no
+#: k-gram with the JSON body that quotes it (newlines arrive escaped), so only json-strings-v1 can find it.
+PNX_LEAKED_FILE = ("database:\n"
+                   "  host: db.internal.example\n"
+                   "  user: svc_agent\n"
+                   f"  password: p4ss-{pnx_stream('db_password', 6).hex()}\n"
+                   "api:\n"
+                   f"  token: {pnx_stream('api_token', 10).hex()}\n"
+                   "  region: eu-west-1\n").encode()
+PNX_CUSTOMER_CSV = b"id,email,plan\n" + b"".join(
+    f"{1000 + i},user{i}@example.com,{('free', 'pro')[i % 2]}\n".encode() for i in range(8))
+PNX_SESSION_ID = pnx_stream("session_id", 20).hex().encode()  # 40 bytes: partial class
+PNX_DB_PIN = b"1234"                                            # 4 bytes: undetectable
+
+PNX_BODIES: List[Dict[str, Any]] = [
+    {"at": "2026-09-20T11:00:00Z", "body": b"POST /v1/chat/completions\n" + pnx_stream("noise-1", 300) + PNX_LEAKED_KEY + b"\n",
+     "note": "raw leak: the key appears verbatim in a binary body"},
+    {"at": "2026-09-20T11:05:00Z",
+     "body": json.dumps({"model": "gpt-4o", "messages": [
+         {"role": "system", "content": "You are a code reviewer."},
+         {"role": "user", "content": "Review this file:\n" + PNX_LEAKED_FILE.decode()}], "temperature": 0}).encode(),
+     "note": "leak inside a JSON string: newlines are escaped in the raw bytes; found only through json-strings-v1"},
+    {"at": "2026-09-20T11:10:00Z", "body": b"GET /health HTTP/1.1\r\n", "note": "shorter than k_gram: adds no fingerprint"},
+    {"at": "2026-09-20T11:15:00Z", "body": pnx_stream("noise-4", 1000), "note": "unrelated traffic"},
+]
+PNX_EXPOSURE_ASSETS: List[Tuple[str, bytes]] = [
+    ("aws_key", PNX_SAFE_KEY), ("openai_key", PNX_LEAKED_KEY), ("config.yaml", PNX_LEAKED_FILE),
+    ("session_id", PNX_SESSION_ID), ("db_pin", PNX_DB_PIN)]
+PNX_CLEAN_ASSETS: List[Tuple[str, bytes]] = [("aws_key", PNX_SAFE_KEY), ("customer_export.csv", PNX_CUSTOMER_CSV)]
+
+
+@dataclass
+class PnxScenario:
+    witness_key: SigningKey
+    issuer: SigningKey
+    witness: Any                      # EgressWitness after ingesting PNX_BODIES
+    sheet: Dict[str, Any]
+    clean: Dict[str, Any]             # proof over PNX_CLEAN_ASSETS: verdict absent
+    exposure: Dict[str, Any]          # proof over PNX_EXPOSURE_ASSETS: verdict present
+    other_sheet: Dict[str, Any]       # same salt and key, different traffic: a foreign root
+
+
+def pnx_witness_key() -> SigningKey:
+    return SigningKey.from_seed(PNX_WITNESS_ID, pnx_stream("witness-key", 32))
+
+
+def build_pnx_scenario() -> PnxScenario:
+    from .egress import EgressWitness
+    key = pnx_witness_key()
+    w = EgressWitness(run_id=PNX_RUN_ID, salt=PNX_SALT)
+    for b in PNX_BODIES:
+        w.ingest(b["body"], b["at"])
+    sheet = w.sheet(key, PNX_CLOSED_AT)
+    other = EgressWitness(run_id=PNX_RUN_ID, salt=PNX_SALT)
+    other.ingest(pnx_stream("other-traffic", 700), "2026-09-20T11:00:00Z")
+    return PnxScenario(
+        witness_key=key,
+        issuer=SigningKey.from_seed(PNX_ISSUER_ID, pnx_stream("issuer-key", 32)),
+        witness=w, sheet=sheet,
+        clean=w.prove(sheet, PNX_CLEAN_ASSETS),
+        exposure=w.prove(sheet, PNX_EXPOSURE_ASSETS),
+        other_sheet=other.sheet(key, PNX_CLOSED_AT),
+    )
