@@ -19,6 +19,8 @@
   <a href="https://croviatrust.com/registry/data/tacet/latest.json"><img alt="signed observations of absence (live)" src="https://img.shields.io/endpoint?url=https%3A%2F%2Fcroviatrust.com%2Fregistry%2Fdata%2Ftacet%2Fbadges%2Fnegative.json"></a>
 </p>
 <p align="center">
+  <a href="https://pypi.org/project/crovia-tacet/"><img alt="PyPI crovia-tacet" src="https://img.shields.io/pypi/v/crovia-tacet?label=crovia-tacet&color=1ec5ff"></a>
+  <a href="https://pypi.org/project/crovia-tacet-operator/"><img alt="PyPI crovia-tacet-operator" src="https://img.shields.io/pypi/v/crovia-tacet-operator?label=crovia-tacet-operator&color=1ec5ff"></a>
   <img alt="Spec" src="https://img.shields.io/badge/TACET-v0.1--draft-1ec5ff">
   <img alt="Seal" src="https://img.shields.io/badge/wraps-crovia.seal.v1-1ec5ff">
   <img alt="License" src="https://img.shields.io/badge/code-Apache--2.0-lightgrey">
@@ -49,9 +51,8 @@ trusted.
 **On the command line, same checks, pure Python, standard library only for the anchors:**
 
 ```bash
-git clone https://github.com/croviatrust/countersign
-git clone https://github.com/croviatrust/crovia-seal
-pip install -e countersign/tacet/reference/python -e crovia-seal/reference/python -e countersign/tacet/operator
+pip install crovia-tacet-operator \
+  "crovia-seal @ git+https://github.com/croviatrust/crovia-seal#subdirectory=reference/python"
 
 curl -sO https://croviatrust.com/registry/data/tacet/proofs/Qwen__Qwen3-32B.seal.json
 tacet-operator verify Qwen__Qwen3-32B.seal.json
