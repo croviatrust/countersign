@@ -1216,7 +1216,7 @@
         "map_id": "urn:crovia:tacet:map:disclosure",
         "strength": "3"
       },
-      "version": "0.3.0",
+      "version": "0.4.0",
       "weights_hash": null
     },
     "issuer": {
@@ -1233,7 +1233,7 @@
       "canon": "csc-1",
       "domain": "CROVIA-SEAL-v1",
       "payload_hash_alg": "sha256",
-      "sig_hex": "40cf835e2226763b521c9e9c78ee113fa5a7fe6d02414e72e3d4e8b743a0ece85823f8c392e9408ee50ec6555d048f1b2ea6d4dc667ebe1759a9f3f4e315d801"
+      "sig_hex": "e5e6002a78006f1d5710fffbf13e45fe267b3a6fc8209da5bc82052119a0861462582c1d20d11514ddbb3ff87ea12e9e6cfab3fb92b0467f9a26b94fc2abff0a"
     },
     "subject": {
       "input_hash": "sha256:8d1cf12b38c851e65aa2d3cb8604b2af1f21911280c950e2a4d1284aaf3f708a",

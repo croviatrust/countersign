@@ -337,7 +337,7 @@
   "spec_sha256": "7c28f16aa99af0df21879cc3022df98c660319f1e98e911af0de18742c632a50",
   "pnx_profile": "crovia.pnx.v1",
   "pnx_source_url": "https://croviatrust.com/registry/tacet/spec/PNX.md",
-  "pnx_sha256": "6a96aa87fe300873c318c54aa76cb4cee1c105c2dd63b7e460a94fa42fbfdc15",
+  "pnx_sha256": "338a1b1fd14f692af4906c8e9cfb7678f85153ea0604f9bf6d10b24b3ae01a22",
   "vectors_manifest_url": "https://croviatrust.com/registry/tacet/spec/vectors/v1/manifest.json",
   "conformance_tests": 47,
   "reference_package_names": {

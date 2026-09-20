@@ -129,6 +129,14 @@ block-header fetch, exactly as the existing TACET verifiers do.
 - **Egress proxies / gateways**: the fingerprinting is one pass over request
   bodies; the map fits in memory for a day of traffic.
 
+Tooling (reference, Apache-2.0): the `tacet-pnx` command line
+(`pip install crovia-tacet`: `keygen`, `witness`, `prove`, `verify`; exit
+codes 0 absent / 1 present or uncovered / 2 invalid) and the GitHub Action
+`croviatrust/pnx-action`, which witnesses captured egress in a job, proves a
+set of assets and secrets, writes the verdict to the job summary and uploads
+the proof as an artifact. Both read capture logs as `.jsonl`
+(`{"at": ..., "body": ...}` or `{"body_b64": ...}`) or one body per file.
+
 ## 9. Conformance (to be added to `conformance/`)
 
 Vectors for: winnowing guarantee at every offset, `partial` and

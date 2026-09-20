@@ -1,0 +1,75 @@
+name: test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  clean-run-is-absent:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: pnx
+        uses: ./
+        env:
+          DEMO_API_KEY: sk-demo-0123456789abcdef0123456789abcdef0123456789abcdef
+        with:
+          egress: |
+            test/egress/
+          assets: |
+            test/protected/
+          asset-env: |
+            DEMO_API_KEY
+          artifact-name: pnx-proof-clean
+      - name: Verdict is absent
+        run: test "${{ steps.pnx.outputs.verdict }}" = "absent"
+      - name: Proof verifies independently
+        run: tacet-pnx verify "${{ steps.pnx.outputs.proof }}" --assets-dir test/protected --asset-env DEMO_API_KEY
+        env:
+          DEMO_API_KEY: sk-demo-0123456789abcdef0123456789abcdef0123456789abcdef
+
+  leaking-run-fails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: pnx
+        uses: ./
+        continue-on-error: true
+        with:
+          egress: |
+            test/egress/
+            test/leaked/
+          assets: |
+            test/protected/customers.csv
+          artifact-name: pnx-proof-leak
+      - name: Step failed with verdict present
+        run: |
+          test "${{ steps.pnx.outcome }}" = "failure"
+          test "${{ steps.pnx.outputs.verdict }}" = "present"
+
+  sealed-delivery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ephemeral seeds for the test
+        id: seeds
+        run: |
+          echo "witness=$(openssl rand -hex 32)" >> "$GITHUB_OUTPUT"
+          echo "issuer=$(openssl rand -hex 32)" >> "$GITHUB_OUTPUT"
+      - id: pnx
+        uses: ./
+        with:
+          egress: test/egress/
+          assets: test/protected/
+          witness-seed: ${{ steps.seeds.outputs.witness }}
+          seal-seed: ${{ steps.seeds.outputs.issuer }}
+          artifact-name: pnx-proof-sealed
+      - name: Proof is a crovia.seal.v1 bundle
+        run: |
+          python3 -c 'import json,sys; b=json.load(open(sys.argv[1])); assert set(b)=={"seal","query","proof"}; assert b["seal"]["seal_version"]=="crovia.seal.v1"; print(b["seal"]["seal_id"], b["seal"]["checks"]["pnx"])' "${{ steps.pnx.outputs.proof }}"
+          tacet-pnx verify "${{ steps.pnx.outputs.proof }}" --assets-dir test/protected

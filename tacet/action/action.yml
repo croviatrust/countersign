@@ -1,0 +1,190 @@
+name: "PNX — Proof of Non-Exfiltration"
+description: "Prove that secrets, customer data and source files never left your AI agent's run. Offline-verifiable, TACET profile crovia.pnx.v1, delivered as a Crovia Seal."
+author: "Crovia Trust"
+branding:
+  icon: "shield"
+  color: "blue"
+
+inputs:
+  egress:
+    description: >
+      What the agent sent out, as the witness saw it: newline-separated files (one body each),
+      directories, or .jsonl capture logs from your LLM gateway/proxy ({"at": "...", "body": "..."} or {"body_b64": "..."}).
+    required: true
+  assets:
+    description: "Newline-separated protected files or directories (label = path relative to the directory)."
+    required: false
+    default: ""
+  asset-env:
+    description: >
+      Newline-separated names of environment variables whose values must never appear in egress
+      (pass them with `env:` on this step). Labels become env:NAME; values never enter the proof.
+    required: false
+    default: ""
+  run-id:
+    description: "Identifier of the run being attested."
+    required: false
+    default: "${{ github.repository }}/${{ github.run_id }}/${{ github.run_attempt }}"
+  witness-id:
+    description: "Witness key id recorded in the run sheet."
+    required: false
+    default: "urn:github:${{ github.repository }}:pnx-witness"
+  witness-seed:
+    description: >
+      Hex-encoded 32-byte Ed25519 seed of the witness key (store as a repository secret, generate with
+      `openssl rand -hex 32`). If empty an ephemeral key is used: the proof still verifies, but the witness
+      identity is not stable across runs.
+    required: false
+    default: ""
+  seal-seed:
+    description: "Hex-encoded 32-byte seed of a Seal issuer key. If set, the proof is delivered inside an unmodified crovia.seal.v1."
+    required: false
+    default: ""
+  seal-issuer-id:
+    description: "Issuer id used when seal-seed is set."
+    required: false
+    default: "urn:github:${{ github.repository }}:pnx-issuer"
+  fail-on-present:
+    description: "Fail the step unless every asset is proven absent (present, undetectable or partial coverage fail)."
+    required: false
+    default: "true"
+  output-dir:
+    description: "Where to write run.sheet.json, pnx.proof.json and (private) run.state.json."
+    required: false
+    default: "pnx"
+  upload-artifact:
+    description: "Upload the sheet and proof as a workflow artifact."
+    required: false
+    default: "true"
+  artifact-name:
+    description: "Artifact name."
+    required: false
+    default: "pnx-proof"
+  python-version:
+    description: "Python used to run tacet-pnx."
+    required: false
+    default: "3.12"
+  tacet-version:
+    description: "pip version specifier for crovia-tacet."
+    required: false
+    default: ">=0.4.0"
+
+outputs:
+  verdict:
+    description: "absent | present | mixed"
+    value: ${{ steps.prove.outputs.verdict }}
+  proof:
+    description: "Path of the proof (bare or sealed)."
+    value: ${{ steps.prove.outputs.proof }}
+  sheet:
+    description: "Path of the signed run sheet."
+    value: ${{ steps.witness.outputs.sheet }}
+  root:
+    description: "Run root committed by the witness (sha256:...)."
+    value: ${{ steps.witness.outputs.root }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install tacet-pnx
+      shell: bash
+      run: python -m pip install --quiet --disable-pip-version-check "crovia-tacet[seal]${{ inputs.tacet-version }}"
+
+    - name: Witness the egress
+      id: witness
+      shell: bash
+      env:
+        PNX_EGRESS: ${{ inputs.egress }}
+        PNX_RUN_ID: ${{ inputs.run-id }}
+        PNX_WITNESS_ID: ${{ inputs.witness-id }}
+        PNX_WITNESS_SEED: ${{ inputs.witness-seed }}
+        PNX_OUT: ${{ inputs.output-dir }}
+      run: |
+        set -euo pipefail
+        mkdir -p "$PNX_OUT"
+        mapfile -t paths < <(printf '%s\n' "$PNX_EGRESS" | sed '/^[[:space:]]*$/d')
+        if [ "${#paths[@]}" -eq 0 ]; then echo "::error::input 'egress' is empty"; exit 2; fi
+        if [ -z "$PNX_WITNESS_SEED" ]; then
+          echo "::warning::no witness-seed given: using an ephemeral witness key for this run"
+          PNX_WITNESS_SEED="$(python3 -c 'import os;print(os.urandom(32).hex())')"
+          export PNX_WITNESS_SEED
+        fi
+        tacet-pnx witness "${paths[@]}" --run-id "$PNX_RUN_ID" --key-env PNX_WITNESS_SEED --key-id "$PNX_WITNESS_ID" \
+          --sheet "$PNX_OUT/run.sheet.json" --state "$PNX_OUT/run.state.json"
+        echo "sheet=$PNX_OUT/run.sheet.json" >> "$GITHUB_OUTPUT"
+        echo "root=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["root"])' "$PNX_OUT/run.sheet.json")" >> "$GITHUB_OUTPUT"
+
+    - name: Prove non-exfiltration
+      id: prove
+      shell: bash
+      env:
+        PNX_ASSETS: ${{ inputs.assets }}
+        PNX_ASSET_ENV: ${{ inputs.asset-env }}
+        PNX_SEAL_SEED: ${{ inputs.seal-seed }}
+        PNX_SEAL_ISSUER: ${{ inputs.seal-issuer-id }}
+        PNX_OUT: ${{ inputs.output-dir }}
+        PNX_FAIL: ${{ inputs.fail-on-present }}
+      run: |
+        set -euo pipefail
+        args=()
+        while IFS= read -r p; do
+          [ -z "$p" ] && continue
+          if [ -d "$p" ]; then args+=(--assets-dir "$p"); else args+=(--asset "$p=$p"); fi
+        done < <(printf '%s\n' "$PNX_ASSETS")
+        while IFS= read -r v; do
+          [ -z "$v" ] && continue
+          args+=(--asset-env "$v")
+        done < <(printf '%s\n' "$PNX_ASSET_ENV")
+        if [ "${#args[@]}" -eq 0 ]; then echo "::error::no assets: set 'assets' and/or 'asset-env'"; exit 2; fi
+        out="$PNX_OUT/pnx.proof.json"
+        seal_args=()
+        if [ -n "$PNX_SEAL_SEED" ]; then seal_args=(--seal-key-env PNX_SEAL_SEED --seal-issuer-id "$PNX_SEAL_ISSUER"); out="$PNX_OUT/pnx.sealed.json"; fi
+        set +e
+        tacet-pnx prove --state "$PNX_OUT/run.state.json" --sheet "$PNX_OUT/run.sheet.json" "${args[@]}" "${seal_args[@]}" --out "$out"
+        rc=$?
+        set -e
+        [ "$rc" -eq 0 ] || exit "$rc"
+        set +e
+        tacet-pnx verify "$out" "${args[@]}" --json > "$PNX_OUT/verify.json"
+        vrc=$?
+        set -e
+        rm -f "$PNX_OUT/run.state.json"
+        verdict="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["verdict"])' "$PNX_OUT/verify.json")"
+        echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
+        echo "proof=$out" >> "$GITHUB_OUTPUT"
+        python3 - "$PNX_OUT/verify.json" "$PNX_OUT/run.sheet.json" "$out" >> "$GITHUB_STEP_SUMMARY" <<'PY'
+        import json, sys
+        v = json.load(open(sys.argv[1])); s = json.load(open(sys.argv[2]))
+        icon = {"absent": "✅", "present": "❌", "mixed": "⚠️"}.get(v["verdict"], "⚠️")
+        print(f"## {icon} PNX — Proof of Non-Exfiltration: `{v['verdict']}`\n")
+        print(f"Run `{s['run_id']}` · witness `{s['witness']['id']}` · {s['egress']['bodies']} bodies, {s['egress']['bytes']:,} bytes"
+              f" · root `{s['root'][:23]}…` · guarantee for shared substrings ≥ {s['params']['threshold']} bytes\n")
+        print("| asset | verdict |\n|---|---|")
+        for label, verdict in v["assets"].items():
+            print(f"| `{label}` | {verdict} |")
+        for e in v.get("errors", []): print(f"\n> ❌ {e}")
+        for w in v.get("warnings", []): print(f"\n> ⚠️ {w}")
+        print(f"\nProof: `{sys.argv[3]}` · verify anywhere with `pip install crovia-tacet && tacet-pnx verify {sys.argv[3]}` · "
+              "[what a PNX proof does and does not claim](https://croviatrust.com/registry/tacet/spec/#pnx-7-what-a-pnx-proof-does-not-claim)")
+        PY
+        if [ "$vrc" -ge 2 ]; then echo "::error::PNX proof failed verification"; exit 2; fi
+        if [ "$PNX_FAIL" = "true" ] && [ "$vrc" -ne 0 ]; then
+          echo "::error::PNX verdict '$verdict': at least one protected asset is present, undetectable or only partially covered"
+          exit 1
+        fi
+
+    - name: Upload proof
+      if: ${{ always() && inputs.upload-artifact == 'true' && steps.witness.outcome == 'success' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: |
+          ${{ inputs.output-dir }}/run.sheet.json
+          ${{ inputs.output-dir }}/pnx.proof.json
+          ${{ inputs.output-dir }}/pnx.sealed.json
+          ${{ inputs.output-dir }}/verify.json
+        if-no-files-found: ignore
