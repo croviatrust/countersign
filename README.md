@@ -6,7 +6,8 @@
 
 <p align="center">
   <a href="https://croviatrust.com/registry/tacet/"><b>Live log</b></a> ·
-  <a href="tacet/SPEC.md">Specification</a> ·
+  <a href="https://croviatrust.com/registry/tacet/spec/">Specification &amp; Internet-Draft</a> ·
+  <a href="https://github.com/croviatrust/pnx-action">PNX Action</a> ·
   <a href="https://croviatrust.com/whitepaper.html">Whitepaper</a> ·
   <a href="https://croviatrust.com/registry/lacuna/">LACUNA candidates</a> ·
   <a href="CANON.md">Canon</a>
@@ -26,6 +27,11 @@
   <img alt="License" src="https://img.shields.io/badge/code-Apache--2.0-lightgrey">
   <img alt="Spec license" src="https://img.shields.io/badge/spec-CC0-lightgrey">
 </p>
+
+**`countersign` is Crovia's witness protocol and the home of TACET** (verifiable map,
+epoch sheets, silence proofs), the PNX profile, the `tacet-pnx` CLI and the canon that
+every Crovia surface follows. Specification and Internet-Draft:
+[croviatrust.com/registry/tacet/spec/](https://croviatrust.com/registry/tacet/spec/).
 
 Transparency logs prove that something **was** published. TACET is a transparency
 log whose product is the opposite: a portable, offline-verifiable proof that, for a
