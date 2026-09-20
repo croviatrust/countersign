@@ -15,7 +15,7 @@ tacet/
   SPEC.md                         The protocol (v0.1-draft, CC0)
   reference/python/tacet/         Reference implementation (Apache-2.0)
   conformance/generate_vectors.py Deterministic vector generator
-  conformance/run_conformance.py  28-case runner; port this to other languages
+  conformance/run_conformance.py  107-case runner; port this to other languages
   conformance/vectors/v1/         Committed vectors (520 KB)
 ```
 
@@ -49,7 +49,8 @@ Silence never accrues without an anchored negative observation (SPEC §8.4).
 ```bash
 pip install -e <crovia-seal>/reference/python      # Seal reference, for the wrapper
 pip install -e tacet/reference/python
-python3 tacet/conformance/run_conformance.py         # 28 passed, 0 failed
+python3 tacet/conformance/run_conformance.py         # 107 passed, 0 failed
+node tacet/conformance/run_conformance_js.cjs        # 76 passed, 0 failed (browser verifier)
 cd tacet/reference/python && python3 -m pytest       # unit tests
 ```
 

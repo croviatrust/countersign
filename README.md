@@ -174,10 +174,10 @@ src/countersign/                 Original countersign: CT-style Merkle log + sig
 ```
 
 ```bash
-cd tacet/reference/python && python -m pytest -q      # reference: 43 passed (incl. PNX)
+cd tacet/reference/python && python -m pytest -q      # reference: 61 passed (incl. PNX and the committed vectors)
 cd tacet/operator          && python -m pytest -q      # operator: predicate vectors, fake-network epochs, proof round-trip
-python tacet/conformance/run_conformance.py            # 47 passed, 0 failed
-node   tacet/conformance/run_conformance_js.cjs        # browser verifier against the same vectors: 20 passed
+python tacet/conformance/run_conformance.py            # 107 passed, 0 failed
+node   tacet/conformance/run_conformance_js.cjs        # browser verifier against the same vectors: 76 passed
 ```
 
 ## Public data
