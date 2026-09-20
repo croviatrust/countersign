@@ -51,6 +51,10 @@ WHAT = {
     "wrapped_001_level3": "level-3 proof wrapped in an unmodified crovia.seal.v1 with its query",
     "invalid_001": "MUST fail: tampered root, tampered delta, missing sheet, overstated silence, key/target mismatch, insufficient witnesses",
     "wrapped_002_invalid": "MUST fail: the same six faults, delivered inside a Seal",
+    "pnx_001_fingerprints": "PNX: salted k-gram hashes, winnowing, detection classes, json-strings-v1, the 47-byte guarantee at every offset (PNX §3)",
+    "pnx_002_proofs": "PNX: a witnessed run, its signed sheet, a clean proof and an exposure proof with the asset bytes; hash-only mode warns (PNX §4–6)",
+    "pnx_003_invalid": "PNX: tampered sheet, forged verdicts, foreign root, relabelled inclusion, wrong or missing assets, substituted fingerprints, unknown layer, bad params, wrong profile",
+    "pnx_004_sealed": "PNX: proofs delivered inside an unmodified crovia.seal.v1, and four sealed faults a verifier that stops at the Seal would accept",
 }
 
 

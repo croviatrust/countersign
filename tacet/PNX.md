@@ -1,8 +1,9 @@
 # PNX — Proof of Non-Exfiltration
 
-**TACET profile `crovia.pnx.v1` · status: draft 0.2 · 2026-09-20**
+**TACET profile `crovia.pnx.v1` · status: draft 0.3 · 2026-09-20**
 
-Reference implementation: `reference/python/tacet/egress.py` (tests in `reference/python/tests/test_egress.py`).
+Reference implementation: `reference/python/tacet/egress.py` (tests in `reference/python/tests/test_egress.py`);
+second implementation: `site/registry/seal/verify/pnx-verify.js` (browser). Conformance vectors: §9.
 
 ## 1. The problem
 
@@ -153,10 +154,27 @@ set of assets and secrets, writes the verdict to the job summary and uploads
 the proof as an artifact. Both read capture logs as `.jsonl`
 (`{"at": ..., "body": ...}` or `{"body_b64": ...}`) or one body per file.
 
-## 9. Conformance (to be added to `conformance/`)
+## 9. Conformance
 
-Vectors for: winnowing guarantee at every offset, `partial` and
-`undetectable` classes, inclusion evidence, tampered sheet, tampered verdict,
-path against a foreign root, hash-only mode warning. The Python tests cover
-each case today; the JSON vectors and the browser verifier extension are the
-next step.
+The vectors live in `conformance/vectors/v1/` next to the TACET core vectors,
+are generated deterministically by `conformance/generate_vectors.py` and are
+exercised by both runners, `conformance/run_conformance.py` (Python reference)
+and `conformance/run_conformance_js.cjs` (the browser verifier
+`site/registry/seal/verify/pnx-verify.js`, run in Node). All byte strings in
+the vectors are hex; every pseudo-random input is `SHA-256("tacet-pnx-fixture:"
+‖ label ‖ ":" ‖ i)` for `i = 0, 1, …`, concatenated and truncated, so a runner in
+any language can rebuild the inputs from the labels.
+
+| Vector | What it pins |
+|---|---|
+| `pnx_001_fingerprints.json` | The fingerprint function of §3, byte for byte: salted k-gram hashes, winnowed set of a 120-byte body, the single-minimum case for a body shorter than one window, the constant leaf value, the four detection classes at 31 / 32 / 46 / 47 / 100 bytes, the `json-strings-v1` derived bodies of a JSON request (and none for a non-JSON body), the epoch leaf key `pnx/<run_id>`, and the winnowing guarantee: a 47-byte secret inserted into a 100-byte body at every one of the 101 offsets shares at least one fingerprint with the secret. |
+| `pnx_002_proofs.json` | A witnessed run of four bodies (a raw leak, a leak quoted inside a JSON string that only `json-strings-v1` can find, a body shorter than a k-gram, unrelated traffic), its signed run sheet, and two proofs against it with the asset bytes: `clean` (two assets, verdict `absent`) and `exposure` (five assets: `absent`, `present` via raw bytes, `present` via `json-strings-v1`, `absent-partial`, `undetectable`; verdict `present`). A verifier MUST rebuild the run root from the bodies, MUST verify both proofs with the assets and, without the assets, MUST accept them with the §6 warning. |
+| `pnx_003_invalid.json` | **MUST fail** with the stated reason: tampered sheet (signature), forged asset verdict, forged overall verdict, path against a foreign root, an inclusion relabelled as absent, wrong asset bytes, missing asset bytes, substituted fingerprint set, dropped fingerprint, understated detection class, unknown normalisation layer, inconsistent parameters, wrong profile. Each case records `hash_only_ok`: whether a verifier *without* the asset bytes can see the fault. Substituted or dropped fingerprints and an understated class are invisible to it, which is why §6 step 2 requires the warning. |
+| `pnx_004_sealed.json` | The `clean` and `exposure` proofs delivered inside an unmodified `crovia.seal.v1` (query = run id and asset hashes, `checks.pnx` = verdict, counts, run root), and four sealed faults: a forged verdict under a valid Seal, a query describing another proof, a proof modified after sealing, a tampered Seal signature. A verifier that stops at the Seal signature accepts the first three; a conformant one rejects all four. |
+
+Run both suites from the repository root:
+
+```
+python3 tacet/conformance/run_conformance.py
+node tacet/conformance/run_conformance_js.cjs
+```

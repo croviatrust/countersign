@@ -1,0 +1,1272 @@
+{
+  "hash_only": {
+    "expect": {
+      "ok": true,
+      "warning_contains": "not recomputed"
+    },
+    "note": "without asset bytes a verifier checks the listed keys only and MUST warn"
+  },
+  "proofs": {
+    "clean": {
+      "assets_hex": {
+        "aws_key": "414b4941663964393631363330363363626430633337356431393662383536636133346263303066326638653938316633363238306462333863393639316635",
+        "customer_export.csv": "69642c656d61696c2c706c616e0a313030302c7573657230406578616d706c652e636f6d2c667265650a313030312c7573657231406578616d706c652e636f6d2c70726f0a313030322c7573657232406578616d706c652e636f6d2c667265650a313030332c7573657233406578616d706c652e636f6d2c70726f0a313030342c7573657234406578616d706c652e636f6d2c667265650a313030352c7573657235406578616d706c652e636f6d2c70726f0a313030362c7573657236406578616d706c652e636f6d2c667265650a313030372c7573657237406578616d706c652e636f6d2c70726f0a"
+      },
+      "expect": {
+        "assets": {
+          "aws_key": "absent",
+          "customer_export.csv": "absent"
+        },
+        "ok": true,
+        "verdict": "absent"
+      },
+      "proof": {
+        "assets": [
+          {
+            "asset_len": 64,
+            "asset_sha256": "sha256:ab955878e8f9853a53770ae26803c87ff122b4e275c15847607b1bde5bdcdf90",
+            "detection": "guaranteed",
+            "fingerprints": [
+              {
+                "key": "008d103fbd23ca08a8d33ada90a65f47f796628cbe2dff9bdba59d6a2d7e4b12",
+                "path": {
+                  "bitmap": "7fc8000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "ae0c9943278b1bf49e8debdbd2b94def34263b255df72dd5604c7c3020d760a2",
+                    "e1a0792476b0e79cd4a7c2cf890d1cd4d52589d2a1858ec65b05fd39af712c21",
+                    "c9d32bf1507db41d5185a8bc6e16d68ca095daa43e8e7a85c614660794530959",
+                    "6928537f3ba435069bee4eec535e68299a227f52e6d0a70e9f6f4ce01785aaeb",
+                    "5514ce0784518313ad133a8f794f59b0dd6d95841c8671275d93fc67c28fa935",
+                    "5d856e05d7f3b1d7843b1a99e7be0f0a71d02c80a71439705e497deb5aa35937",
+                    "aa952292d004eecd6237fcaaa0822fe49634ced7054e34a89123456d86854216",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "0842d30cf075c46532fcad6e1cad70e780cf32bc4b179822402a81b13ce55829",
+                "path": {
+                  "bitmap": "7ff0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "07f5d2144429f11139ccc9fd688be5b4ae21dda7dfab0c1476155e54d8a4137b",
+                    "6b1eb4609740dbaba905fa94c0474d8c61e73c44bfb8bde2352ce61e0a906291",
+                    "39ad0997dc45164a2344c6d2d3d460b56bd5ac34b47c806b6e08c3329191db80",
+                    "fcb31943f0f8a8dfa834471714a40e3f9796fbab125efc2ded0a6302cda00b12",
+                    "98081cfdad73ae980d0e692e6296e792200724352426b3afa88e69c00689e7aa",
+                    "d6a36357ffa1124cb31f8b80fa74ea3a4b1e6ad0f70a24539169871d68bc4b95",
+                    "21c7afa944945050081ce4e5d40e34bc397f5665ddd28c38b484ee64eb1d55e4",
+                    "101f47253123a73cf408df5c3e62e1e85e2994bb601a6b41270f21f2b9c4ca81",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "11ad9f685c4d48eaeb37dbcabb3e2a98816ac5594752d212727688915acb6945",
+                "path": {
+                  "bitmap": "7fa0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "30b55607b6a962894b6657cf5d4dbdd5a67e7b4f4e17036d91259011fcce1658",
+                    "e68e763d20651dea1a997488826d89f36d4e92f5ee62fa8b3fd2aab941a5eb6f",
+                    "eea589d80f4af9e0070585866c435f0c4be6b4c6b6c8a1958ed814fc7e7dd92f",
+                    "3ed1861c2d8f21501ddccad5cd4c69c996effa8e515426a50f93adb862393c7a",
+                    "1e436eb84fc37185c441e61863fed816b556cb3bd2ea4703298eca19542ae02d",
+                    "9c7e67e91243f034513d828c9847cf29d67db689f9fa8e5ce2ebc74acfa33c3a",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "1c2a065878a164ec9b1488d2994ba8503b54d40a0151ea2f0a2e327ab3624521",
+                "path": {
+                  "bitmap": "7f41000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "a2627a1b13d31cb9880029f9f9e2262f8526786e82afe25bba7c29af0f01153c",
+                    "287c44aeab9c53ec3842242e34cc66a0eb687f7d59e50b2a88d5d0377b276e31",
+                    "c70dca036a6971b26c3a6fc9cd84573309d13c3a41deaa000cbbcd7738ba6e0b",
+                    "c34b1d5dbb76867f5f351216da73408e779cc69a8b88af78e64173a96c320928",
+                    "69f53527ea8df4cb3d15c725a3065d42b97c38ab105d19fe06cd65500d95eadf",
+                    "75aa00eebb5aa59bb69c6ad9535f030c8b0b7bd9260e4e7e2af0617882923ca5",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              }
+            ],
+            "label": "aws_key",
+            "verdict": "absent"
+          },
+          {
+            "asset_len": 234,
+            "asset_sha256": "sha256:491f594823be89a023f7f6b34e54831607b235af66303b8ef7a2906416a69897",
+            "detection": "guaranteed",
+            "fingerprints": [
+              {
+                "key": "006801c813472b8fab1f69db8107b09fa03ced037fe2fe2067faf070a9596b7e",
+                "path": {
+                  "bitmap": "7fe8000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "b31aabeed827881fbfb1ffe3782e865d5906fe0b1dfc76f3674a47e39d8d708a",
+                    "eb2cb3df83a5134670d18d09edc2bd37c1da53b06e19dab33699640c53b87a45",
+                    "47b35524379eda3c73b7817bcc28280fbc445222987430b44d2514d032b23aa5",
+                    "3cb6e3dd81b6c408b216a00420098fbae3915f17b28348016553225ae30d4fad",
+                    "6928537f3ba435069bee4eec535e68299a227f52e6d0a70e9f6f4ce01785aaeb",
+                    "5514ce0784518313ad133a8f794f59b0dd6d95841c8671275d93fc67c28fa935",
+                    "5d856e05d7f3b1d7843b1a99e7be0f0a71d02c80a71439705e497deb5aa35937",
+                    "aa952292d004eecd6237fcaaa0822fe49634ced7054e34a89123456d86854216",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "047bf0b31906c516fc1198cdc19907d0aea8fd6be2ce39cb8a298abb958ab0ef",
+                "path": {
+                  "bitmap": "7fc8000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "df555c67b605b50433caa719e6aa682c345014e1962950153e8f4b97ce39e18e",
+                    "3e3539121cacec9faa4416145c641f0e9a3bb441a02fabbcea27bc0b2b5c5c62",
+                    "c85ce7850673154498957ad4bc79c401b43958d9e89b0f22eb28077038dc90ca",
+                    "d8273832a9cd4515fcd0346b9d1d7e32218d74724766d353278d106b6a72fd3a",
+                    "0aee0fdc8b4b7500abfc1baa1a31b5c28611e5776f1c36cc5e2422b57f611bb4",
+                    "845707c19c3076f9f5b1bb6d0b3ce88a153488522738efe09727515d457670c1",
+                    "aa952292d004eecd6237fcaaa0822fe49634ced7054e34a89123456d86854216",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "06d6f69e855055bc46a6b8213282c8c4766c5d26d3bcfe03168e77950606d74e",
+                "path": {
+                  "bitmap": "7fe0200000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "b666092b8f124a60dc660d860f343d9eaef7731889d7097eeb2c97f3ebdb247e",
+                    "4ff87ca809bc2937916959ed67061ee02683b5dae295690776ffde70b49ce80d",
+                    "955a4a1eb5c3269ef7a5f038c90ba863c4936f5a86a5e8831091b171de6cd16a",
+                    "ce0c46001674147b96e61c371cdff25669e8279b3229fa9f46265a3229f27aae",
+                    "211b0b2053773dc915735c1b540e5fea8078d638726f2b29439eb745c4634b05",
+                    "fa333d93b7cbba87c805ad8fe845f5a3df5c387320a3f730a907a3b6536d072c",
+                    "845707c19c3076f9f5b1bb6d0b3ce88a153488522738efe09727515d457670c1",
+                    "aa952292d004eecd6237fcaaa0822fe49634ced7054e34a89123456d86854216",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "07ab8692f0384197e2e5f6b418ce0484bb6dcb7ab9d4f8004abc97ab3d94e1fa",
+                "path": {
+                  "bitmap": "7fe8000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "d6be66a6b978e3fd4fb8589c1f6a5cd7e56b8a366b673acce3292312229235d8",
+                    "8304bfda9886e4c8e2fa71fc5b7c8c11b99410a23e5b0e9d9e4a47e275578dc1",
+                    "dc4ed69a53f76b7e93d6fcce7ad306aad804a9bd9a9136072df9a3add4ab1ea5",
+                    "8a74377fbcb0473b7acf65211df5e9895121a18d9c1ad650ebc57b13b5a2395c",
+                    "48866de69a0bc856daad0da28745511ff2ba68a20c849f895c70cbd6d3d3aa2f",
+                    "fa333d93b7cbba87c805ad8fe845f5a3df5c387320a3f730a907a3b6536d072c",
+                    "845707c19c3076f9f5b1bb6d0b3ce88a153488522738efe09727515d457670c1",
+                    "aa952292d004eecd6237fcaaa0822fe49634ced7054e34a89123456d86854216",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "0859d8ad7d63143ce7c0c2c779ea29383fdf81ca56934005910eeace8a5af7f2",
+                "path": {
+                  "bitmap": "7fe2000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "91637396bccf7b81d3a42b377ede988726d4db67489fca19db6e764ee9da0e90",
+                    "6b1eb4609740dbaba905fa94c0474d8c61e73c44bfb8bde2352ce61e0a906291",
+                    "39ad0997dc45164a2344c6d2d3d460b56bd5ac34b47c806b6e08c3329191db80",
+                    "fcb31943f0f8a8dfa834471714a40e3f9796fbab125efc2ded0a6302cda00b12",
+                    "98081cfdad73ae980d0e692e6296e792200724352426b3afa88e69c00689e7aa",
+                    "d6a36357ffa1124cb31f8b80fa74ea3a4b1e6ad0f70a24539169871d68bc4b95",
+                    "21c7afa944945050081ce4e5d40e34bc397f5665ddd28c38b484ee64eb1d55e4",
+                    "101f47253123a73cf408df5c3e62e1e85e2994bb601a6b41270f21f2b9c4ca81",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "099b3bf192d27699af755d0ce88cb7efb54cf417d63c3c866b21e19efd3aad87",
+                "path": {
+                  "bitmap": "7fd0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "7f466a9d1611acd705963a91641a37352a14ed7b97ec0925c2f08803ca7bb449",
+                    "9a085af1bb1ea02f69abffc76d6bca8783d7f4f3bc4d4639ebcdec95b80c1231",
+                    "a4c2577193e41113905b54ba942a3715fedd26b146763ad5fbd27adeab549dbb",
+                    "86a7939b4df15667c50aafb0997ff0d49149fe0e3995f5cc0c01259bc8def590",
+                    "d6a36357ffa1124cb31f8b80fa74ea3a4b1e6ad0f70a24539169871d68bc4b95",
+                    "21c7afa944945050081ce4e5d40e34bc397f5665ddd28c38b484ee64eb1d55e4",
+                    "101f47253123a73cf408df5c3e62e1e85e2994bb601a6b41270f21f2b9c4ca81",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "0b87db2c69797e625c74f32396defec21294563856ab80cbe47a008dcc0a9346",
+                "path": {
+                  "bitmap": "7fc0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "47880b62236975145c4b9ba17eef7a59569a120cf68c5e21abf6ec77d67d8af0",
+                    "448a7218479ee86fa4dde2e9ddb2c326bf13bad46db920d405efaafb7c4d6cbd",
+                    "ccacaa79c823fb5da4cad509196a9a69e8dfb4fec7ee4fb8be1d07b0c9a2c469",
+                    "42d01e481d1e11445b3db8caf978471d79d90089eca8cfbc55cc29bd97d7bdf4",
+                    "21c7afa944945050081ce4e5d40e34bc397f5665ddd28c38b484ee64eb1d55e4",
+                    "101f47253123a73cf408df5c3e62e1e85e2994bb601a6b41270f21f2b9c4ca81",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "0c5ba710e6bdc7ea3cc38ba0e931f5cf75f80010f3f57eedf817ea2ce2ef6327",
+                "path": {
+                  "bitmap": "7f80000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "177069144fa8322e4c513dae78318e7d280b575f997ac17d5dd94498879405d4",
+                    "d2705450e04d59c6d07095f902cbb970ad2e88cad83f78e485a2dd6fef9b98c4",
+                    "7318c382071c3f100246c3d4ca1896f7cd4890c70e7301dafa114a5dc847d5f7",
+                    "e5355b1c5db281125ed2c88282c8c73edaa24a4e63d2ef256c6d097908b89513",
+                    "101f47253123a73cf408df5c3e62e1e85e2994bb601a6b41270f21f2b9c4ca81",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "0cbeb8e1f2cefeca74505f1961be7f768cc09cd7443bc6d2b6a1af7d89814462",
+                "path": {
+                  "bitmap": "7f58000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "1c2f49d5b771d699395400e1af9cbc7ace72b08767ba52368a0ce1585281408b",
+                    "a4b091b0fc8f6f801057cf0fd5fabada3330eece09dd13d18a740a165ddcdd42",
+                    "1c56951000219f67f1da6c94e4ee2f60533ece1bead4a5a77ecc263e219bedbe",
+                    "d2705450e04d59c6d07095f902cbb970ad2e88cad83f78e485a2dd6fef9b98c4",
+                    "7318c382071c3f100246c3d4ca1896f7cd4890c70e7301dafa114a5dc847d5f7",
+                    "e5355b1c5db281125ed2c88282c8c73edaa24a4e63d2ef256c6d097908b89513",
+                    "101f47253123a73cf408df5c3e62e1e85e2994bb601a6b41270f21f2b9c4ca81",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "0d3b95b4f4def5575591b83341801cbc40809762bfbb8c140256779c5486500c",
+                "path": {
+                  "bitmap": "7fcc000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "5aa55b83788bca3cc3c49a5a7ee2801f3811c46b56c53b773a193558fc8de6b1",
+                    "d994b8ad845d9fead5a4bf1472500a3c6155ae843aba5172abd01e6b553cb6b6",
+                    "080b42f750cbb40434023a15bd45467109892b088136140166a36bc08fdee7f0",
+                    "d40f41b8e451139ea81b40f02b20059a4f2ec461dea296eab7aaadc5af4a7cfa",
+                    "a75f7ffedcfc214a702babdb3e1ac5efdf6038b39d1120d70f021a6b9450b826",
+                    "7318c382071c3f100246c3d4ca1896f7cd4890c70e7301dafa114a5dc847d5f7",
+                    "e5355b1c5db281125ed2c88282c8c73edaa24a4e63d2ef256c6d097908b89513",
+                    "101f47253123a73cf408df5c3e62e1e85e2994bb601a6b41270f21f2b9c4ca81",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "0f9c54c8868f6ea40d9138fde1e87cc576ddb540184861d2efa4d51023f69edd",
+                "path": {
+                  "bitmap": "7f80000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "801a2389afc1bd52bc7985304bf3a659b8b734c33d4a3f9e37024031716a8032",
+                    "3b47bce675ebae6a9cc9c8f2cd2f0efd154366e3663bf39567cc19208a0f4a24",
+                    "db7920481b77966bdd6f91bdf607ae3cd9ed34de7f643b1b1e99a462b7fa949c",
+                    "e5355b1c5db281125ed2c88282c8c73edaa24a4e63d2ef256c6d097908b89513",
+                    "101f47253123a73cf408df5c3e62e1e85e2994bb601a6b41270f21f2b9c4ca81",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "1090d515b80e4defeea8fd930b66afa0a7c8067dab18375ace7a5376a9e03d8d",
+                "path": {
+                  "bitmap": "7f80000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "a2a7f2c9d7acc7f570065c5af0afc48a51ad22d5a86520eeecc53b960a5a30b1",
+                    "f2ed82985d53aa4fbe23e15aa341556242fb2bc84239b4c5bd037da0885c587b",
+                    "3ed1861c2d8f21501ddccad5cd4c69c996effa8e515426a50f93adb862393c7a",
+                    "1e436eb84fc37185c441e61863fed816b556cb3bd2ea4703298eca19542ae02d",
+                    "9c7e67e91243f034513d828c9847cf29d67db689f9fa8e5ce2ebc74acfa33c3a",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "1247993ef470b7292f58337da14ea09b6d8a1e70f25dee3dfd5b1fad56449bc8",
+                "path": {
+                  "bitmap": "7ff0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "731edc03356ba5630bd3e3ee94a382d99354a6249ddd825b9914127d3b0afe98",
+                    "55073a371346d40faa7d14159a3ef2e7876f725c8bbe52b4f68c04c241d6c5fe",
+                    "18b8b3766b9ec5ec5d60235470ecb1afafa8227c180f106714a6f1c66dc06361",
+                    "1eef6a39a5d2485843f792a878f01dca2d6c4ddef1cf6ef5ff9bfbb351e59884",
+                    "762b0ae852a78d5a052856f5aef6ece5588b236cdc78cc2817c419807b35fe12",
+                    "d851cc947f24b4680e4647e5a0083f0625d80f5a3760b1e596fede085f749848",
+                    "1e436eb84fc37185c441e61863fed816b556cb3bd2ea4703298eca19542ae02d",
+                    "9c7e67e91243f034513d828c9847cf29d67db689f9fa8e5ce2ebc74acfa33c3a",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "12dc7456f5a36fe3c4c6779bfbbdd21a1184d25d8a2c3fea1b5729c97ff833b8",
+                "path": {
+                  "bitmap": "7ff0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "19a691f941e054d6c37f301e16ac2f565869984ae6933fd1f1b31ff63cc24aea",
+                    "a0a2f0d313ac5090b4103d768717c27aaf63aed6d9683fa7cefbe19586c36803",
+                    "afd697013ebed2d7ea6d46b307864ac6f150508e5a2c1530631d096c0bfd1047",
+                    "cc3aed2ebebad6f545c0b8428fa419fedb4be3335cb0feed1778614c9338c29b",
+                    "762b0ae852a78d5a052856f5aef6ece5588b236cdc78cc2817c419807b35fe12",
+                    "d851cc947f24b4680e4647e5a0083f0625d80f5a3760b1e596fede085f749848",
+                    "1e436eb84fc37185c441e61863fed816b556cb3bd2ea4703298eca19542ae02d",
+                    "9c7e67e91243f034513d828c9847cf29d67db689f9fa8e5ce2ebc74acfa33c3a",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "13716694b80ca94aa22ea1f88b31476957152b5eee7a59c082068e1485392302",
+                "path": {
+                  "bitmap": "7f60000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "15fe9c06be2600f294762e1fe717b6b8c8aeaa9ab8a9477d9cf75929008e8c1c",
+                    "807a9729572359eee5da3b9fb1e713ce488378ae34a2ada05aeeaa82d85ac5b4",
+                    "8ca34eb362c9eaedf9cdf78c66e56c0170e18735ab97f3dfe7e5fc1fcc399d31",
+                    "d851cc947f24b4680e4647e5a0083f0625d80f5a3760b1e596fede085f749848",
+                    "1e436eb84fc37185c441e61863fed816b556cb3bd2ea4703298eca19542ae02d",
+                    "9c7e67e91243f034513d828c9847cf29d67db689f9fa8e5ce2ebc74acfa33c3a",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "13ecd262a9bb25e2ad11cd3a6461736ca3ab2bbc4245dd7713f55b42d1d968a9",
+                "path": {
+                  "bitmap": "7f80000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "73ba62106795e630195e3ca01fc82f043001df4f81e8301d8c29597a2c406e48",
+                    "8ca34eb362c9eaedf9cdf78c66e56c0170e18735ab97f3dfe7e5fc1fcc399d31",
+                    "d851cc947f24b4680e4647e5a0083f0625d80f5a3760b1e596fede085f749848",
+                    "1e436eb84fc37185c441e61863fed816b556cb3bd2ea4703298eca19542ae02d",
+                    "9c7e67e91243f034513d828c9847cf29d67db689f9fa8e5ce2ebc74acfa33c3a",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "144f21e8002d9fd3284d9cd4f6def4b2f3e8ae580e4507aba2693ba4804d60dc",
+                "path": {
+                  "bitmap": "7f40000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "a2da71563eb05678af6787b10a3c57df2e469c016d22a9a8b4fcf5abf9f99229",
+                    "aa925175f15ac00a73d92ec5d1be2c37138e14afbe9bc58c4b92e19a4e1a358f",
+                    "6c399643f416e17edd89969cd7a3bdbd60396c4a6b1bcafe64c135a315794931",
+                    "1a27033cfeb206d8c590b20013ad242bb0b053391bca20eee50a1d1b76e7fe60",
+                    "9c7e67e91243f034513d828c9847cf29d67db689f9fa8e5ce2ebc74acfa33c3a",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "1616e2636ee32b1f6c8913f264b6eec06ed75a9eef86b66ec222c4c6030e5f8b",
+                "path": {
+                  "bitmap": "7f80000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "168f77ef5e52a3594200be8ea29f2815dce73a7f3f1679ac487122bc0d33a1a1",
+                    "49c3a2fad262fb5310aa050ee370f4fb1fd111078110970a7e333946583c6e48",
+                    "f7c99a3d1a2150d4210e6850e38ab87430f17da5dfa96f18c7129015f733bd20",
+                    "1a27033cfeb206d8c590b20013ad242bb0b053391bca20eee50a1d1b76e7fe60",
+                    "9c7e67e91243f034513d828c9847cf29d67db689f9fa8e5ce2ebc74acfa33c3a",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "191646a076af73f77cd22dc25bdf748333a4843c012682374e444ff46ccac906",
+                "path": {
+                  "bitmap": "7fc0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "34b88889a25884f5690228c9a4678624b56cac4a597c1cb098fb578c4d0ed979",
+                    "0f00c3cbb758e29dc29219a95d8a673769033a214e10a67e7a1f04d8cbfed2ec",
+                    "fcc3eb9aa713930aa5db71b60db806cb83cdb2206141596d50419aa72bb0feeb",
+                    "4c716f1bcea271454281dcf155e14474c74da3ce29bdcc2dfb4db5765ed04ce7",
+                    "3be89db81f2b000cdd5e9ddb52f7347f9f96df4ce8f5eacc881ea693eb4d6d9e",
+                    "75aa00eebb5aa59bb69c6ad9535f030c8b0b7bd9260e4e7e2af0617882923ca5",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "195998c91cabf82235969cf0505076f0401d4bb3c4a426ac744c92d616c06b04",
+                "path": {
+                  "bitmap": "7f90000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "d875181d9d24c28287a4b91467f22682feff5a83ab1f368c16f95db276d611ca",
+                    "0f00c3cbb758e29dc29219a95d8a673769033a214e10a67e7a1f04d8cbfed2ec",
+                    "fcc3eb9aa713930aa5db71b60db806cb83cdb2206141596d50419aa72bb0feeb",
+                    "4c716f1bcea271454281dcf155e14474c74da3ce29bdcc2dfb4db5765ed04ce7",
+                    "3be89db81f2b000cdd5e9ddb52f7347f9f96df4ce8f5eacc881ea693eb4d6d9e",
+                    "75aa00eebb5aa59bb69c6ad9535f030c8b0b7bd9260e4e7e2af0617882923ca5",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "198a4170a1f14f42eb81f93742496635f8e0f0074e285da978c139ecac8a8ab6",
+                "path": {
+                  "bitmap": "7fe0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "24da5a9557932fd13ed9ee0567ab4b8e73477e7175034e4dff3529d10aa6e350",
+                    "be2ea4504982c6516b70c1a21b4a6a741c962e512a8a6b97edaa63aae680ec02",
+                    "ca5b3698a34e17fb9d99e7c69642be7333e16f2ed16829a4c44350e850fc07ad",
+                    "fcc3eb9aa713930aa5db71b60db806cb83cdb2206141596d50419aa72bb0feeb",
+                    "4c716f1bcea271454281dcf155e14474c74da3ce29bdcc2dfb4db5765ed04ce7",
+                    "3be89db81f2b000cdd5e9ddb52f7347f9f96df4ce8f5eacc881ea693eb4d6d9e",
+                    "75aa00eebb5aa59bb69c6ad9535f030c8b0b7bd9260e4e7e2af0617882923ca5",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "221d293c28145f0540c2cd9fd9b669c156f0dc51c7f84fdf80245517b12fc967",
+                "path": {
+                  "bitmap": "7f88000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "a2d282cd237d71cb37812baafefe31b9b640d2ba1523d451b3c7fae5ddfbe471",
+                    "cb17ea0d3d2817703066c0bf3b8024b005543a08a69acbfdc23ebdc65293a65c",
+                    "3dfd177e46bdd31a4b821658e6b7dea8a358320d9fd798e63c9b7912b911f62a",
+                    "a7b570aa50e6a3761018c2894407806502767a4a780b21982578f80d1cfc8374",
+                    "255e017e1c58415aa8d42c0ef88f3dcca99275adf457789fd73a7f96c86f62f0",
+                    "3e5d2038f80d6468d438db8380af5c5dd434de08c647a0d95214e7c80b0a46b9",
+                    "5578d09751f077e6f2f595ce435c3303e020b8e0ed15bc3d12c0581ccc611666",
+                    "a12a18f71947c20def8161cc58fad77fa02c8f10386e433542e68f97f8925e48",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "23c1d733afbced711616eebad5fa9788a5589660813a552a6974f258b2d3ffdd",
+                "path": {
+                  "bitmap": "7f60000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "3f93d397830c7044e5861dcf482a8a4054518a402d5371d6b5241f3225e56eb7",
+                    "e942915666ea1664362b39f6831745c6252009a9ab3d6590ee3b9fe17f391a20",
+                    "adcbafe4781be5671543de5625e02784f97febea732f6354c73da2221ea19154",
+                    "a7b570aa50e6a3761018c2894407806502767a4a780b21982578f80d1cfc8374",
+                    "255e017e1c58415aa8d42c0ef88f3dcca99275adf457789fd73a7f96c86f62f0",
+                    "3e5d2038f80d6468d438db8380af5c5dd434de08c647a0d95214e7c80b0a46b9",
+                    "5578d09751f077e6f2f595ce435c3303e020b8e0ed15bc3d12c0581ccc611666",
+                    "a12a18f71947c20def8161cc58fad77fa02c8f10386e433542e68f97f8925e48",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "3329f3149fa2e4a7f788ef384887f607c571d7ae7d5e1ed21795daa2a8582557",
+                "path": {
+                  "bitmap": "7c80000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "28f3b38f332f618b1241709001b5795bda907f51c08f8a8bdd5bfe76cf362ced",
+                    "8e3fcae4aac57fa8e433d4eeff441a6c3628fd74d43fc43700fbb81edbe89d62",
+                    "e5b4273edc6264168715178529ee329a1b2b11e64f339b6c23c6661dd222a072",
+                    "c0228485aefd9560ec3024aba567e3a7a2fab9aa97be50a41951b80e6d75853a",
+                    "a12a18f71947c20def8161cc58fad77fa02c8f10386e433542e68f97f8925e48",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              }
+            ],
+            "label": "customer_export.csv",
+            "verdict": "absent"
+          }
+        ],
+        "profile": "crovia.pnx.v1",
+        "proof_version": "crovia.pnx.proof.v1",
+        "sheet": {
+          "closed_at": "2026-09-20T12:00:00Z",
+          "egress": {
+            "bodies": 4,
+            "bytes": 1739,
+            "first_at": "2026-09-20T11:00:00Z",
+            "last_at": "2026-09-20T11:15:00Z"
+          },
+          "fingerprints": 198,
+          "normalization": [
+            "json-strings-v1"
+          ],
+          "params": {
+            "hash": "sha256",
+            "k_gram": 32,
+            "threshold": 47,
+            "window": 16
+          },
+          "profile": "crovia.pnx.v1",
+          "root": "sha256:e3e31b945a8907927d8bfd3b44cc1e53aadbc728ea59783634fe602835db332e",
+          "run_id": "conformance/run-001",
+          "salt_hex": "47dfe6cc13a8b4cbef0863bb1891a0a5",
+          "signature": {
+            "alg": "ed25519",
+            "domain": "CROVIA-PNX-SHEET-v1",
+            "sig_hex": "afb8494893e465cee9a5c33f8c13b6191b138a4e54cadf7cbc4a041a669238a8f2777dbf8a597a253d87aa0c71cd4776d30ce3f39f354312424639c3c5df4c07"
+          },
+          "witness": {
+            "id": "urn:crovia:pnx-witness:fixture",
+            "pubkey": {
+              "alg": "ed25519",
+              "key_hex": "b3c8f805e787a0a3c9d752d5dc908f1dcde5b9cdf87aa09f888b8f052e2d0520"
+            }
+          }
+        },
+        "verdict": "absent"
+      }
+    },
+    "exposure": {
+      "assets_hex": {
+        "aws_key": "414b4941663964393631363330363363626430633337356431393662383536636133346263303066326638653938316633363238306462333863393639316635",
+        "config.yaml": "64617461626173653a0a2020686f73743a2064622e696e7465726e616c2e6578616d706c650a2020757365723a207376635f6167656e740a202070617373776f72643a20703473732d3434666564373835643836620a6170693a0a2020746f6b656e3a2039373933623831643265346364323338616263640a2020726567696f6e3a2065752d776573742d310a",
+        "db_pin": "31323334",
+        "openai_key": "736b2d6c6976652d666538376134343231323738303766366561663763386163656630336536636461373131363735333639666138356238363566353963353164663831373165323863616433333730",
+        "session_id": "36356537623933373239653966646164646531383837663835646466636565376533636235613133"
+      },
+      "expect": {
+        "assets": {
+          "aws_key": "absent",
+          "config.yaml": "present",
+          "db_pin": "undetectable",
+          "openai_key": "present",
+          "session_id": "absent-partial"
+        },
+        "ok": true,
+        "verdict": "present"
+      },
+      "proof": {
+        "assets": [
+          {
+            "asset_len": 64,
+            "asset_sha256": "sha256:ab955878e8f9853a53770ae26803c87ff122b4e275c15847607b1bde5bdcdf90",
+            "detection": "guaranteed",
+            "fingerprints": [
+              {
+                "key": "008d103fbd23ca08a8d33ada90a65f47f796628cbe2dff9bdba59d6a2d7e4b12",
+                "path": {
+                  "bitmap": "7fc8000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "ae0c9943278b1bf49e8debdbd2b94def34263b255df72dd5604c7c3020d760a2",
+                    "e1a0792476b0e79cd4a7c2cf890d1cd4d52589d2a1858ec65b05fd39af712c21",
+                    "c9d32bf1507db41d5185a8bc6e16d68ca095daa43e8e7a85c614660794530959",
+                    "6928537f3ba435069bee4eec535e68299a227f52e6d0a70e9f6f4ce01785aaeb",
+                    "5514ce0784518313ad133a8f794f59b0dd6d95841c8671275d93fc67c28fa935",
+                    "5d856e05d7f3b1d7843b1a99e7be0f0a71d02c80a71439705e497deb5aa35937",
+                    "aa952292d004eecd6237fcaaa0822fe49634ced7054e34a89123456d86854216",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "0842d30cf075c46532fcad6e1cad70e780cf32bc4b179822402a81b13ce55829",
+                "path": {
+                  "bitmap": "7ff0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "07f5d2144429f11139ccc9fd688be5b4ae21dda7dfab0c1476155e54d8a4137b",
+                    "6b1eb4609740dbaba905fa94c0474d8c61e73c44bfb8bde2352ce61e0a906291",
+                    "39ad0997dc45164a2344c6d2d3d460b56bd5ac34b47c806b6e08c3329191db80",
+                    "fcb31943f0f8a8dfa834471714a40e3f9796fbab125efc2ded0a6302cda00b12",
+                    "98081cfdad73ae980d0e692e6296e792200724352426b3afa88e69c00689e7aa",
+                    "d6a36357ffa1124cb31f8b80fa74ea3a4b1e6ad0f70a24539169871d68bc4b95",
+                    "21c7afa944945050081ce4e5d40e34bc397f5665ddd28c38b484ee64eb1d55e4",
+                    "101f47253123a73cf408df5c3e62e1e85e2994bb601a6b41270f21f2b9c4ca81",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "11ad9f685c4d48eaeb37dbcabb3e2a98816ac5594752d212727688915acb6945",
+                "path": {
+                  "bitmap": "7fa0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "30b55607b6a962894b6657cf5d4dbdd5a67e7b4f4e17036d91259011fcce1658",
+                    "e68e763d20651dea1a997488826d89f36d4e92f5ee62fa8b3fd2aab941a5eb6f",
+                    "eea589d80f4af9e0070585866c435f0c4be6b4c6b6c8a1958ed814fc7e7dd92f",
+                    "3ed1861c2d8f21501ddccad5cd4c69c996effa8e515426a50f93adb862393c7a",
+                    "1e436eb84fc37185c441e61863fed816b556cb3bd2ea4703298eca19542ae02d",
+                    "9c7e67e91243f034513d828c9847cf29d67db689f9fa8e5ce2ebc74acfa33c3a",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "1c2a065878a164ec9b1488d2994ba8503b54d40a0151ea2f0a2e327ab3624521",
+                "path": {
+                  "bitmap": "7f41000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "a2627a1b13d31cb9880029f9f9e2262f8526786e82afe25bba7c29af0f01153c",
+                    "287c44aeab9c53ec3842242e34cc66a0eb687f7d59e50b2a88d5d0377b276e31",
+                    "c70dca036a6971b26c3a6fc9cd84573309d13c3a41deaa000cbbcd7738ba6e0b",
+                    "c34b1d5dbb76867f5f351216da73408e779cc69a8b88af78e64173a96c320928",
+                    "69f53527ea8df4cb3d15c725a3065d42b97c38ab105d19fe06cd65500d95eadf",
+                    "75aa00eebb5aa59bb69c6ad9535f030c8b0b7bd9260e4e7e2af0617882923ca5",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              }
+            ],
+            "label": "aws_key",
+            "verdict": "absent"
+          },
+          {
+            "asset_len": 80,
+            "asset_sha256": "sha256:7e3011fc573727301989c9aec1bd5135d15607d90708dcd9028dc69993b22485",
+            "detection": "guaranteed",
+            "fingerprints": [
+              {
+                "key": "00464b6b0d4d357a8d2281d3d7551a4eb34efcd79c4317e9321fa8ec5bd0aca0",
+                "path": {
+                  "bitmap": "7fe0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "809314a9c2e7da9bee0d1b7d984ce30ca22edd1bbfc1291a683d5a203571ab60",
+                    "47b35524379eda3c73b7817bcc28280fbc445222987430b44d2514d032b23aa5",
+                    "3cb6e3dd81b6c408b216a00420098fbae3915f17b28348016553225ae30d4fad",
+                    "6928537f3ba435069bee4eec535e68299a227f52e6d0a70e9f6f4ce01785aaeb",
+                    "5514ce0784518313ad133a8f794f59b0dd6d95841c8671275d93fc67c28fa935",
+                    "5d856e05d7f3b1d7843b1a99e7be0f0a71d02c80a71439705e497deb5aa35937",
+                    "aa952292d004eecd6237fcaaa0822fe49634ced7054e34a89123456d86854216",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "00644aec71d634bc4e396b2f6128bf06db9f0f32a3a95e0757d70f17fd968e56",
+                "path": {
+                  "bitmap": "7fe0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "eb2cb3df83a5134670d18d09edc2bd37c1da53b06e19dab33699640c53b87a45",
+                    "47b35524379eda3c73b7817bcc28280fbc445222987430b44d2514d032b23aa5",
+                    "3cb6e3dd81b6c408b216a00420098fbae3915f17b28348016553225ae30d4fad",
+                    "6928537f3ba435069bee4eec535e68299a227f52e6d0a70e9f6f4ce01785aaeb",
+                    "5514ce0784518313ad133a8f794f59b0dd6d95841c8671275d93fc67c28fa935",
+                    "5d856e05d7f3b1d7843b1a99e7be0f0a71d02c80a71439705e497deb5aa35937",
+                    "aa952292d004eecd6237fcaaa0822fe49634ced7054e34a89123456d86854216",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "011905f43bfd79ddf33d39b83b056e47f36d3e0e4925866b7bda35fbd76097ab",
+                "path": {
+                  "bitmap": "7f80000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "b3d22cfd222065360ed05b27d4a23a647e5aa7d50b8ef346c1910ad3fa1182dc",
+                    "885ef26a46398dc00f2af87ae97144f1f605b5093f1d6542ac8b0f2e08c95ef7",
+                    "5514ce0784518313ad133a8f794f59b0dd6d95841c8671275d93fc67c28fa935",
+                    "5d856e05d7f3b1d7843b1a99e7be0f0a71d02c80a71439705e497deb5aa35937",
+                    "aa952292d004eecd6237fcaaa0822fe49634ced7054e34a89123456d86854216",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "085addfc4f0940ced5266bfaedcb1d30fca5cc79ae80f85eae073cea5e1343d1",
+                "path": {
+                  "bitmap": "7fe0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "6b1eb4609740dbaba905fa94c0474d8c61e73c44bfb8bde2352ce61e0a906291",
+                    "39ad0997dc45164a2344c6d2d3d460b56bd5ac34b47c806b6e08c3329191db80",
+                    "fcb31943f0f8a8dfa834471714a40e3f9796fbab125efc2ded0a6302cda00b12",
+                    "98081cfdad73ae980d0e692e6296e792200724352426b3afa88e69c00689e7aa",
+                    "d6a36357ffa1124cb31f8b80fa74ea3a4b1e6ad0f70a24539169871d68bc4b95",
+                    "21c7afa944945050081ce4e5d40e34bc397f5665ddd28c38b484ee64eb1d55e4",
+                    "101f47253123a73cf408df5c3e62e1e85e2994bb601a6b41270f21f2b9c4ca81",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "113de1cd2a261838191d23d9d7ab738e76b0d47368be992b2bb0f468e3f5057f",
+                "path": {
+                  "bitmap": "7fd0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "297fecef5dcebc69627b1752706b0f9cbb82b771df6d4be2538e495974a1810d",
+                    "d9c25c4ca28802cc7a0bf844def675ebac3516fbb52a8d25b73b153f7d6ae580",
+                    "12d1d85f516192734fd4794448d0da10d2ae5f522cff0eacee5dd48c0a8c4fa2",
+                    "eea589d80f4af9e0070585866c435f0c4be6b4c6b6c8a1958ed814fc7e7dd92f",
+                    "3ed1861c2d8f21501ddccad5cd4c69c996effa8e515426a50f93adb862393c7a",
+                    "1e436eb84fc37185c441e61863fed816b556cb3bd2ea4703298eca19542ae02d",
+                    "9c7e67e91243f034513d828c9847cf29d67db689f9fa8e5ce2ebc74acfa33c3a",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              }
+            ],
+            "label": "openai_key",
+            "verdict": "present"
+          },
+          {
+            "asset_len": 141,
+            "asset_sha256": "sha256:88e5f6637fbc333e024e3415fc8a5e237ddbb56571777a9d0bb56c5471de0a07",
+            "detection": "guaranteed",
+            "fingerprints": [
+              {
+                "key": "0d8adbb0fa2eddaad70d9067e0d9a9d12b3c6924d6bd539cc5b1cfdeb62e7822",
+                "path": {
+                  "bitmap": "7f82000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "f1f87f1333e48cec27d4925700d58a3c13e593ce7db2f20844e3fa27f3da6c9b",
+                    "17ae57d8f1f1da40ae25b2addfe13bc03b2b7099d0d889b25a33af735bc77420",
+                    "a75f7ffedcfc214a702babdb3e1ac5efdf6038b39d1120d70f021a6b9450b826",
+                    "7318c382071c3f100246c3d4ca1896f7cd4890c70e7301dafa114a5dc847d5f7",
+                    "e5355b1c5db281125ed2c88282c8c73edaa24a4e63d2ef256c6d097908b89513",
+                    "101f47253123a73cf408df5c3e62e1e85e2994bb601a6b41270f21f2b9c4ca81",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "0eed51347d0041be0e70c2d3a0f9388bd88a71dc732d57d0197fcce4f9b02103",
+                "path": {
+                  "bitmap": "7fe0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "3d307e02f622eb584ef8168a893ab1aa6a991734b731ac2219e4cfee4e152854",
+                    "dcc8c33621b224769ca0f9d427a16e9712ccc94779de6f9e7c3d39933dbfe2c4",
+                    "3a8a16e2b91d407b4fae57357c91169367bd0f555e312a6d5fb3d47c08cd7980",
+                    "2734102c24f45ec1cac774999233754e65c232bd1f61e3265b52cc287b0aa524",
+                    "db7920481b77966bdd6f91bdf607ae3cd9ed34de7f643b1b1e99a462b7fa949c",
+                    "e5355b1c5db281125ed2c88282c8c73edaa24a4e63d2ef256c6d097908b89513",
+                    "101f47253123a73cf408df5c3e62e1e85e2994bb601a6b41270f21f2b9c4ca81",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "0f3478b02fd9b0cb356538816acde237a0dee4fba709e4e0c8d677abdc988b94",
+                "path": {
+                  "bitmap": "7f60000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "a350c6193875705d876b8806325f5f26a484a4697797d5e25fbae30a0f5f0bcc",
+                    "a62c18456a05ad5634d133bcf58c5edd3d4f3d2b00b0e21e1eb817218fe1fc42",
+                    "3b47bce675ebae6a9cc9c8f2cd2f0efd154366e3663bf39567cc19208a0f4a24",
+                    "db7920481b77966bdd6f91bdf607ae3cd9ed34de7f643b1b1e99a462b7fa949c",
+                    "e5355b1c5db281125ed2c88282c8c73edaa24a4e63d2ef256c6d097908b89513",
+                    "101f47253123a73cf408df5c3e62e1e85e2994bb601a6b41270f21f2b9c4ca81",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "1020fcf3b71d5a95a94ad806fe44851883f72562dd5bd9c1ccacd793e333d094",
+                "path": {
+                  "bitmap": "7f6c000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "d9dc4bd2d998b20876300bbc191abf8461a9263c0a55bc73738099f7d93674b6",
+                    "174ed92ff318cd56765583eea90b5eef4d2bae03909276ac3647638492089e98",
+                    "b0014c2a1c698cb8b8e5f0e1ba18bd6e4c1bbd0bcfbfd958ab7e6261a5390ba9",
+                    "b85b2324d00291b7ce59d087415e7e208afc6835466589ef5a3e1a14e75c6488",
+                    "f2ed82985d53aa4fbe23e15aa341556242fb2bc84239b4c5bd037da0885c587b",
+                    "3ed1861c2d8f21501ddccad5cd4c69c996effa8e515426a50f93adb862393c7a",
+                    "1e436eb84fc37185c441e61863fed816b556cb3bd2ea4703298eca19542ae02d",
+                    "9c7e67e91243f034513d828c9847cf29d67db689f9fa8e5ce2ebc74acfa33c3a",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "134000a9645602da2d8da22df590753b70735413a78e4ad7302e213c4df2f915",
+                "path": {
+                  "bitmap": "7f50000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "0b5095d1976fff5969a21efa76070bdde620ce559a176036f795da5bce3187e5",
+                    "807a9729572359eee5da3b9fb1e713ce488378ae34a2ada05aeeaa82d85ac5b4",
+                    "8ca34eb362c9eaedf9cdf78c66e56c0170e18735ab97f3dfe7e5fc1fcc399d31",
+                    "d851cc947f24b4680e4647e5a0083f0625d80f5a3760b1e596fede085f749848",
+                    "1e436eb84fc37185c441e61863fed816b556cb3bd2ea4703298eca19542ae02d",
+                    "9c7e67e91243f034513d828c9847cf29d67db689f9fa8e5ce2ebc74acfa33c3a",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "17e0e9eb2f7c685e4580028486b9b8ee05da9bbda0f0ddc1891aabc54972bad4",
+                "path": {
+                  "bitmap": "7f70000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "685f6c093c62c06cc4d67a6bdffbe5ae85b4fcfab47702687231ef710615af72",
+                    "29b83cb099b107c1fabdd05c7a140929ec714fc76fb637a0494c604a1cab0892",
+                    "500f7d327a1015276d85a4826454095f6eabfe239a147bc392bdb4108ed51d57",
+                    "eb75543406cf51664afcebe425beb7ce44e8ac68962edd51c61d432f5fd78528",
+                    "f7c99a3d1a2150d4210e6850e38ab87430f17da5dfa96f18c7129015f733bd20",
+                    "1a27033cfeb206d8c590b20013ad242bb0b053391bca20eee50a1d1b76e7fe60",
+                    "9c7e67e91243f034513d828c9847cf29d67db689f9fa8e5ce2ebc74acfa33c3a",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "18346c2ebf1adbd8a3b102ab4a473d40a25caa5f3e3535e4c402aae43c6c7fc6",
+                "path": {
+                  "bitmap": "7fe0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "d613cb3e050e5b857095fc1eb3208518e1e85cfb318cb3086083871b96708a58",
+                    "ba486566d031972263f685bb6cc677164aa4d71e42da39b18e4eeb76902de123",
+                    "c64b9c3ccdda451de84e1847a9da8bbc9f4cf03a261bd732a347fc82810cb1a8",
+                    "f380e39798e6845c4ad65c40427fb7061ed12cec391b3bfc8beedb0f2fa4b973",
+                    "4c716f1bcea271454281dcf155e14474c74da3ce29bdcc2dfb4db5765ed04ce7",
+                    "3be89db81f2b000cdd5e9ddb52f7347f9f96df4ce8f5eacc881ea693eb4d6d9e",
+                    "75aa00eebb5aa59bb69c6ad9535f030c8b0b7bd9260e4e7e2af0617882923ca5",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "18c5c01e5271c59a8082948f03127fdb683a427720e150a515961a8c3633dc76",
+                "path": {
+                  "bitmap": "7f88000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "626ba2ee3edc6765f2ee1991379044fe98d3fe60aed7f7c36001b61163c7ca42",
+                    "701a206d696d7dafccfcb96122feab880a56fe793faa3e86d5dadda581150bd4",
+                    "f380e39798e6845c4ad65c40427fb7061ed12cec391b3bfc8beedb0f2fa4b973",
+                    "4c716f1bcea271454281dcf155e14474c74da3ce29bdcc2dfb4db5765ed04ce7",
+                    "3be89db81f2b000cdd5e9ddb52f7347f9f96df4ce8f5eacc881ea693eb4d6d9e",
+                    "75aa00eebb5aa59bb69c6ad9535f030c8b0b7bd9260e4e7e2af0617882923ca5",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "19e680b791d6637c2a3bfdd8a80d6a30d195e12b8cb08c897786755bfe941866",
+                "path": {
+                  "bitmap": "7fc0000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "308f57c3806ff1900fe2a0c0acd3804f96b3191cd3009fa530084090d847cb8e",
+                    "ca5b3698a34e17fb9d99e7c69642be7333e16f2ed16829a4c44350e850fc07ad",
+                    "fcc3eb9aa713930aa5db71b60db806cb83cdb2206141596d50419aa72bb0feeb",
+                    "4c716f1bcea271454281dcf155e14474c74da3ce29bdcc2dfb4db5765ed04ce7",
+                    "3be89db81f2b000cdd5e9ddb52f7347f9f96df4ce8f5eacc881ea693eb4d6d9e",
+                    "75aa00eebb5aa59bb69c6ad9535f030c8b0b7bd9260e4e7e2af0617882923ca5",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "1c461d1ea913675bf5bca5ba56c4c30aca84eab399338312af03b59b26e153d7",
+                "path": {
+                  "bitmap": "7f60000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "645147a3f743bbb881006d5dfc8e69c3436cb6004c88cee82bbfef23ae2860d6",
+                    "c805c52229827c2454c8db7b4cef559569ed75dfdbf34d92063eb956cd5f8d28",
+                    "c70dca036a6971b26c3a6fc9cd84573309d13c3a41deaa000cbbcd7738ba6e0b",
+                    "c34b1d5dbb76867f5f351216da73408e779cc69a8b88af78e64173a96c320928",
+                    "69f53527ea8df4cb3d15c725a3065d42b97c38ab105d19fe06cd65500d95eadf",
+                    "75aa00eebb5aa59bb69c6ad9535f030c8b0b7bd9260e4e7e2af0617882923ca5",
+                    "4fc7afc9ed9f6146909c1c3035bdd144f7d2c89c7a00a77212a9ed913e20c045",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "216611200196f765134f10fc061aabe34b808d62f237aaf73963fd5dc84b5d43",
+                "path": {
+                  "bitmap": "7f60000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "86c851182cdf73b3e45da07cea0b590b16b3da9ecb2b752e61f0ef8c8c33b25f",
+                    "a8928c619cfd91d2b33bccf9757dfd042d1b64d8fba3b31c9f6580ad1d76ae3a",
+                    "d71b49638338a98baf0a25e05b7d8a11c549656bd58223149fb41f02afad0709",
+                    "59a1f82c1816e3be4d479e55c0ca644997a8fed70bfcb450ccdded0ccc2c509f",
+                    "255e017e1c58415aa8d42c0ef88f3dcca99275adf457789fd73a7f96c86f62f0",
+                    "3e5d2038f80d6468d438db8380af5c5dd434de08c647a0d95214e7c80b0a46b9",
+                    "5578d09751f077e6f2f595ce435c3303e020b8e0ed15bc3d12c0581ccc611666",
+                    "a12a18f71947c20def8161cc58fad77fa02c8f10386e433542e68f97f8925e48",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              },
+              {
+                "key": "22131fce5363a9253d36c13c653682e91411b481a0e72eb8fea028f4f0f89116",
+                "path": {
+                  "bitmap": "7f80000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "cb17ea0d3d2817703066c0bf3b8024b005543a08a69acbfdc23ebdc65293a65c",
+                    "3dfd177e46bdd31a4b821658e6b7dea8a358320d9fd798e63c9b7912b911f62a",
+                    "a7b570aa50e6a3761018c2894407806502767a4a780b21982578f80d1cfc8374",
+                    "255e017e1c58415aa8d42c0ef88f3dcca99275adf457789fd73a7f96c86f62f0",
+                    "3e5d2038f80d6468d438db8380af5c5dd434de08c647a0d95214e7c80b0a46b9",
+                    "5578d09751f077e6f2f595ce435c3303e020b8e0ed15bc3d12c0581ccc611666",
+                    "a12a18f71947c20def8161cc58fad77fa02c8f10386e433542e68f97f8925e48",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": true
+              }
+            ],
+            "label": "config.yaml",
+            "verdict": "present"
+          },
+          {
+            "asset_len": 40,
+            "asset_sha256": "sha256:3da72777327aa4320d1291b5cec6818174fe9321bdb4c95270c1aa1a3147b501",
+            "detection": "partial",
+            "fingerprints": [
+              {
+                "key": "090758d48cb56b285c1623833ba68d149274285e8a38dd93691b0af05cc4e779",
+                "path": {
+                  "bitmap": "7fe4000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "ddb3dceb0f6e26e77b6f641dc76dde6964cf3a3bcf1c83c2c3710211ed475323",
+                    "0b246d1f2931f513edcad41c4555bb3dfcb41b7d3665047495356c362137964e",
+                    "97f1215a0255b1de7af20226d01fc5096fa9701f06b7330102d6b25c369e3b4d",
+                    "43ae5936c0890e3be579b0f142de41ce2ae7ace117184174f809bceb27a2ea4f",
+                    "86a7939b4df15667c50aafb0997ff0d49149fe0e3995f5cc0c01259bc8def590",
+                    "d6a36357ffa1124cb31f8b80fa74ea3a4b1e6ad0f70a24539169871d68bc4b95",
+                    "21c7afa944945050081ce4e5d40e34bc397f5665ddd28c38b484ee64eb1d55e4",
+                    "101f47253123a73cf408df5c3e62e1e85e2994bb601a6b41270f21f2b9c4ca81",
+                    "4198a26601fbb751486356b1db27b5c8c14df07ff3bc1e8ee4b35089734f544d",
+                    "11091c9eb1bbc90913eec5135fe6f64f59e79347b7fd37bd98f73a44ffc0e12b",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "3470175e0ee9c0ca14b48fc9b58e0a801073dd5119222945b04dd078a64bc3eb",
+                "path": {
+                  "bitmap": "7f00000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "1b16ebe7d04c9df8d3243285b50decf225e692396601f54e8817a19a8ab015ab",
+                    "e3a800564345b460d1312a8ee78b22d14d70b0c6d3614a0731f1954ce2021ba8",
+                    "47e4590d7ef3d3214b638f8d370cdf769da96813a9dedf3f2f553a618fb75a68",
+                    "e5b4273edc6264168715178529ee329a1b2b11e64f339b6c23c6661dd222a072",
+                    "c0228485aefd9560ec3024aba567e3a7a2fab9aa97be50a41951b80e6d75853a",
+                    "a12a18f71947c20def8161cc58fad77fa02c8f10386e433542e68f97f8925e48",
+                    "6e36c0451ad869b228ebc7f18d6b6442cb888b38496bbf340c39461c8284d754"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "4261f2af50589846a092dc7cd9112a4c414c2241abf9e81818ec73f4973228bf",
+                "path": {
+                  "bitmap": "4d80000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "404e716c527e07166b459a938220b574e1865b72a2b83dc90278195419710967",
+                    "fe1cb16be9bff22751afd6b17e027bec8bdd20b85b9e4a7685881cf9758b69f8",
+                    "35b833b4bf39b00297bbb7e2985bd7cf60be0a7188e560ca541733c9462bac46",
+                    "3b9462c1d49a50a8a6b7ce30419ba7b7f5b7fbd07214747e9f51b4d60b5e1439",
+                    "74763f27ad5cbcbc2c98c5d5048283a0efe5d1f7da57ceb4db055d86d7648019"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "691732c0086fba11fcea03a1bbd63a9c8427e06dfb46daa16a6378de994d26f5",
+                "path": {
+                  "bitmap": "6000000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "65bcfb252c231feb964f60097af472cdc8eb1ed0dee283f61a06077a25c37cf6",
+                    "74763f27ad5cbcbc2c98c5d5048283a0efe5d1f7da57ceb4db055d86d7648019"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "7f02899f3843ff6b2761cbf1f08bcddf49fca3c67e1442b77ceb55b7ae589312",
+                "path": {
+                  "bitmap": "6000000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "65bcfb252c231feb964f60097af472cdc8eb1ed0dee283f61a06077a25c37cf6",
+                    "74763f27ad5cbcbc2c98c5d5048283a0efe5d1f7da57ceb4db055d86d7648019"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "936d3c282a83fed38f2906a395d989f9c88f98d198432cb6bc25f8884b96db7b",
+                "path": {
+                  "bitmap": "8000000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "fcf5ad3dcc42dabc0cfe4b1441188103c5ce58b9ced19983ecc4d7dedcb4dbed"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "db20694296b11ff6b6839c71d852272718949bced5b13dd8e477686d5d91bf92",
+                "path": {
+                  "bitmap": "8000000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "fcf5ad3dcc42dabc0cfe4b1441188103c5ce58b9ced19983ecc4d7dedcb4dbed"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "e03c00d5c03d1437a27c52bafcdefc3680158092aead586cd08fa354cd31c488",
+                "path": {
+                  "bitmap": "8000000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "fcf5ad3dcc42dabc0cfe4b1441188103c5ce58b9ced19983ecc4d7dedcb4dbed"
+                  ]
+                },
+                "present": false
+              },
+              {
+                "key": "f08f439d7df2a39deab7a9e58c415b81b39f8e05f0ea171a09099104e36d13a9",
+                "path": {
+                  "bitmap": "8000000000000000000000000000000000000000000000000000000000000000",
+                  "siblings": [
+                    "fcf5ad3dcc42dabc0cfe4b1441188103c5ce58b9ced19983ecc4d7dedcb4dbed"
+                  ]
+                },
+                "present": false
+              }
+            ],
+            "label": "session_id",
+            "verdict": "absent-partial"
+          },
+          {
+            "asset_len": 4,
+            "asset_sha256": "sha256:03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4",
+            "detection": "undetectable",
+            "fingerprints": [],
+            "label": "db_pin",
+            "verdict": "undetectable"
+          }
+        ],
+        "profile": "crovia.pnx.v1",
+        "proof_version": "crovia.pnx.proof.v1",
+        "sheet": {
+          "closed_at": "2026-09-20T12:00:00Z",
+          "egress": {
+            "bodies": 4,
+            "bytes": 1739,
+            "first_at": "2026-09-20T11:00:00Z",
+            "last_at": "2026-09-20T11:15:00Z"
+          },
+          "fingerprints": 198,
+          "normalization": [
+            "json-strings-v1"
+          ],
+          "params": {
+            "hash": "sha256",
+            "k_gram": 32,
+            "threshold": 47,
+            "window": 16
+          },
+          "profile": "crovia.pnx.v1",
+          "root": "sha256:e3e31b945a8907927d8bfd3b44cc1e53aadbc728ea59783634fe602835db332e",
+          "run_id": "conformance/run-001",
+          "salt_hex": "47dfe6cc13a8b4cbef0863bb1891a0a5",
+          "signature": {
+            "alg": "ed25519",
+            "domain": "CROVIA-PNX-SHEET-v1",
+            "sig_hex": "afb8494893e465cee9a5c33f8c13b6191b138a4e54cadf7cbc4a041a669238a8f2777dbf8a597a253d87aa0c71cd4776d30ce3f39f354312424639c3c5df4c07"
+          },
+          "witness": {
+            "id": "urn:crovia:pnx-witness:fixture",
+            "pubkey": {
+              "alg": "ed25519",
+              "key_hex": "b3c8f805e787a0a3c9d752d5dc908f1dcde5b9cdf87aa09f888b8f052e2d0520"
+            }
+          }
+        },
+        "verdict": "present"
+      }
+    }
+  },
+  "run": {
+    "bodies": [
+      {
+        "at": "2026-09-20T11:00:00Z",
+        "body_hex": "504f5354202f76312f636861742f636f6d706c6574696f6e730a1c60ec5c65d86ce492104f7ecc63dbb5a4e21c698af91435824bfaef793f2f4c50b09c468267573f200ad58b034c6484f874d040c8539954274ced28e87a36ab38788310b2b7c0d2988875fc5f4e5d245c769a8aba5cbc2974f0b8d01b263b4f63db90e98b79eaaad13b13acd73fd72183e569c1f41951615cb46b2a8f29c0483a3261ef26a1b6169fb500d845a28766d720455076c3272478da5ca71c97fab6ba79fd6db1a1ac3e81f65f0533c8fa770d0d1bd01d05cda151e901eb817d4508e9cfafa14fb6b4ecaee0025d9cd9d4bffce4b2761f59bf3429b4dfb356b243abccfddd99d2d3ce38a4576161fd5a7e676df5d1bd9f4097d10004ffa2400c687ac87db86d8206d89adfbdc08c4695c155617537af8ec9b89d751919d64587a6b2b2448d5cb9e0bacef2afb1d6736b2d6c6976652d6665383761343432313237383037663665616637633861636566303365366364613731313637353336396661383562383635663539633531646638313731653238636164333337300a",
+        "note": "raw leak: the key appears verbatim in a binary body"
+      },
+      {
+        "at": "2026-09-20T11:05:00Z",
+        "body_hex": "7b226d6f64656c223a20226770742d346f222c20226d65737361676573223a205b7b22726f6c65223a202273797374656d222c2022636f6e74656e74223a2022596f7520617265206120636f64652072657669657765722e227d2c207b22726f6c65223a202275736572222c2022636f6e74656e74223a202252657669657720746869732066696c653a5c6e64617461626173653a5c6e2020686f73743a2064622e696e7465726e616c2e6578616d706c655c6e2020757365723a207376635f6167656e745c6e202070617373776f72643a20703473732d3434666564373835643836625c6e6170693a5c6e2020746f6b656e3a2039373933623831643265346364323338616263645c6e2020726567696f6e3a2065752d776573742d315c6e227d5d2c202274656d7065726174757265223a20307d",
+        "note": "leak inside a JSON string: newlines are escaped in the raw bytes; found only through json-strings-v1"
+      },
+      {
+        "at": "2026-09-20T11:10:00Z",
+        "body_hex": "474554202f6865616c746820485454502f312e310d0a",
+        "note": "shorter than k_gram: adds no fingerprint"
+      },
+      {
+        "at": "2026-09-20T11:15:00Z",
+        "body_hex": "0d5b080bd4d0cd48ec5b681589be10d42bbe0f383382d43292a854f0d08069d778e376d6c5a5b6960dfa65b233244c51258322d52fcdf86557f0426aa4e60ca31dab6bfa89a4c8567cb313fa63253c7b2b4006a2e5ee1c9af9f6458fd237dfba34d1f1d4be2d4abf8a062440db6256de35d71100442994da87cf145fac03d930898d9e3a1a1a749643b3bd208f628e97bcfc8c1d4c7907ab0abc76d305b0c94d20b83512c41f597df40c793939f92a324ac874a0a50bcccb31dc9fec641369767baf8af7cc28cfcff0566ca18d090baa4cd5be8ff43b23185a9de8622fe33c5cdf4d23eb172387256c7a3e468f98581f979a2819c718aa1ccff1c1c72d136e1db5090257e4f4713cbb251e42a5accf3268598f4f827fbd2728a0fb045758f40b2db9bf07802356bf5f009b788b2f7001cc870562c5e966e8f7dd43c7283438386c912ba751950b76f73179f1bf098de2422c02f30606f6956060599cb057c140dc0352b25e67eae0b7462965716fece4c6785a6df22ce63fa136c38f31cf642156764df0605ad93f8ab24b9a247d3b4cda8f17414ac1a76eec21266b74090fe11ec0ad01bc23599624d67b10f6494b173fd143d0f33f15ece5091c7f4fea009cd0f9345a7509044c62bf6264adf99983c7cf8511a735c0b88d2669a8088f8b4a5eef44c6d9dbf298edfe8bbc21f4bc51cbb9a0ad9cebf561620fa05498a99c0f32fcde3ddabbba0e04d2d5c168ecc40126cc9b051b7aa807652e536c3af1ff81a57be2a5bf3d04ef9d34a4165889f9a9322da3cf21e5d5e92d6350a1e978ddb4029654a784f9bfaa666045fa1de72e7964675c8ee38f85bf2b0f9c8ab459937c43cbaa3058b28a608cc62dd1da91b5bfdcb1cefc8b85fccd17ab6f83852974b14505c142edf9a76bf2fa5d70061b3dd55f06d0c57d05f78d81985db3a197ae544b7baf18916a994ee0796a21cb89637e508c1d22c1a93e8912106147dccde89df56148e8081ec18265b4dacc010abff77d2f370aa5e06ce074f3aaddc805e87c411c3dc90b85a6de8f22809ba107d68d833602b8bc9966663d99b145ab026d1ce8c2b0bacf08543c5d7d2f053d7265cbf1debe41030a3a9b567460ebb78e6ea97cc53ce4d008eecea4461485c8c895e75923674da0db1a49560ba1b4aaa5fcf65556fa22edee1337a0af76ff1e7cf0c888f852a90a6181b8f35c9a7151e9260f8008dd64a9f259bf979951bb38b12d66fa876851e9d5d973054a4e6d30ea3fe63e333ae9431979ffb1720c483e76bb6d16975480203e732bf15b79c7a998a5eb9561d509600bb46f473d5f587b3ada27ec46ba349f807a8e55c58b2dfcdd8cf17d51353d7c172052a66b00b4c0bc0ce4b925f202e6e6a8c69919043b8b77a64f518cabca74b21dae",
+        "note": "unrelated traffic"
+      }
+    ],
+    "normalization": [
+      "json-strings-v1"
+    ],
+    "run_id": "conformance/run-001",
+    "salt_hex": "47dfe6cc13a8b4cbef0863bb1891a0a5",
+    "witness_pubkey_hex": "b3c8f805e787a0a3c9d752d5dc908f1dcde5b9cdf87aa09f888b8f052e2d0520"
+  },
+  "sheet": {
+    "closed_at": "2026-09-20T12:00:00Z",
+    "egress": {
+      "bodies": 4,
+      "bytes": 1739,
+      "first_at": "2026-09-20T11:00:00Z",
+      "last_at": "2026-09-20T11:15:00Z"
+    },
+    "fingerprints": 198,
+    "normalization": [
+      "json-strings-v1"
+    ],
+    "params": {
+      "hash": "sha256",
+      "k_gram": 32,
+      "threshold": 47,
+      "window": 16
+    },
+    "profile": "crovia.pnx.v1",
+    "root": "sha256:e3e31b945a8907927d8bfd3b44cc1e53aadbc728ea59783634fe602835db332e",
+    "run_id": "conformance/run-001",
+    "salt_hex": "47dfe6cc13a8b4cbef0863bb1891a0a5",
+    "signature": {
+      "alg": "ed25519",
+      "domain": "CROVIA-PNX-SHEET-v1",
+      "sig_hex": "afb8494893e465cee9a5c33f8c13b6191b138a4e54cadf7cbc4a041a669238a8f2777dbf8a597a253d87aa0c71cd4776d30ce3f39f354312424639c3c5df4c07"
+    },
+    "witness": {
+      "id": "urn:crovia:pnx-witness:fixture",
+      "pubkey": {
+        "alg": "ed25519",
+        "key_hex": "b3c8f805e787a0a3c9d752d5dc908f1dcde5b9cdf87aa09f888b8f052e2d0520"
+      }
+    }
+  }
+}
