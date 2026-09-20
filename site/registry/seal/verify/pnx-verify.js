@@ -53,12 +53,14 @@
   }
   async function fingerprints(data, salt, k, w) { return winnow(await kgramHashes(data, salt, k), w); }
   // {detection, fingerprints}: guaranteed (winnowed) at >= k+w-1 bytes, partial (every k-gram) at >= k, else undetectable.
+  function classForLen(n, k, w) { return n < k ? UNDETECTABLE : n >= k + w - 1 ? "guaranteed" : "partial"; }
   async function assetFingerprints(asset, salt, k, w) {
     k = k || K_GRAM; w = w || WINDOW;
-    if (asset.length < k) return { detection: UNDETECTABLE, fingerprints: [] };
+    const detection = classForLen(asset.length, k, w);
+    if (detection === UNDETECTABLE) return { detection, fingerprints: [] };
     const hashes = await kgramHashes(asset, salt, k);
-    if (asset.length >= k + w - 1) return { detection: "guaranteed", fingerprints: winnow(hashes, w) };
-    return { detection: "partial", fingerprints: Array.from(new Set(hashes.map(hex))).sort() };
+    if (detection === "guaranteed") return { detection, fingerprints: winnow(hashes, w) };
+    return { detection, fingerprints: Array.from(new Set(hashes.map(hex))).sort() };
   }
   // json-strings-v1: decoded string values of a JSON body, document order, at least minLen bytes.
   function jsonStrings(body, minLen) {
@@ -160,6 +162,9 @@
         if (listed.map(f => f.key).sort().join() !== r.fingerprints.join()) { err(false, label + ": fingerprint set does not match the asset"); continue; }
         klass = r.detection;
         step(true, label + ": asset bytes recomputed", data.length + " bytes, class " + klass + ", " + r.fingerprints.length + " fingerprint(s)");
+      } else if (Number.isInteger(a.asset_len) && classForLen(a.asset_len, k, w) !== klass) {
+        // The stated length alone fixes the class: an understated class is visible without the bytes.
+        err(false, label + ": detection class '" + klass + "' does not match asset_len"); continue;
       }
       let hits = 0;
       for (const f of listed) {

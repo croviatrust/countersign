@@ -5,7 +5,7 @@
   {
    "path": "index.json",
    "bytes": 1553,
-   "sha256": "095391577f67a49e9670f4e87cfd5fb206a976024d274fe8d25241bcc3d718f5"
+   "sha256": "80a74e8038fe2dfec589b7ed85ee825d4d845e12d5c6879a0de4d277005b5f04"
   },
   {
    "path": "invalid_001.json",
@@ -34,8 +34,8 @@
   },
   {
    "path": "pnx_003_invalid.json",
-   "bytes": 444316,
-   "sha256": "d2bfe4b8488e181bb219b683f1251461fef2f90e2368716f3eeeafd4682ffcac"
+   "bytes": 444317,
+   "sha256": "9fe265facd8df34ec11537baba8450fd5d5b3665ec223ea70d72da964abd5e82"
   },
   {
    "path": "pnx_004_sealed.json",

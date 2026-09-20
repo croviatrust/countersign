@@ -137,7 +137,7 @@ def pnx_vectors() -> dict[str, dict]:
     bad["assets"][0]["detection"] = "partial"
     bad["assets"][0]["verdict"] = egress.VERDICT_ABSENT_PARTIAL
     bad["verdict"] = "mixed"
-    fault("understated_detection_class", bad, fx.PNX_CLEAN_ASSETS, "detection class", hash_only_ok=True)
+    fault("understated_detection_class", bad, fx.PNX_CLEAN_ASSETS, "detection class", hash_only_ok=False)
     for name, member, value, contains in (
             ("unknown_normalization", "normalization", ["base64-v1"], "unknown normalization"),
             ("inconsistent_params", "params", {"k_gram": 32, "window": 16, "threshold": 46, "hash": "sha256"}, "inconsistent params"),

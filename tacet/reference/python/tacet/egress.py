@@ -106,12 +106,22 @@ def asset_fingerprints(asset: bytes, salt: bytes, k: int = K_GRAM, w: int = WIND
     detection). Shorter assets that still hold at least one k-gram use every
     k-gram hash (best effort). Anything shorter is undetectable.
     """
-    if len(asset) < k:
-        return "undetectable", []
+    klass = _class_for_len(len(asset), k, w)
+    if klass == "undetectable":
+        return klass, []
     hashes = kgram_hashes(asset, salt, k)
-    if len(asset) >= k + w - 1:
-        return "guaranteed", sorted(winnow(hashes, w))
-    return "partial", sorted(set(hashes))
+    if klass == "guaranteed":
+        return klass, sorted(winnow(hashes, w))
+    return klass, sorted(set(hashes))
+
+
+def _class_for_len(n: int, k: int, w: int) -> str:
+    """Detection class of an asset of ``n`` bytes: a function of the length only."""
+    if n < k:
+        return "undetectable"
+    if n >= k + w - 1:
+        return "guaranteed"
+    return "partial"
 
 
 def json_strings(body: bytes, min_len: int = K_GRAM) -> list[bytes]:
@@ -325,6 +335,13 @@ def verify_pnx(proof: dict[str, Any], assets: dict[str, bytes] | None = None) ->
                 continue
         else:
             klass = a.get("detection", "?")
+            # The proof states the asset's length. The class it must carry
+            # follows from that alone, so an understated class is visible
+            # even without the bytes.
+            n = a.get("asset_len")
+            if isinstance(n, int) and klass != _class_for_len(n, k, w):
+                res.errors.append(f"{label}: detection class {klass!r} does not match asset_len")
+                continue
         present = 0
         for f in listed:
             key = bytes.fromhex(f["key"])

@@ -113,7 +113,8 @@ protected string left the perimeter during a bounded window.
 1. Check the sheet: profile, parameter consistency, Ed25519 signature.
 2. If the asset bytes are supplied, recompute `asset_sha256`, the detection
    class and the fingerprint set; refuse the proof if any differ. If they are
-   not supplied, verify the paths for the listed keys and emit a warning: the
+   not supplied, check that the stated detection class is the one `asset_len`
+   implies (§3), verify the paths for the listed keys and emit a warning: the
    result then proves non-inclusion of *those keys*, not of any asset.
 3. Verify each path against `root`.
 4. Recompute every verdict and the overall verdict; refuse on mismatch.
@@ -169,7 +170,7 @@ any language can rebuild the inputs from the labels.
 |---|---|
 | `pnx_001_fingerprints.json` | The fingerprint function of §3, byte for byte: salted k-gram hashes, winnowed set of a 120-byte body, the single-minimum case for a body shorter than one window, the constant leaf value, the four detection classes at 31 / 32 / 46 / 47 / 100 bytes, the `json-strings-v1` derived bodies of a JSON request (and none for a non-JSON body), the epoch leaf key `pnx/<run_id>`, and the winnowing guarantee: a 47-byte secret inserted into a 100-byte body at every one of the 101 offsets shares at least one fingerprint with the secret. |
 | `pnx_002_proofs.json` | A witnessed run of four bodies (a raw leak, a leak quoted inside a JSON string that only `json-strings-v1` can find, a body shorter than a k-gram, unrelated traffic), its signed run sheet, and two proofs against it with the asset bytes: `clean` (two assets, verdict `absent`) and `exposure` (five assets: `absent`, `present` via raw bytes, `present` via `json-strings-v1`, `absent-partial`, `undetectable`; verdict `present`). A verifier MUST rebuild the run root from the bodies, MUST verify both proofs with the assets and, without the assets, MUST accept them with the §6 warning. |
-| `pnx_003_invalid.json` | **MUST fail** with the stated reason: tampered sheet (signature), forged asset verdict, forged overall verdict, path against a foreign root, an inclusion relabelled as absent, wrong asset bytes, missing asset bytes, substituted fingerprint set, dropped fingerprint, understated detection class, unknown normalisation layer, inconsistent parameters, wrong profile. Each case records `hash_only_ok`: whether a verifier *without* the asset bytes can see the fault. Substituted or dropped fingerprints and an understated class are invisible to it, which is why §6 step 2 requires the warning. |
+| `pnx_003_invalid.json` | **MUST fail** with the stated reason: tampered sheet (signature), forged asset verdict, forged overall verdict, path against a foreign root, an inclusion relabelled as absent, wrong asset bytes, missing asset bytes, substituted fingerprint set, dropped fingerprint, understated detection class, unknown normalisation layer, inconsistent parameters, wrong profile. Each case records `hash_only_ok`: whether a verifier *without* the asset bytes can see the fault. Substituted or dropped fingerprints are invisible to it, which is why §6 step 2 requires the warning; an understated class is not, because `asset_len` is in the proof. |
 | `pnx_004_sealed.json` | The `clean` and `exposure` proofs delivered inside an unmodified `crovia.seal.v1` (query = run id and asset hashes, `checks.pnx` = verdict, counts, run root), and four sealed faults: a forged verdict under a valid Seal, a query describing another proof, a proof modified after sealing, a tampered Seal signature. A verifier that stops at the Seal signature accepts the first three; a conformant one rejects all four. |
 
 Run both suites from the repository root:
