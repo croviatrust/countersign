@@ -1,0 +1,98 @@
+{
+ "press_kit_version": "crovia.press.v1",
+ "updated": "2026-09-20",
+ "organization": {
+  "name": "Crovia Trust",
+  "short_name": "Crovia",
+  "legal_form": "independent project, Italy",
+  "founder": "Tarik En Nakhai",
+  "founded": "2026",
+  "url": "https://croviatrust.com",
+  "email": "info@croviatrust.com",
+  "security_contact": "https://croviatrust.com/.well-known/security.txt",
+  "logo": "https://croviatrust.com/logo.png",
+  "sameAs": [
+   "https://github.com/croviatrust",
+   "https://bsky.app/profile/crovia.bsky.social",
+   "https://pypi.org/project/crovia-tacet/",
+   "https://pypi.org/project/crovia-seal/",
+   "https://www.npmjs.com/package/@crovia/seal",
+   "https://doi.org/10.5281/zenodo.20111130",
+   "https://datatracker.ietf.org/doc/draft-crovia-seal/",
+   "https://datatracker.ietf.org/doc/draft-crovia-tacet/",
+   "https://registry.modelcontextprotocol.io/v0/servers?search=com.croviatrust/crovia"
+  ]
+ },
+ "one_liners": {
+  "5_words": "Silence you can verify.",
+  "12_words": "Crovia records what AI providers disclose about training data, and the absence of it.",
+  "25_words": "Crovia Trust runs TACET, a public log that turns the absence of an AI training-data disclosure into a signed, Bitcoin-anchored, offline-verifiable proof.",
+  "tweet": "Transparency logs prove presence. TACET proves absence over time: hourly, signed, Bitcoin-anchored evidence that an AI model published no training-data disclosure. Every proof is an unmodified Crovia Seal you can verify offline. croviatrust.com/registry/tacet/"
+ },
+ "boilerplate": {
+  "50_words": "Crovia Trust is an independent observatory of AI training-data disclosure. Its protocol, TACET, records every hour whether AI models on public registries carry a training-data disclosure, signs what it saw, anchors it in Bitcoin, and issues portable proofs of absence — silence you can verify, without trusting Crovia.",
+  "100_words": "Crovia Trust is an independent observatory of AI training-data disclosure. Existing transparency logs prove that something happened; Crovia's protocol, TACET, proves that something did not. Every hour it opens an epoch with a public randomness beacon, fetches the model cards of the AI systems under watch, runs a published predicate over the bytes, signs the result and closes the hour with a Bitcoin anchor. A model that never discloses accumulates anchored negative observations — and nothing else. The result is a portable proof, delivered as a Crovia Seal, that anyone can verify offline. Data is CC-BY-4.0; specifications are public domain.",
+  "200_words": "Crovia Trust is an independent observatory of AI training-data disclosure, based in Italy. It publishes observation facts, never accusations: what a provider disclosed about a model's training data, when, and — its distinctive product — for how long nothing was disclosed at all.\n\nIts core protocol, TACET (Latin: \"it is silent\"), is a transparency log whose output is a proof of absence over time. Each hour an epoch is opened with a drand randomness round, the public surfaces of the models under watch are fetched, a published predicate is evaluated over the bytes, every observation is signed, and the epoch head is anchored in Bitcoin through OpenTimestamps. Silence never accrues without an anchored negative observation: downtime and gaps count zero. Proofs are sparse-Merkle non-inclusion paths across a contiguous range of epochs, wrapped in an unmodified Crovia Seal (crovia.seal.v1), Crovia's cryptographic receipt format, so any Seal verifier can check them offline.\n\nPNX, a TACET profile, turns the same machinery inward: it lets a company prove that none of its protected assets left an AI agent's run. TACET and Crovia Seal are documented as IETF Internet-Drafts with public conformance vectors and Apache-2.0 reference code; all observation data is CC-BY-4.0 and every weekly snapshot is archived with a DOI."
+ },
+ "names": {
+  "Crovia": "the project; also fine: Crovia Trust (the organization). Never 'CROVIA' in prose, never 'Crovia.ai'.",
+  "TACET": "always upper case; the protocol of verifiable silence. Not 'Tacet', not 'the TACET index'.",
+  "PNX": "Proof of Non-Exfiltration; a TACET profile (crovia.pnx.v1).",
+  "LACUNA": "a TACET level-2 silence proof for a model with anchored negative observations; upper case.",
+  "Crovia Seal": "the receipt format, crovia.seal.v1. 'Seal' alone is fine after first mention.",
+  "silence": "always with observed_to: 'silent for N observed days, to <date>'. Never a wall-clock count.",
+  "do_not_say": [
+   "grades, scores, rankings or letter marks (Crovia retired them in September 2026)",
+   "that a model 'hides' or 'refuses' anything: Crovia records absence, not intent",
+   "that TACET proves what happened between observations",
+   "'certified by Crovia': proofs are verifiable, not certifications"
+  ]
+ },
+ "facts": {
+  "live_source": "https://croviatrust.com/registry/data/tacet/latest.json",
+  "genesis": "2026-09-19T18:00:00Z",
+  "epoch_seconds": 3600,
+  "map_id": "urn:crovia:tacet:map:disclosure",
+  "predicate": "crovia.pred.hf-card-training-data 1.0.0",
+  "anchors": "drand (opening) and Bitcoin via OpenTimestamps (closing)",
+  "proof_format": "crovia.seal.v1",
+  "specifications": {
+   "tacet": "https://croviatrust.com/registry/tacet/spec/",
+   "seal": "https://croviatrust.com/registry/seal/spec/",
+   "internet_drafts": ["draft-crovia-seal-01", "draft-crovia-tacet-00"],
+   "conformance_tests": {"tacet": 47, "seal": 41}
+  },
+  "code": {
+   "crovia-tacet": "https://pypi.org/project/crovia-tacet/",
+   "crovia-tacet-operator": "https://pypi.org/project/crovia-tacet-operator/",
+   "crovia-seal": "https://pypi.org/project/crovia-seal/",
+   "@crovia/seal": "https://www.npmjs.com/package/@crovia/seal",
+   "pnx-action": "https://github.com/croviatrust/pnx-action"
+  },
+  "licenses": {"data": "CC-BY-4.0", "specification_text": "CC0-1.0", "code": "Apache-2.0"},
+  "archive": "https://doi.org/10.5281/zenodo.20111130",
+  "machine_access": {
+   "llms_txt": "https://croviatrust.com/llms.txt",
+   "mcp": "https://croviatrust.com/mcp (official MCP Registry: com.croviatrust/crovia)",
+   "api": "https://croviatrust.com/registry/api/",
+   "weekly_report": "https://croviatrust.com/report/",
+   "feed": "https://croviatrust.com/feed.xml"
+  }
+ },
+ "assets": {
+  "logo_png": "https://croviatrust.com/logo.png",
+  "icon_512": "https://croviatrust.com/assets/icon-512.png",
+  "icon_192": "https://croviatrust.com/assets/icon-192.png",
+  "og_crovia": "https://croviatrust.com/og-card.png",
+  "og_tacet": "https://croviatrust.com/og-tacet.png",
+  "og_seal": "https://croviatrust.com/og-seal.png",
+  "colors": {"background": "#050a12", "accent": "#1ec5ff", "text": "#c8d6e5", "positive": "#3ddc97"},
+  "type": {"sans": "Inter", "mono": "JetBrains Mono", "display": "Fraunces"},
+  "rules": "Use the mark on dark backgrounds; keep clear space of one mark-height around it; do not recolor, rotate or add effects."
+ },
+ "quotes": [
+  {"text": "Transparency logs prove presence. TACET proves absence over time.", "attribution": "TACET specification, §1"},
+  {"text": "No observation, no silence.", "attribution": "Crovia canon"},
+  {"text": "Precision is the product. The limits are part of the specification.", "attribution": "croviatrust.com/registry/tacet/"}
+ ]
+}

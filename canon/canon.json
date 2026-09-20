@@ -89,7 +89,8 @@
   "/m/",
   "/m/Qwen/Qwen3-32B/",
   "/report/",
-  "/feed.xml"
+  "/feed.xml",
+  "/press/"
  ],
  "retired_paths": [
   "/index/",
