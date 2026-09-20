@@ -49,7 +49,8 @@ There is exactly one thing called a Crovia Seal.
 | Signature object | `{"alg":"ed25519","canon":"csc-1","domain":"CROVIA-SEAL-v1","payload_hash_alg":"sha256","sig_hex":"<128 hex>"}` |
 | Timestamp | `timestamp.emitted_at` (RFC 3339, ms) + `timestamp.nonce` |
 | Canonicalization | CSC-1 (strict RFC 8785 subset, no floats) |
-| Spec | `crovia-seal/SPEC.md` v0.5, `draft-crovia-seal-01` |
+| Spec | `crovia-seal/SPEC.md` v0.5, `draft-crovia-seal-01` ([datatracker](https://datatracker.ietf.org/doc/draft-crovia-seal/)) |
+| Spec page (cited by the draft) | `https://croviatrust.com/registry/seal/spec/` — static render of `SPEC.md` (sha256 in `canon.json` → `seal.spec_sha256`), draft mirrored as `.txt/.xml/.html`, all 44 conformance files under `/registry/seal/spec/vectors/v1/` with `manifest.json`. Built by `tools/build_seal_spec.py --seal-repo <crovia-seal>`; never edit `index.html` by hand. |
 | Reference | `crovia-seal/reference/python` (`crovia_seal`), `crovia-seal/reference/typescript` |
 | Public verifier | `https://croviatrust.com/registry/seal/verify/` |
 | Issuer trust root | `https://seal.croviatrust.com/trust-root.json` (+ `trust-root.sig.json`) |

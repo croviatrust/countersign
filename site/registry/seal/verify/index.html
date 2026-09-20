@@ -248,17 +248,19 @@ function renderSteps(steps, stepsEl) {
   }
 }
 
-/* Load a proof by URL: only from this site's public TACET directory (?url= or the button). */
+/* Load a seal or proof by URL (?url= or the button): only from this site's public TACET directory or the
+   spec's conformance vectors. */
 const PROOF_BASE = "/registry/data/tacet/";
+const URL_BASES = [PROOF_BASE, "/registry/seal/spec/vectors/"];
 function proofUrlAllowed(u) {
   try {
     const url = new URL(u, location.origin);
-    return (url.origin === location.origin || url.origin === "https://croviatrust.com") && url.pathname.startsWith(PROOF_BASE) && url.pathname.endsWith(".json");
+    return (url.origin === location.origin || url.origin === "https://croviatrust.com") && URL_BASES.some(b => url.pathname.startsWith(b)) && url.pathname.endsWith(".json");
   } catch (_) { return false; }
 }
 async function loadProof(u) {
   const verdict = $("verdict"), report = $("report");
-  if (!proofUrlAllowed(u)) { report.style.display = "block"; verdict.className = "vf-verdict bad"; verdict.textContent = "refusing to load: only files under " + PROOF_BASE + " on this site can be loaded by URL"; return; }
+  if (!proofUrlAllowed(u)) { report.style.display = "block"; verdict.className = "vf-verdict bad"; verdict.textContent = "refusing to load: only files under " + URL_BASES.join(" or ") + " on this site can be loaded by URL"; return; }
   try {
     const r = await fetch(u, { cache: "no-store" });
     if (!r.ok) throw new Error("HTTP " + r.status);
@@ -304,6 +306,6 @@ $("btnTamper").addEventListener("click", () => {
   } catch (_) { $("btnExample").click(); }
 });
 </script>
-<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c"></script>
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919g"></script>
 </body>
 </html>

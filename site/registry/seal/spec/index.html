@@ -2,66 +2,94 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Crovia Seal Specification (v0.5) &mdash; SPEC.md</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#000000">
-<meta name="description" content="The Crovia Seal protocol — RFC-style specification, v0.5, public domain (CC0).">
+<title>Crovia Seal Specification — crovia.seal.v1, canonical text, test vectors</title>
+<meta name="description" content="The canonical text of the Crovia Seal protocol (crovia.seal.v1, v0.5 (draft, pre-IETF)), the Internet-Draft draft-crovia-seal, and the normative conformance vectors — 41 tests every implementation must pass. Public domain (CC0).">
+<link rel="canonical" href="https://croviatrust.com/registry/seal/spec/">
 <link rel="icon" type="image/png" href="https://croviatrust.com/logo.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
-<style>
-:root {
-  --ink:#000; --panel:#0a1018; --line:rgba(30,197,255,0.16);
-  --line-hi:rgba(30,197,255,0.36); --accent:#1ec5ff;
-  --text:#d9e4ee; --text-dim:#6c7988; --text-ghost:#39424d;
-  --mono:'JetBrains Mono',ui-monospace,monospace;
-  --serif:'Fraunces','Times New Roman',serif;
-  --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{background:radial-gradient(ellipse at 50% 20%,#07121c 0%,#000 70%);color:var(--text);font-family:var(--sans);min-height:100vh}
-.topbar{padding:22px 32px;display:flex;justify-content:space-between;align-items:center;font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);border-bottom:1px solid var(--line)}
-.topbar a{color:var(--text);text-decoration:none;display:inline-flex;align-items:center;gap:10px}
-.topbar a img{height:22px}
-.topbar .right a{color:var(--text-dim);margin-left:24px}
-.topbar .right a:hover{color:var(--accent)}
-.wrap{max-width:880px;margin:0 auto;padding:60px 32px 96px}
-.eyebrow{display:inline-block;padding:6px 16px;border:1px solid var(--line-hi);border-radius:999px;color:var(--accent);font:600 11px var(--mono);letter-spacing:.22em;text-transform:uppercase;margin-bottom:24px}
-.title{font-family:var(--serif);font-weight:300;font-size:48px;line-height:1.08;color:#fff;letter-spacing:-.02em;margin-bottom:14px}
-.title em{font-style:italic;background:linear-gradient(90deg,var(--accent),#85e3ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.subtitle{color:var(--text-dim);font:400 16px/1.5 var(--sans);margin-bottom:48px}
-article{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:48px 56px;font:400 15px/1.7 var(--sans)}
-article h1{font-family:var(--serif);font-weight:400;font-size:30px;color:#fff;margin:36px 0 16px;border-bottom:1px solid var(--line);padding-bottom:10px}
-article h1:first-child{margin-top:0}
-article h2{font-family:var(--serif);font-weight:400;font-size:24px;color:#fff;margin:36px 0 12px}
-article h3{font-weight:600;font-size:17px;color:var(--accent);margin:24px 0 10px;font-family:var(--sans)}
-article h4{font-weight:600;font-size:14px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.1em;margin:20px 0 8px}
-article p{margin-bottom:14px;color:var(--text)}
-article a{color:var(--accent);text-decoration:underline dotted}
-article a:hover{text-decoration:underline}
-article code{background:#020608;border:1px solid var(--line);border-radius:3px;padding:1px 6px;font:500 13px var(--mono);color:#85e3ff}
-article pre{background:#020608;border:1px solid var(--line);border-radius:6px;padding:16px;overflow-x:auto;margin:16px 0;font:500 12.5px/1.55 var(--mono)}
-article pre code{background:transparent;border:0;padding:0;color:var(--text)}
-article ul,article ol{padding-left:28px;margin-bottom:14px}
-article li{margin-bottom:6px}
-article blockquote{border-left:3px solid var(--accent);padding-left:18px;margin:18px 0;color:var(--text-dim);font-style:italic}
-article hr{border:0;border-top:1px solid var(--line);margin:32px 0}
-article strong{color:#fff}
-article table{width:100%;border-collapse:collapse;margin:16px 0;font:500 13px var(--mono)}
-article th,article td{padding:8px 10px;border:1px solid var(--line);text-align:left}
-article th{background:#020608;color:var(--accent);font-weight:600;text-transform:uppercase;letter-spacing:.06em;font-size:11px}
-.loading{color:var(--text-ghost);text-align:center;padding:48px;font-style:italic}
-.foot{margin-top:32px;padding:18px 22px;border:1px solid var(--line);border-radius:8px;background:#020608;font:500 12px var(--mono);color:var(--text-dim)}
-.foot a{color:var(--accent);text-decoration:none}
-.foot a:hover{text-decoration:underline}
-</style>
+<link rel="alternate" type="text/markdown" href="https://croviatrust.com/registry/seal/spec/SPEC.md">
+<meta property="og:title" content="Crovia Seal Specification">
+<meta property="og:description" content="Canonical text, Internet-Draft and 41 conformance tests for crovia.seal.v1. Frozen, public domain, verifiable in the browser.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://croviatrust.com/registry/seal/spec/">
 <meta property="og:image" content="https://croviatrust.com/og-seal.png?v=20260919">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://croviatrust.com/og-seal.png?v=20260919">
+<link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&display=swap" rel="stylesheet">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Crovia Seal Specification", "alternativeHeadline": "crovia.seal.v1 · v0.5", "url": "https://croviatrust.com/registry/seal/spec/", "author": {"@type": "Organization", "name": "Crovia Trust", "url": "https://croviatrust.com"}, "license": "https://creativecommons.org/publicdomain/zero/1.0/", "inLanguage": "en", "isBasedOn": "https://datatracker.ietf.org/doc/draft-crovia-seal/", "encodingFormat": "text/html", "identifier": "sha256:ed125588b40c88a71373cd5db9679b2d55de77f2db16ec6a2336be9d39f5c8e8", "dateModified": "2026-04"}</script>
+<style>
+  .sp-wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+  .sp-hero{padding:64px 0 26px}
+  .sp-eyebrow{font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  .sp-hero h1{font:300 clamp(34px,4.6vw,52px)/1.05 'Fraunces',var(--sans);letter-spacing:-.02em;margin:14px 0 14px;color:#fff}
+  .sp-hero h1 em{font-style:italic;color:var(--accent)}
+  .sp-lead{font-size:16px;color:var(--text-soft);max-width:780px;line-height:1.6}
+  .sp-lead a{color:var(--accent)}
+  .sp-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:30px}
+  .sp-stat{background:var(--bg-card);padding:16px 18px;display:block}
+  .sp-stat .n{font:600 19px var(--mono);color:#fff;line-height:1.15;letter-spacing:-.02em;overflow-wrap:anywhere}
+  .sp-stat .l{font:400 11px var(--mono);color:var(--text-muted);margin-top:8px;letter-spacing:.04em}
+  a.sp-stat:hover{background:var(--bg-card-hi)}
+  .sp-cols{display:grid;grid-template-columns:250px minmax(0,1fr);gap:36px;margin-top:44px;align-items:start}
+  .sp-toc{position:sticky;top:84px;max-height:calc(100vh - 100px);overflow:auto;padding-right:6px}
+  .sp-toc .k{font:600 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px}
+  .sp-toc a{display:block;font:400 12.5px/1.45 var(--sans);color:var(--text-muted);padding:4px 0 4px 10px;border-left:1px solid var(--border);text-decoration:none}
+  .sp-toc a.l3{padding-left:22px;font-size:12px;color:var(--text-faint)}
+  .sp-toc a.x{margin-top:8px;color:var(--accent)}
+  .sp-toc a:hover,.sp-toc a.on{color:#fff;border-left-color:var(--accent)}
+  .sp-toc details summary{display:none}
+  article.sp-doc{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:44px 52px;font:400 15px/1.7 var(--sans);color:var(--text)}
+  .sp-doc h1{font:400 30px/1.2 'Fraunces',var(--sans);color:#fff;margin:0 0 18px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+  .sp-doc h2{font:400 24px/1.2 'Fraunces',var(--sans);color:#fff;margin:40px 0 12px;scroll-margin-top:90px}
+  .sp-doc h3{font:600 16.5px var(--sans);color:var(--accent);margin:26px 0 10px;scroll-margin-top:90px}
+  .sp-doc h4{font:600 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);margin:20px 0 8px}
+  .sp-doc p{margin:0 0 14px}
+  .sp-doc a{color:var(--accent)}
+  .sp-doc code{background:#070b12;border:1px solid var(--border);border-radius:4px;padding:1px 6px;font:500 12.5px var(--mono);color:#85e3ff}
+  .sp-doc pre{background:#070b12;border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;margin:14px 0;font:500 12.5px/1.55 var(--mono)}
+  .sp-doc pre code{background:transparent;border:0;padding:0;color:var(--text)}
+  .sp-doc ul,.sp-doc ol{padding-left:26px;margin:0 0 14px}
+  .sp-doc li{margin-bottom:6px}
+  .sp-doc blockquote{border-left:3px solid var(--accent);padding-left:16px;margin:16px 0;color:var(--text-muted)}
+  .sp-doc hr{border:0;border-top:1px solid var(--border);margin:30px 0}
+  .sp-doc strong{color:#fff}
+  .sp-doc table{width:100%;border-collapse:collapse;margin:14px 0;font:500 12.5px var(--mono)}
+  .sp-doc th,.sp-doc td{padding:8px 10px;border:1px solid var(--border);text-align:left;vertical-align:top}
+  .sp-doc th{background:#070b12;color:var(--accent);font:600 10.5px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+  .sp-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:12px;margin:60px 0 16px}
+  .sp-head h2{font:700 24px/1.15 var(--sans);letter-spacing:-.02em;scroll-margin-top:90px}
+  .sp-head .meta{font:400 11.5px var(--mono);color:var(--text-muted)}
+  .sp-files{width:100%;border-collapse:collapse;font-size:13px}
+  .sp-files th{text-align:left;font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);padding:8px 10px;border-bottom:1px solid var(--border)}
+  .sp-files td{padding:10px;border-bottom:1px solid var(--border);vertical-align:top}
+  .sp-files td.f{font:500 12.5px var(--mono);white-space:nowrap}
+  .sp-files td.f a,.sp-files td.t a{color:var(--accent)}
+  .sp-files td.d{color:var(--text-soft)}
+  .sp-files td.d code{font:500 12px var(--mono);color:#85e3ff}
+  .sp-files td.t{font:500 11.5px var(--mono);color:var(--text-faint);white-space:nowrap}
+  .sp-verify{border:1px solid var(--border);border-radius:999px;padding:3px 10px;text-decoration:none}
+  .sp-verify:hover{border-color:var(--accent)}
+  .sp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+  .sp-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px 22px}
+  .sp-card .k{font:600 10px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .sp-card h3{font:600 16px/1.25 var(--sans);color:#fff;margin-bottom:8px}
+  .sp-card p{font-size:13.5px;color:var(--text-soft);line-height:1.55}
+  .sp-card p a{color:var(--accent)}
+  .sp-card pre{margin-top:12px;background:#070b12;border:1px solid var(--border);border-radius:8px;padding:12px 14px;font:12px/1.6 var(--mono);color:var(--text);overflow-x:auto}
+  .sp-card .mono{font:500 11.5px var(--mono);color:var(--text-muted);word-break:break-all}
+  .sp-end{margin:26px 0 72px;font-size:12.5px;color:var(--text-faint)}
+  .sp-end a{color:var(--accent)}
+  @media (max-width:900px){
+    .sp-cols{grid-template-columns:1fr}
+    .sp-toc{position:static;max-height:none}
+    .sp-toc details summary{display:block;cursor:pointer;font:600 12px var(--mono);color:var(--accent);letter-spacing:.1em;text-transform:uppercase;padding:10px 0}
+    .sp-toc .k{display:none}
+    article.sp-doc{padding:26px 20px}
+    .sp-files td.t:last-child{white-space:normal}
+  }
+  @media print{.cv-topbar,.sp-toc,.cv-foot{display:none}article.sp-doc{border:0;padding:0}}
+</style>
 </head>
 <body>
 <nav class="cv-topbar">
@@ -72,29 +100,482 @@ article th{background:#020608;color:var(--accent);font-weight:600;text-transform
     <div class="cv-nav-status" id="cv-nav-status"><span class="dot"></span><span data-cv-status>connecting</span></div>
   </div>
 </nav>
+<main class="sp-wrap">
+  <section class="sp-hero">
+    <div class="sp-eyebrow">Specification · crovia.seal.v1 · v0.5 · frozen · CC0</div>
+    <h1>The Crovia Seal <em>Protocol</em></h1>
+    <p class="sp-lead">The canonical text of the Seal format, rendered from <a href="/registry/seal/spec/SPEC.md">SPEC.md</a> and served without scripts. This is the document the Internet-Draft <a href="https://datatracker.ietf.org/doc/draft-crovia-seal/" rel="noopener">draft-crovia-seal</a> points to: the same bytes, the same section numbers, and below the text the <a href="#vectors">normative test vectors</a> an implementation must reproduce and reject. The text is frozen except for additive fields; profiles such as TACET extend it, they do not change it.</p>
+    <div class="sp-strip">
+      <div class="sp-stat"><div class="n">v0.5</div><div class="l">implementation-complete, spec frozen except for additive fields</div></div>
+      <a class="sp-stat" href="https://datatracker.ietf.org/doc/draft-crovia-seal/" rel="noopener"><div class="n">draft-crovia-seal-01</div><div class="l">Internet-Draft · IETF datatracker ↗</div></a>
+      <a class="sp-stat" href="#vectors"><div class="n">41 tests</div><div class="l">10 seals · 26 CSC-1 cases · 5 invalid</div></a>
+      <a class="sp-stat" href="https://github.com/croviatrust/crovia-seal" rel="noopener"><div class="n">0.5.0</div><div class="l">reference implementation · Python ↗</div></a>
+      <a class="sp-stat" href="/registry/seal/spec/SPEC.md"><div class="n">ed125588b40c…</div><div class="l">SHA-256 of SPEC.md as rendered</div></a>
+    </div>
+  </section>
 
-<main class="wrap">
-  <span class="eyebrow">SPECIFICATION &middot; v0.5 &middot; CC0</span>
-  <h1 class="title">The Crovia Seal <em>Protocol</em></h1>
-  <p class="subtitle">RFC-style specification for cryptographic provenance of AI-generated outputs &mdash; canonical text, dedicated to the public domain.</p>
-
-  <article id="md"><div class="loading">Loading specification&hellip;</div></article>
-
-  <div class="foot">
-    Source: <a href="/registry/seal/spec/SPEC.md">SPEC.md</a>
-    &middot; <a href="/registry/seal/threat-model/">Companion threat model</a>
-    &middot; <a href="/registry/seal/verify/">Try the verifier</a>
-    &middot; <a href="/registry/seal/log/">Transparency log</a>
-    &middot; <a href="/trust-root.json">Issuer trust root</a>
+  <div class="sp-cols">
+    <nav class="sp-toc" aria-label="Contents"><details open><summary>Contents</summary><div class="k">Contents</div><a class="l2" href="#1-introduction">1. Introduction</a><a class="l3" href="#11-purpose">1.1 Purpose</a><a class="l3" href="#12-design-principles">1.2 Design principles</a><a class="l3" href="#13-out-of-scope">1.3 Out of scope</a><a class="l2" href="#2-terminology">2. Terminology</a><a class="l2" href="#3-canonicalization-csc-1">3. Canonicalization (CSC-1)</a><a class="l3" href="#31-motivation">3.1 Motivation</a><a class="l3" href="#32-rules">3.2 Rules</a><a class="l3" href="#33-signing-payload">3.3 Signing payload</a><a class="l2" href="#4-seal-structure">4. Seal structure</a><a class="l3" href="#41-top-level-fields">4.1 Top-level fields</a><a class="l3" href="#42-seal_version">4.2 seal_version</a><a class="l3" href="#43-seal_id">4.3 seal_id</a><a class="l3" href="#44-issuer">4.4 issuer</a><a class="l3" href="#45-subject">4.5 subject</a><a class="l3" href="#46-generator">4.6 generator</a><a class="l3" href="#47-timestamp">4.7 timestamp</a><a class="l3" href="#48-chain">4.8 chain</a><a class="l3" href="#49-checks-optional">4.9 checks (OPTIONAL)</a><a class="l3" href="#410-anchor-optional">4.10 anchor (OPTIONAL)</a><a class="l3" href="#411-signature">4.11 signature</a><a class="l2" href="#5-issuer-hash-chain">5. Issuer hash chain</a><a class="l2" href="#6-witnesses-optional">6. Witnesses (OPTIONAL)</a><a class="l2" href="#7-transparency-log-informative">7. Transparency log (informative)</a><a class="l2" href="#8-algorithm-agility-post-quantum">8. Algorithm agility (post-quantum)</a><a class="l2" href="#9-security-considerations">9. Security considerations</a><a class="l3" href="#91-replay-across-protocols">9.1 Replay across protocols</a><a class="l3" href="#92-replay-within-the-protocol">9.2 Replay within the protocol</a><a class="l3" href="#93-json-malleability">9.3 JSON malleability</a><a class="l3" href="#94-field-tampering">9.4 Field tampering</a><a class="l3" href="#95-key-compromise">9.5 Key compromise</a><a class="l3" href="#96-downgrade">9.6 Downgrade</a><a class="l3" href="#97-canonicalization-ambiguity">9.7 Canonicalization ambiguity</a><a class="l3" href="#98-hash-choice">9.8 Hash choice</a><a class="l3" href="#99-randomness">9.9 Randomness</a><a class="l3" href="#910-content-privacy">9.10 Content privacy</a><a class="l2" href="#10-iana-considerations">10. IANA considerations</a><a class="l2" href="#11-references">11. References</a><a class="l3" href="#111-normative">11.1 Normative</a><a class="l3" href="#112-informative">11.2 Informative</a><a class="l2" href="#appendix-a-reference-signing-ceremony">Appendix A. Reference signing ceremony</a><a class="l2 x" href="#vectors">Test vectors</a><a class="l2 x" href="#related">Draft, code, related</a></details></nav>
+    <article class="sp-doc" id="spec">
+<h1 id="crovia-seal-specification">Crovia Seal Specification</h1>
+<p><strong>Version:</strong> 0.5 (draft, pre-IETF)
+<strong>Status:</strong> implementation-complete, spec frozen except for additive fields
+<strong>Authors:</strong> CROVIA Research
+<strong>Date:</strong> 2026-04</p>
+<p>This document specifies <strong>Crovia Seal v1</strong>, a compact, tamper-evident JSON
+receipt that may be attached to any AI-generated output to record its
+provenance in a cryptographically verifiable form.</p>
+<p>The key words <strong>MUST</strong>, <strong>MUST NOT</strong>, <strong>SHOULD</strong>, <strong>SHOULD NOT</strong>, <strong>MAY</strong>, and
+<strong>OPTIONAL</strong> in this document are to be interpreted as described in RFC 2119
+and RFC 8174.</p>
+<h2 id="1-introduction">1. Introduction</h2>
+<h3 id="11-purpose">1.1 Purpose</h3>
+<p>Crovia Seal defines a standard, cross-vendor, cross-platform receipt format
+for AI outputs. A Seal MUST enable any third party, given only the Seal itself
+and the issuer's public key, to determine:</p>
+<ol>
+<li>That the Seal has not been tampered with since issuance.</li>
+<li>That the Seal's signer possessed the private key corresponding to the
+   claimed public key at issuance time.</li>
+<li>That the input hash, output hash, generator identity, and any analytical
+   claims embedded in the Seal are as asserted by the issuer.</li>
+<li>That the Seal forms a consistent link in the issuer's append-only hash chain.</li>
+<li>(Optionally) That the Seal was included in a public transparency log as of
+   a given time.</li>
+</ol>
+<h3 id="12-design-principles">1.2 Design principles</h3>
+<ul>
+<li><strong>Record, do not judge.</strong> The Seal MUST NOT encode verdicts on lawfulness,
+  harm, or quality. It MAY embed analytical signals with explicit confidence.</li>
+<li><strong>Verify offline.</strong> The core verification path MUST require no network access.</li>
+<li><strong>Composable.</strong> The schema MUST permit optional extensions (co-signatures,
+  post-quantum signatures, transparency anchors) without breaking base verifiers.</li>
+<li><strong>Canonical.</strong> The exact bytes that are signed MUST be derivable from the
+  Seal by a single, fully specified canonicalization algorithm.</li>
+<li><strong>Defensive by default.</strong> All cryptographic operations MUST use
+  domain separation; no signed payload may be replayed in another protocol.</li>
+<li><strong>Fail closed.</strong> Any unrecognized field or algorithm MUST cause verification
+  to fail unless the verifier explicitly opts into permissive mode.</li>
+</ul>
+<h3 id="13-out-of-scope">1.3 Out of scope</h3>
+<ul>
+<li>Detection of AI-generated content from the output alone (no watermarking).</li>
+<li>Judgments about copyright, fairness, accuracy, or safety.</li>
+<li>Revocation: a Seal, once emitted, is an immutable historical record.
+  Issuers are identified by public key; key rotation is handled by the
+  transparency log, not by Seal-level revocation.</li>
+</ul>
+<h2 id="2-terminology">2. Terminology</h2>
+<ul>
+<li><strong>Seal</strong>: a single JSON object conforming to Section 4.</li>
+<li><strong>Issuer</strong>: the entity producing and signing Seals; identified by its
+  long-term Ed25519 public key (or successor per Section 8).</li>
+<li><strong>Witness</strong>: an optional co-signer of a Seal (Section 6).</li>
+<li><strong>Subject</strong>: the input/output pair that the Seal describes.</li>
+<li><strong>Generator</strong>: the AI model or system that produced the output.</li>
+<li><strong>Chain</strong>: the per-issuer append-only sequence of Seals (Section 5).</li>
+<li><strong>Anchor</strong>: an optional proof that the Seal was included in a public
+  transparency log (Section 7).</li>
+<li><strong>CSC-1</strong>: Crovia Seal Canonicalization v1 (Section 3).</li>
+<li><strong>Payload</strong>: the exact byte sequence over which a signature is computed
+  (Section 3.3).</li>
+</ul>
+<h2 id="3-canonicalization-csc-1">3. Canonicalization (CSC-1)</h2>
+<h3 id="31-motivation">3.1 Motivation</h3>
+<p>JSON is syntactically flexible: whitespace, key ordering, number formatting,
+and string escape choices can vary while producing the same logical value.
+A signature over a JSON text requires an unambiguous serialization.</p>
+<p>CSC-1 is a <strong>strict subset</strong> of RFC 8785 (JSON Canonicalization Scheme, JCS).
+It adopts the deterministic ordering and escaping rules of JCS but <strong>forbids
+floating-point numbers</strong> in signed payloads, sidestepping the edge cases of
+ECMA-262 number serialization. This restriction does not constrain use cases
+(continuous parameters such as <code>temperature</code> MUST be encoded as strings
+when carried inside the signed payload).</p>
+<h3 id="32-rules">3.2 Rules</h3>
+<p>A CSC-1-serialized JSON value is a UTF-8 byte sequence produced as follows:</p>
+<ol>
+<li><strong><code>null</code></strong> → <code>null</code></li>
+<li><strong><code>true</code></strong> / <strong><code>false</code></strong> → <code>true</code> / <code>false</code></li>
+<li><strong>integers</strong> (Python <code>int</code>, JSON number with no fractional part, within
+   <code>[-2^53 + 1, 2^53 - 1]</code>) → shortest decimal representation, no leading zeros,
+   no <code>+</code> sign.</li>
+<li><strong>strings</strong> → UTF-8 JSON string literal using only the escapes required by
+   RFC 8259: <code>\"</code>, <code>\\</code>, <code>\b</code>, <code>\f</code>, <code>\n</code>, <code>\r</code>, <code>\t</code>, and <code>\u00XX</code> for
+   U+0000..U+001F. All other code points MUST be emitted literally.</li>
+<li><strong>arrays</strong> → <code>[</code> followed by canonicalized elements separated by <code>,</code>
+   followed by <code>]</code>. No interior whitespace.</li>
+<li><strong>objects</strong> → <code>{</code> followed by <code>"key":value</code> pairs separated by <code>,</code>
+   followed by <code>}</code>. Keys MUST be sorted ascending by their UTF-16 code-unit
+   sequence (equivalent to JavaScript <code>Array.prototype.sort</code> on strings).
+   No interior whitespace.</li>
+<li><strong>floats, NaN, Infinity, <code>-0</code></strong> → MUST cause serialization to fail with
+   <code>NonCanonicalNumber</code>.</li>
+<li><strong>duplicate object keys</strong> → MUST cause serialization to fail with
+   <code>DuplicateKey</code>.</li>
+<li><strong>non-string object keys</strong> → MUST cause serialization to fail with
+   <code>NonStringKey</code>.</li>
+</ol>
+<h3 id="33-signing-payload">3.3 Signing payload</h3>
+<p>Given a Seal <code>S</code>, the signing payload <code>P(S)</code> is computed as:</p>
+<pre><code>P(S) = DOMAIN || 0x0A || CSC1(S \ {signature, witnesses})
+</code></pre>
+<p>where:</p>
+<ul>
+<li><code>DOMAIN</code> = the ASCII string <code>"CROVIA-SEAL-v1"</code> (14 bytes).</li>
+<li><code>0x0A</code> = a single newline byte, acting as an unambiguous separator.</li>
+<li><code>S \ {signature, witnesses}</code> = the Seal with the <code>signature</code> and <code>witnesses</code>
+  top-level fields removed (they are computed over the payload, not part of it).</li>
+<li><code>CSC1(...)</code> = the UTF-8 serialization per Section 3.2.</li>
+</ul>
+<p>The <code>DOMAIN</code> prefix ensures that a signature over <code>P(S)</code> cannot be replayed as
+a valid signature in any other protocol that does not use the same prefix.
+Implementations MUST NOT omit the prefix. Verifiers MUST reject any Seal
+whose signature was produced without the prefix.</p>
+<h2 id="4-seal-structure">4. Seal structure</h2>
+<h3 id="41-top-level-fields">4.1 Top-level fields</h3>
+<p>A conformant Seal is a JSON object with exactly the top-level fields listed
+below. Unknown top-level fields MUST cause verification to fail.</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Required</th>
+<th>Type</th>
+<th>Section</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>seal_version</code></td>
+<td>MUST</td>
+<td>string</td>
+<td>4.2</td>
+</tr>
+<tr>
+<td><code>seal_id</code></td>
+<td>MUST</td>
+<td>string</td>
+<td>4.3</td>
+</tr>
+<tr>
+<td><code>issuer</code></td>
+<td>MUST</td>
+<td>object</td>
+<td>4.4</td>
+</tr>
+<tr>
+<td><code>subject</code></td>
+<td>MUST</td>
+<td>object</td>
+<td>4.5</td>
+</tr>
+<tr>
+<td><code>generator</code></td>
+<td>MUST</td>
+<td>object</td>
+<td>4.6</td>
+</tr>
+<tr>
+<td><code>timestamp</code></td>
+<td>MUST</td>
+<td>object</td>
+<td>4.7</td>
+</tr>
+<tr>
+<td><code>chain</code></td>
+<td>MUST</td>
+<td>object</td>
+<td>4.8</td>
+</tr>
+<tr>
+<td><code>checks</code></td>
+<td>OPTIONAL</td>
+<td>object</td>
+<td>4.9</td>
+</tr>
+<tr>
+<td><code>anchor</code></td>
+<td>OPTIONAL</td>
+<td>object</td>
+<td>4.10</td>
+</tr>
+<tr>
+<td><code>signature</code></td>
+<td>MUST</td>
+<td>object</td>
+<td>4.11</td>
+</tr>
+<tr>
+<td><code>witnesses</code></td>
+<td>OPTIONAL</td>
+<td>array</td>
+<td>6</td>
+</tr>
+</tbody>
+</table>
+<h3 id="42-seal_version">4.2 <code>seal_version</code></h3>
+<p>The literal string <code>"crovia.seal.v1"</code>. Any other value MUST cause verification
+to fail.</p>
+<h3 id="43-seal_id">4.3 <code>seal_id</code></h3>
+<p>A string matching the regular expression <code>^cs_[0-9]{4}_[A-Z2-7]{26}$</code>:
+prefix <code>cs_</code>, 4-digit issuance year, underscore, 26 RFC 4648 base32
+characters (alphabet A–Z, 2–7, no padding) encoding 16 random bytes
+(128 bits). The random bytes MUST be produced by a cryptographically secure
+source.</p>
+<h3 id="44-issuer">4.4 <code>issuer</code></h3>
+<pre><code>{
+  &quot;id&quot;:     string,           ; urn:crovia:seal-issuer:&lt;name&gt; recommended
+  &quot;pubkey&quot;: { &quot;alg&quot;:&quot;ed25519&quot;, &quot;key_hex&quot;: string }
+}
+</code></pre>
+<p><code>key_hex</code> is 64 lowercase hexadecimal characters (32 raw bytes, Ed25519
+public key per RFC 8032). Other algorithms are reserved for Section 8.</p>
+<h3 id="45-subject">4.5 <code>subject</code></h3>
+<pre><code>{
+  &quot;input_hash&quot;:  &quot;sha256:&quot; + 64 lowercase hex chars,
+  &quot;output_hash&quot;: &quot;sha256:&quot; + 64 lowercase hex chars,
+  &quot;input_len&quot;:   integer,    ; byte length of input
+  &quot;output_len&quot;:  integer,    ; byte length of output
+  &quot;modality&quot;:    string      ; one of: &quot;text&quot;,&quot;code&quot;,&quot;image&quot;,&quot;audio&quot;,&quot;multimodal&quot;
+}
+</code></pre>
+<p>The Seal does NOT carry the content itself. The hashes commit to the content;
+verifiers who possess the content can re-hash and compare.</p>
+<h3 id="46-generator">4.6 <code>generator</code></h3>
+<pre><code>{
+  &quot;id&quot;:             string,          ; e.g. &quot;openai/gpt-4o&quot;
+  &quot;version&quot;:        string | null,   ; e.g. &quot;2024-08-06&quot;
+  &quot;weights_hash&quot;:   string | null,   ; if available
+  &quot;params&quot;:         object           ; key→string map of generation parameters
+}
+</code></pre>
+<p>All parameter values MUST be strings in the signed payload (per Section 3.1
+restriction). Numeric values like <code>temperature=0.7</code> MUST be encoded as
+<code>"0.7"</code>.</p>
+<h3 id="47-timestamp">4.7 <code>timestamp</code></h3>
+<pre><code>{
+  &quot;emitted_at&quot;: string,   ; RFC 3339 UTC, millisecond precision, e.g. &quot;2026-04-15T12:34:56.789Z&quot;
+  &quot;nonce&quot;:      string    ; 26 RFC 4648 base32 chars (16 random bytes)
+}
+</code></pre>
+<h3 id="48-chain">4.8 <code>chain</code></h3>
+<pre><code>{
+  &quot;prev_seal_hash&quot;: &quot;sha256:&quot; + 64 hex chars | null,
+  &quot;sequence&quot;:       integer (&gt;= 0)
+}
+</code></pre>
+<p><code>prev_seal_hash</code> is the SHA-256 over the canonical payload (<code>P(S_prev)</code>) of
+the immediately preceding Seal from the same issuer, or <code>null</code> for the
+genesis Seal (<code>sequence == 0</code>). Verifiers that track issuer chains MUST
+detect gaps or forks.</p>
+<h3 id="49-checks-optional">4.9 <code>checks</code> (OPTIONAL)</h3>
+<p>Free-form object carrying analytical claims such as memorization checks,
+safety probes, toxicity scores. The schema for specific check types is
+defined in separate check specifications; the seal itself imposes no
+constraints on the content beyond CSC-1 compatibility.</p>
+<p>Example:</p>
+<pre><code>{
+  &quot;memorization&quot;: {
+    &quot;db_version&quot;: &quot;crovia-memdb-2026-04-15&quot;,
+    &quot;method&quot;:     &quot;ngram-lsh-v1&quot;,
+    &quot;matches&quot;:    0,
+    &quot;max_conf&quot;:   &quot;0.03&quot;
+  }
+}
+</code></pre>
+<p>Each check produced by an issuer is signed along with the rest of the Seal;
+its validity as evidence depends on the method's own robustness, which is
+out of scope for this specification.</p>
+<h3 id="410-anchor-optional">4.10 <code>anchor</code> (OPTIONAL)</h3>
+<pre><code>{
+  &quot;log_url&quot;:      string,
+  &quot;merkle_root&quot;:  &quot;sha256:&quot; + 64 hex chars,
+  &quot;merkle_proof&quot;: [ &quot;sha256:&quot; + hex, ... ],
+  &quot;log_index&quot;:    integer (&gt;= 0),
+  &quot;root_signed_at&quot;: string (RFC 3339 UTC)
+}
+</code></pre>
+<p>The anchor commits the Seal to a public transparency log. The log operator's
+signature over <code>merkle_root</code> is not part of this Seal and MUST be fetched
+separately from <code>log_url</code>.</p>
+<h3 id="411-signature">4.11 <code>signature</code></h3>
+<pre><code>{
+  &quot;alg&quot;:              &quot;ed25519&quot;,
+  &quot;canon&quot;:            &quot;csc-1&quot;,
+  &quot;domain&quot;:           &quot;CROVIA-SEAL-v1&quot;,
+  &quot;payload_hash_alg&quot;: &quot;sha256&quot;,
+  &quot;sig_hex&quot;:          string     ; 128 hex chars (64 raw bytes)
+}
+</code></pre>
+<p>The signature is computed as <code>Ed25519_sign(privkey, P(S))</code> where <code>P(S)</code> is
+defined in Section 3.3. Implementations MUST NOT hash the payload before
+signing; Ed25519 internally handles the hash (SHA-512). The
+<code>payload_hash_alg</code> field is informational, indicating the algorithm used
+to derive <code>prev_seal_hash</code> and other SHA-256 digests in the Seal.</p>
+<h2 id="5-issuer-hash-chain">5. Issuer hash chain</h2>
+<p>Each issuer maintains a per-issuer-key append-only sequence of Seals.
+<code>chain.sequence</code> starts at 0 for the genesis Seal and increments by 1 for
+each subsequent Seal. <code>chain.prev_seal_hash</code> MUST be:</p>
+<ul>
+<li><code>null</code> for <code>sequence == 0</code>.</li>
+<li><code>"sha256:" + hex(SHA256(P(S_prev)))</code> for <code>sequence &gt;= 1</code>, where <code>S_prev</code>
+  is the Seal with sequence number <code>sequence - 1</code> from the same issuer key.</li>
+</ul>
+<p>Verifiers that follow an issuer's chain MUST detect:</p>
+<ul>
+<li><strong>Fork</strong>: two Seals with the same issuer key and same <code>chain.sequence</code>
+  but different <code>prev_seal_hash</code>. This is non-repudiable evidence of
+  issuer misbehavior or key compromise.</li>
+<li><strong>Gap</strong>: missing sequence numbers. A verifier with partial history SHOULD
+  obtain the missing Seals from the transparency log before accepting.</li>
+</ul>
+<h2 id="6-witnesses-optional">6. Witnesses (OPTIONAL)</h2>
+<pre><code>&quot;witnesses&quot;: [
+  {
+    &quot;id&quot;:      string,
+    &quot;pubkey&quot;:  { &quot;alg&quot;:&quot;ed25519&quot;, &quot;key_hex&quot;: string },
+    &quot;sig_hex&quot;: string
+  },
+  ...
+]
+</code></pre>
+<p>A witness signs the same canonical payload <code>P(S)</code> as the issuer. Witness
+signatures are OPTIONAL and additive: a Seal with no witnesses is valid;
+a Seal with invalid witness signatures is invalid overall (fail-closed).</p>
+<p>Typical witnesses: consortium co-signers (civil-society organizations,
+academic institutions, regulatory observers). Witnesses endorse the Seal
+without endorsing its content.</p>
+<h2 id="7-transparency-log-informative">7. Transparency log (informative)</h2>
+<p>A conformant transparency log accepts Seals and periodically publishes a
+signed Merkle root over the Seals it has received. Implementations of the
+log API are outside the scope of this document; see <code>docs/TRANSPARENCY_LOG.md</code>.</p>
+<h2 id="8-algorithm-agility-post-quantum">8. Algorithm agility (post-quantum)</h2>
+<p>Future versions of this specification MAY permit alternative signature
+algorithms (e.g., Dilithium, Falcon) by extending the <code>signature.alg</code>
+vocabulary. A Seal MAY additionally carry a <code>pq_signature</code> top-level field
+with an independent post-quantum signature over the same payload <code>P(S)</code>.
+Verifiers that support only Ed25519 MUST ignore <code>pq_signature</code> and rely on
+<code>signature</code>. Verifiers MAY REQUIRE both signatures to validate (strict mode).</p>
+<h2 id="9-security-considerations">9. Security considerations</h2>
+<h3 id="91-replay-across-protocols">9.1 Replay across protocols</h3>
+<p>Prevented by domain separation (Section 3.3). A signature on <code>P(S)</code> cannot
+be reinterpreted as a valid signature on a payload of any other protocol
+that does not use the exact same 14-byte <code>CROVIA-SEAL-v1</code> prefix followed
+by a newline.</p>
+<h3 id="92-replay-within-the-protocol">9.2 Replay within the protocol</h3>
+<p>A Seal is a historical record; "replay" of a Seal is a semantic issue, not
+a cryptographic one. The <code>seal_id</code>, <code>timestamp</code>, and <code>chain.sequence</code> fields
+make each Seal unique. Verifiers that track seen seal IDs can detect
+duplication attempts.</p>
+<h3 id="93-json-malleability">9.3 JSON malleability</h3>
+<p>Eliminated by CSC-1 (Section 3). Any tool that reorders keys, adds
+whitespace, or re-escapes strings produces a different byte sequence and
+hence an invalid signature.</p>
+<h3 id="94-field-tampering">9.4 Field tampering</h3>
+<p>The signature covers every field except <code>signature</code> and <code>witnesses</code>, which
+are themselves cryptographic. Adding, modifying, or deleting any field
+invalidates the signature.</p>
+<h3 id="95-key-compromise">9.5 Key compromise</h3>
+<p>If an issuer key is compromised, the attacker can issue valid Seals until
+the compromise is detected and the key is revoked in the transparency log's
+trust root. The issuer hash chain MAY reveal the compromise if the attacker
+issues a forking Seal.</p>
+<h3 id="96-downgrade">9.6 Downgrade</h3>
+<p><code>seal_version</code>, <code>signature.alg</code>, <code>signature.canon</code>, and <code>signature.domain</code>
+are all inside the signed payload. An attacker cannot negotiate a weaker
+algorithm without producing a wholly new signature.</p>
+<h3 id="97-canonicalization-ambiguity">9.7 Canonicalization ambiguity</h3>
+<p>CSC-1 forbids floats in the signed payload precisely to avoid the numeric
+edge cases of JCS. Strings carrying numeric values MUST use a documented
+format (see Section 4.6).</p>
+<h3 id="98-hash-choice">9.8 Hash choice</h3>
+<p>SHA-256 is used for all digests (content commitments, chain links).
+Migration to SHA-3 or BLAKE3 is anticipated in a future minor version; the
+<code>payload_hash_alg</code> field signals the choice.</p>
+<h3 id="99-randomness">9.9 Randomness</h3>
+<p>All random values (<code>seal_id</code> suffix, <code>timestamp.nonce</code>) MUST be produced by
+a cryptographically secure source (e.g., <code>os.urandom</code>, <code>secrets</code> in Python,
+<code>crypto.randomBytes</code> in Node.js).</p>
+<h3 id="910-content-privacy">9.10 Content privacy</h3>
+<p>The Seal commits to input/output hashes, never content. Content-bearing
+fields such as <code>generator.params</code> are in the clear; issuers MUST NOT place
+sensitive user data in these fields.</p>
+<h2 id="10-iana-considerations">10. IANA considerations</h2>
+<p>This document registers the media type <code>application/vnd.crovia.seal+json</code>
+(TBD) and the URN namespace <code>urn:crovia:seal-issuer:</code> (TBD).</p>
+<h2 id="11-references">11. References</h2>
+<h3 id="111-normative">11.1 Normative</h3>
+<ul>
+<li><strong>RFC 2119</strong>, RFC 8174 — key words</li>
+<li><strong>RFC 3339</strong> — timestamps</li>
+<li><strong>RFC 4648</strong> — base32 encoding</li>
+<li><strong>RFC 8032</strong> — Ed25519 signature algorithm</li>
+<li><strong>RFC 8259</strong> — JSON</li>
+<li><strong>RFC 8785</strong> — JCS (superset; CSC-1 is a strict subset)</li>
+</ul>
+<h3 id="112-informative">11.2 Informative</h3>
+<ul>
+<li>C2PA Content Credentials Specification v1.3</li>
+<li>Certificate Transparency (RFC 9162)</li>
+<li>Sigstore (Rekor transparency log design)</li>
+</ul>
+<h2 id="appendix-a-reference-signing-ceremony">Appendix A. Reference signing ceremony</h2>
+<p>Normative test-vectors are in <code>conformance/vectors/</code>. An interactive
+demonstration is available via <code>reference/python/examples/demo_hp.py</code>.</p>
+    </article>
   </div>
-</main>
 
-<script type="module">
-import { marked } from 'https://cdn.jsdelivr.net/npm/marked@12.0.2/+esm';
-const r = await fetch('/registry/seal/spec/SPEC.md', { cache: 'no-cache' });
-const md = await r.text();
-document.getElementById('md').innerHTML = marked.parse(md);
+  <div class="sp-head"><h2 id="vectors">Test vectors</h2><div class="meta">normative · <a href="/registry/seal/spec/vectors/v1/manifest.json" style="color:var(--accent)">manifest.json</a> with the SHA-256 of every file · byte-identical to the repository</div></div>
+  <p class="sp-lead" style="margin-bottom:18px">Every conformant implementation MUST reproduce the payload bytes and signature of each valid Seal below and MUST reject every file under <code>invalid/</code> with the stated error. The issuer is a published demo key (<span class="mono">urn:crovia:seal-issuer:conformance</span>, pubkey <span class="mono">ff57575dc7af8bfc…</span>) so that anyone can regenerate the vectors; it must never sign anything else.</p>
+  <table class="sp-files">
+    <thead><tr><th>valid seal</th><th>what it exercises</th><th>expected bytes</th><th></th></tr></thead>
+    <tbody><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/seal_001_genesis.json">seal_001_genesis.json</a></td><td class="d">first Seal of a chain (prev_hash = null)</td><td class="t"><a href="/registry/seal/spec/vectors/v1/seal_001_genesis.payload.hex">payload</a> · <a href="/registry/seal/spec/vectors/v1/seal_001_genesis.signature.hex">signature</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/seal_001_genesis.json">verify in browser</a></td></tr><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/seal_002_chained.json">seal_002_chained.json</a></td><td class="d">second link, prev_hash set</td><td class="t"><a href="/registry/seal/spec/vectors/v1/seal_002_chained.payload.hex">payload</a> · <a href="/registry/seal/spec/vectors/v1/seal_002_chained.signature.hex">signature</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/seal_002_chained.json">verify in browser</a></td></tr><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/seal_003_image.json">seal_003_image.json</a></td><td class="d">image output kind</td><td class="t"><a href="/registry/seal/spec/vectors/v1/seal_003_image.payload.hex">payload</a> · <a href="/registry/seal/spec/vectors/v1/seal_003_image.signature.hex">signature</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/seal_003_image.json">verify in browser</a></td></tr><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/seal_004_audio.json">seal_004_audio.json</a></td><td class="d">audio output kind</td><td class="t"><a href="/registry/seal/spec/vectors/v1/seal_004_audio.payload.hex">payload</a> · <a href="/registry/seal/spec/vectors/v1/seal_004_audio.signature.hex">signature</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/seal_004_audio.json">verify in browser</a></td></tr><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/seal_005_multimodal.json">seal_005_multimodal.json</a></td><td class="d">mixed input/output kinds</td><td class="t"><a href="/registry/seal/spec/vectors/v1/seal_005_multimodal.payload.hex">payload</a> · <a href="/registry/seal/spec/vectors/v1/seal_005_multimodal.signature.hex">signature</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/seal_005_multimodal.json">verify in browser</a></td></tr><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/seal_006_with_checks.json">seal_006_with_checks.json</a></td><td class="d">embedded analytical checks</td><td class="t"><a href="/registry/seal/spec/vectors/v1/seal_006_with_checks.payload.hex">payload</a> · <a href="/registry/seal/spec/vectors/v1/seal_006_with_checks.signature.hex">signature</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/seal_006_with_checks.json">verify in browser</a></td></tr><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/seal_007_with_anchor.json">seal_007_with_anchor.json</a></td><td class="d">transparency-log anchor</td><td class="t"><a href="/registry/seal/spec/vectors/v1/seal_007_with_anchor.payload.hex">payload</a> · <a href="/registry/seal/spec/vectors/v1/seal_007_with_anchor.signature.hex">signature</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/seal_007_with_anchor.json">verify in browser</a></td></tr><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/seal_008_empty_params.json">seal_008_empty_params.json</a></td><td class="d">empty generator params</td><td class="t"><a href="/registry/seal/spec/vectors/v1/seal_008_empty_params.payload.hex">payload</a> · <a href="/registry/seal/spec/vectors/v1/seal_008_empty_params.signature.hex">signature</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/seal_008_empty_params.json">verify in browser</a></td></tr><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/seal_009_long_chain.json">seal_009_long_chain.json</a></td><td class="d">long issuer chain</td><td class="t"><a href="/registry/seal/spec/vectors/v1/seal_009_long_chain.payload.hex">payload</a> · <a href="/registry/seal/spec/vectors/v1/seal_009_long_chain.signature.hex">signature</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/seal_009_long_chain.json">verify in browser</a></td></tr><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/seal_010_utf8_content.json">seal_010_utf8_content.json</a></td><td class="d">non-ASCII content, CSC-1 escapes</td><td class="t"><a href="/registry/seal/spec/vectors/v1/seal_010_utf8_content.payload.hex">payload</a> · <a href="/registry/seal/spec/vectors/v1/seal_010_utf8_content.signature.hex">signature</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/seal_010_utf8_content.json">verify in browser</a></td></tr></tbody>
+  </table>
+  <div class="sp-head" style="margin-top:36px"><h2 style="font-size:18px">Must fail</h2><div class="meta">fail closed · <a href="/registry/seal/spec/vectors/v1/invalid/index.json" style="color:var(--accent)">index.json</a></div></div>
+  <table class="sp-files">
+    <thead><tr><th>file</th><th>expected outcome</th><th></th></tr></thead>
+    <tbody><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/invalid/invalid_01_bad_signature.json">invalid_01_bad_signature.json</a></td><td class="d">MUST fail with <code>BadSignature</code> · <a href="/registry/seal/spec/vectors/v1/invalid/invalid_01_bad_signature.note.md">why</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/invalid/invalid_01_bad_signature.json">watch it fail</a></td></tr><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/invalid/invalid_02_wrong_domain.json">invalid_02_wrong_domain.json</a></td><td class="d">MUST fail with <code>WrongDomain</code> · <a href="/registry/seal/spec/vectors/v1/invalid/invalid_02_wrong_domain.note.md">why</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/invalid/invalid_02_wrong_domain.json">watch it fail</a></td></tr><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/invalid/invalid_03_tampered_field.json">invalid_03_tampered_field.json</a></td><td class="d">MUST fail with <code>SignatureMismatch</code> · <a href="/registry/seal/spec/vectors/v1/invalid/invalid_03_tampered_field.note.md">why</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/invalid/invalid_03_tampered_field.json">watch it fail</a></td></tr><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/invalid/invalid_04_bad_seal_version.json">invalid_04_bad_seal_version.json</a></td><td class="d">MUST fail with <code>UnknownSealVersion</code> · <a href="/registry/seal/spec/vectors/v1/invalid/invalid_04_bad_seal_version.note.md">why</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/invalid/invalid_04_bad_seal_version.json">watch it fail</a></td></tr><tr><td class="f"><a href="/registry/seal/spec/vectors/v1/invalid/invalid_05_unknown_toplevel.json">invalid_05_unknown_toplevel.json</a></td><td class="d">MUST fail with <code>UnknownTopLevelField</code> · <a href="/registry/seal/spec/vectors/v1/invalid/invalid_05_unknown_toplevel.note.md">why</a></td><td class="t"><a class="sp-verify" href="/registry/seal/verify/?url=/registry/seal/spec/vectors/v1/invalid/invalid_05_unknown_toplevel.json">watch it fail</a></td></tr></tbody>
+  </table>
+  <div class="sp-grid" style="margin-top:22px">
+    <div class="sp-card"><div class="k">Canonicalization</div><h3>26 CSC-1 cases</h3><p><a href="/registry/seal/spec/vectors/v1/canonical_cases.json">canonical_cases.json</a>: JSON values and the exact UTF-8 bytes CSC-1 must produce, including the cases that must fail (floats, duplicate keys, non-string keys).</p></div>
+    <div class="sp-card"><div class="k">Run the suite</div><h3>One command, 41 checks</h3><pre>git clone https://github.com/croviatrust/crovia-seal
+cd crovia-seal && python3 conformance/run_conformance.py
+# ALL 41 TESTS PASSED</pre></div>
+  </div>
+
+  <div class="sp-head"><h2 id="related">Draft, code, related</h2><div class="meta">everything the draft refers to, in one place</div></div>
+  <div class="sp-grid">
+    <div class="sp-card"><div class="k">Internet-Draft</div><h3>draft-crovia-seal-01</h3><p>Independent Submission, Informational. <a href="https://datatracker.ietf.org/doc/draft-crovia-seal/" rel="noopener">Datatracker ↗</a> · mirrored here: <a href="/registry/seal/spec/draft-crovia-seal-01.txt">.txt</a> · <a href="/registry/seal/spec/draft-crovia-seal-01.xml">.xml</a> · <a href="/registry/seal/spec/draft-crovia-seal-01.html">.html</a>. The draft is not modified; this page is its companion.</p></div>
+    <div class="sp-card"><div class="k">Reference implementation</div><h3>crovia-seal 0.5.0</h3><p>Python, Apache-2.0: canonicalization, signing, chain and verification. <a href="https://github.com/croviatrust/crovia-seal" rel="noopener">github.com/croviatrust/crovia-seal ↗</a></p><pre>pip install "crovia-seal @ git+https://github.com/croviatrust/crovia-seal#subdirectory=reference/python"
+python3 -c "from crovia_seal.seal import verify_seal"</pre></div>
+    <div class="sp-card"><div class="k">Verify</div><h3>In your browser, offline</h3><p>Paste any Seal — or open a vector with the links above. CSC-1 bytes, Ed25519 signature and chain links are checked locally; nothing is uploaded. <a href="/registry/seal/verify/">Open the verifier</a>.</p></div>
+    <div class="sp-card"><div class="k">Companions</div><h3>Threat model, log, trust root</h3><p><a href="/registry/seal/threat-model/">Threat model</a> · <a href="/registry/seal/log/">Transparency log</a> · <a href="/trust-root.json">Issuer trust root</a> · <a href="/registry/seal/">Seal overview</a> · <a href="https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md" rel="noopener">TACET, the first profile that wraps Seals ↗</a></p></div>
+  </div>
+  <p class="sp-end">Specification text dedicated to the public domain under CC0 1.0. Built from SPEC.md <span class="mono">sha256:ed125588b40c88a71373cd5db9679b2d55de77f2db16ec6a2336be9d39f5c8e8</span>. Corrections: <a href="https://github.com/croviatrust/crovia-seal/issues" rel="noopener">open an issue</a> or write to <a href="mailto:info@croviatrust.com">info@croviatrust.com</a>.</p>
+</main>
+<footer class="cv-foot">
+  <div class="cv-foot-inner">
+    <div class="cv-foot-links">
+      <a href="/registry/tacet/">TACET</a>
+      <a href="/registry/lacuna/">LACUNA</a>
+      <a href="/registry/seal/">Seal</a>
+      <a href="/registry/seal/verify/">Verify</a>
+      <a href="/m/">Model records</a>
+      <a href="/registry/api/">Data &amp; API</a>
+      <a href="mailto:info@croviatrust.com">Contact</a>
+    </div>
+    <div class="cv-foot-meta">&copy; 2026 Crovia Trust · observation facts only · all observation data CC-BY-4.0</div>
+  </div>
+</footer>
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919g" defer></script>
+<script>
+(function(){
+  var d=document.querySelector('.sp-toc details'); if(d&&window.matchMedia('(max-width:900px)').matches)d.removeAttribute('open');
+  var links=[].slice.call(document.querySelectorAll('.sp-toc a[href^="#"]'));
+  var heads=links.map(function(a){return document.getElementById(a.getAttribute('href').slice(1));});
+  function on(){var y=window.scrollY+120,cur=-1;heads.forEach(function(h,i){if(h&&h.offsetTop<=y)cur=i;});links.forEach(function(a,i){a.classList.toggle('on',i===cur);});}
+  window.addEventListener('scroll',on,{passive:true});on();
+})();
 </script>
-<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c" defer></script>
 </body>
 </html>

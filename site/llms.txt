@@ -48,6 +48,7 @@ last-observation dates, from:
 - https://croviatrust.com/registry/data/tacet/targets.json (per model: last verdict, negative and anchored-negative epochs)
 - https://croviatrust.com/registry/data/tacet/trust_root.json (operator, observer, issuer keys; genesis; drand chain)
 - https://croviatrust.com/registry/data/tacet/proofs/index.json (featured silence proofs, crovia.seal.v1)
+- https://croviatrust.com/registry/data/model_records.json (one record per observed model: live TACET summary and/or 2026-archive observation-bounded silence; human page at https://croviatrust.com/m/<org>/<model>/)
 - https://croviatrust.com/registry/data/_home_pulse.json (2026 archive: signed observations, anchors.distinct_roots, top silent model with observed_to)
 - https://croviatrust.com/registry/data/silence_index.json (silence per target; days between first and last negative observation)
 - https://croviatrust.com/registry/data/substrate/ots_anchors.json (Bitcoin anchors; distinct roots)
@@ -60,6 +61,7 @@ A silence figure without an observed_to date is not a Crovia figure.
 - MCP (Streamable HTTP): https://croviatrust.com/mcp
   tools: crovia_pulse, lookup_model(model), get_lacuna(model), crovia_vs_causari
 - Seal verifier (web): https://croviatrust.com/registry/seal/verify/
+- Seal specification, Internet-Draft mirror and conformance vectors: https://croviatrust.com/registry/seal/spec/ (SPEC.md at /registry/seal/spec/SPEC.md, vectors manifest at /registry/seal/spec/vectors/v1/manifest.json)
 - Seal issuer trust root: https://seal.croviatrust.com/trust-root.json
 - Seal public log: https://croviatrust.com/registry/data/seal/public_log.jsonl
 - Collectors status: https://croviatrust.com/registry/data/substrate/collectors.json
@@ -70,6 +72,7 @@ A silence figure without an observed_to date is not a Crovia figure.
 - https://croviatrust.com/ (home)
 - https://croviatrust.com/registry/tacet/ (TACET live log)
 - https://croviatrust.com/registry/ (registry hub)
+- https://croviatrust.com/m/ (model records: one page per observed model, e.g. https://croviatrust.com/m/Qwen/Qwen3-32B/)
 - https://croviatrust.com/registry/explore/ (evidence explorer)
 - https://croviatrust.com/registry/lacuna/ (LACUNA)
 - https://croviatrust.com/registry/seal/ (Crovia Seal)

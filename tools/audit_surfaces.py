@@ -662,6 +662,52 @@ class Audit:
         except ValueError:
             return
         self._assess_public_log(self.url(log_path), seals)
+        self._assess_spec_page()
+
+    def _assess_spec_page(self) -> None:
+        """The spec page is what draft-crovia-seal points to: the text must be inline (no client-side
+        rendering), the served SPEC.md must be the bytes canon records, and the vectors it promises
+        must be there with the hashes the manifest states."""
+        canon_seal = self.canon["seal"]
+        spec_url = canon_seal.get("spec_url")
+        if not spec_url:
+            return
+        page = self.fetcher.get(spec_url)
+        if not page.ok:
+            self.add("seal_format", spec_url, "high", "HTTP 200", page.describe(), "spec page unreachable")
+        elif "Loading specification" in page.text or "3.3 Signing payload" not in page.text:
+            self.add("seal_format", spec_url, "high", "normative text inline in HTML", "section 3.3 not found in served HTML", "spec page needs JavaScript to show the text")
+        else:
+            self.add("seal_format", spec_url, "info", "normative text inline in HTML", "section 3.3 present", "spec page readable without scripts")
+        src_url, want = canon_seal.get("spec_source_url"), canon_seal.get("spec_sha256")
+        if src_url and want:
+            src = self.fetcher.get(src_url)
+            got = hashlib.sha256(src.body).hexdigest() if src.ok else None
+            if got != want:
+                self.add("seal_format", src_url, "high", f"sha256 {want[:16]}…", src.describe() if not src.ok else f"sha256 {got[:16]}…", "served SPEC.md differs from canon")
+            else:
+                self.add("seal_format", src_url, "info", f"sha256 {want[:16]}…", "match", "SPEC.md bytes match canon")
+        manifest_url = canon_seal.get("vectors_manifest_url")
+        if manifest_url:
+            man = self.fetcher.get(manifest_url)
+            try:
+                files = json.loads(man.text)["files"] if man.ok else []
+            except (ValueError, KeyError, TypeError):
+                files = []
+            if not files:
+                self.add("seal_format", manifest_url, "high", "manifest with files[]", man.describe(), "vector manifest missing or malformed")
+                return
+            base = manifest_url.rsplit("/", 1)[0] + "/"
+            probe = [f for f in files if f["path"].endswith(".json")][:3]
+            bad = []
+            for f in probe:
+                r = self.fetcher.get(base + f["path"])
+                if not r.ok or hashlib.sha256(r.body).hexdigest() != f["sha256"]:
+                    bad.append(f["path"])
+            if bad:
+                self.add("seal_format", manifest_url, "high", "vector bytes match manifest sha256", f"mismatch: {bad}", "published vectors differ from manifest")
+            else:
+                self.add("seal_format", manifest_url, "info", "vector bytes match manifest sha256", f"{len(files)} files listed, {len(probe)} probed", "conformance vectors published")
 
     def _assess_seal_endpoint(self, path: str) -> None:
         surface = self.url(path, self.seal_host)

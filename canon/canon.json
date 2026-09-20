@@ -1,337 +1,353 @@
 {
-  "schema": "crovia.canon.v1",
-  "revised": "2026-09-19",
-  "identity": {
-    "name": "Crovia Trust",
-    "short": "Crovia",
-    "domain": "croviatrust.com",
-    "mirror": "registry.croviatrust.com",
-    "seal_host": "seal.croviatrust.com",
-    "contact": "info@croviatrust.com",
-    "trust_contact": "trust@croviatrust.com",
-    "github": "https://github.com/croviatrust",
-    "git_author": "Crovia Trust <info@croviatrust.com>",
-    "one_liner": "Crovia records what AI providers disclose about training data, and the absence of it, as signed, Bitcoin-anchored facts.",
-    "sibling": {
-      "name": "Causari",
-      "url": "https://causari.dev",
-      "repo": "https://github.com/croviatrust/causari"
-    }
-  },
-  "seal": {
-    "seal_version": "crovia.seal.v1",
-    "seal_id_prefix": "cs_",
-    "signature_keys": [
-      "alg",
-      "canon",
-      "domain",
-      "payload_hash_alg",
-      "sig_hex"
-    ],
-    "signature_domain": "CROVIA-SEAL-v1",
-    "canon": "csc-1",
-    "spec_version": "v0.5",
-    "ietf_draft": "draft-crovia-seal-01",
-    "verifier_url": "https://croviatrust.com/registry/seal/verify/",
-    "trust_root_url": "https://seal.croviatrust.com/trust-root.json",
-    "trust_root_sig_url": "https://seal.croviatrust.com/trust-root.sig.json",
-    "issuer_pubkey_hex": "b6149a4278a9e66fc08dba86929a0ff0f6c50d610701f597a8e390c67a28d949",
-    "production_issuers": [
-      "urn:crovia:seal-issuer:causari",
-      "urn:crovia:seal-issuer:crovia-trust"
-    ],
-    "forbidden_markers": [
-      "crovia-seal-v1",
-      "\"Ed25519:",
-      "crovia.receipt.v1 is a Crovia Seal"
-    ],
-    "receipt_package_names": {
-      "pypi": "crovia-receipt",
-      "npm": "@crovia/receipt"
-    },
-    "reference_package_names": {
-      "pypi": "crovia-seal"
-    }
-  },
-  "pages": [
-    "/",
-    "/whitepaper.html",
-    "/whitepaper-v2-2026-03.html",
-    "/proof.html",
-    "/registry/",
-    "/registry/explore/",
-    "/registry/verify/",
-    "/registry/compliance/",
-    "/registry/tacet/",
-    "/registry/lacuna/",
-    "/registry/api/",
-    "/registry/seal/",
-    "/registry/seal/spec/",
-    "/registry/seal/threat-model/",
-    "/registry/seal/verify/",
-    "/registry/seal/log/",
-    "/registry/provenance/",
-    "/registry/embed/silence.html",
-    "/llms.txt",
-    "/llms-full.txt",
-    "/robots.txt",
-    "/sitemap.xml",
-    "/.well-known/ai-plugin.json",
-    "/.well-known/openapi.yaml"
-  ],
-  "retired_paths": [
-    "/check.html",
-    "/how-to-read.html",
-    "/absence-clock.html",
-    "/alive.html",
-    "/observatory/",
-    "/registry/cep/",
-    "/registry/chains/",
-    "/registry/enterprise/",
-    "/registry/forensics/",
-    "/registry/omissions/",
-    "/registry/outreach/",
-    "/registry/ranking/",
-    "/registry/substrate/",
-    "/registry/tpa/",
-    "/registry/v/",
-    "/registry/diamond/",
-    "/registry/lineage/",
-    "/registry/risk/",
-    "/registry/pont/"
-  ],
-  "data_files": [
-    "/registry/data/_home_pulse.json",
-    "/registry/data/silence_index.json",
-    "/registry/data/lineage_graph.json",
-    "/registry/data/observatory/feed.json",
-    "/registry/data/pipeline_status.json",
-    "/registry/data/transparency_index.json",
-    "/registry/data/seal/public_log.jsonl",
-    "/registry/data/seal/transparency_log.json",
-    "/registry/data/substrate/collectors.json",
-    "/registry/data/substrate/latest_seal.json",
-    "/registry/data/substrate/ots_anchors.json",
-    "/registry/data/substrate/quality_report.json",
-    "/registry/data/substrate/recent.json",
-    "/registry/data/substrate/trust_root.json",
-    "/registry/data/substrate/diamond.json",
-    "/registry/data/substrate/lacuna_candidates.json",
-    "/registry/data/_smoke.json",
-    "/registry/data/tacet/trust_root.json",
-    "/registry/data/tacet/latest.json",
-    "/registry/data/tacet/index.json",
-    "/registry/data/tacet/proofs/index.json",
-    "/registry/data/global_ranking.json"
-  ],
-  "private_files": [
-    "/registry/data/forensic_dossiers.json",
-    "/registry/data/forensic_report.json"
-  ],
-  "heavy_files": [
-    "/registry/data/substrate/chains.json",
-    "/registry/data/substrate/consensus.json",
-    "/registry/data/substrate/predecessors_map.json",
-    "/registry/data/substrate/target_index.json",
-    "/registry/data/tpa_cep.json",
-    "/registry/data/search_targets.json"
-  ],
-  "apis": {
-    "anchor_post": "https://croviatrust.com/api/anchor",
-    "mcp": "https://croviatrust.com/mcp",
-    "mcp_tools": [
-      "crovia_pulse",
-      "lookup_model",
-      "get_lacuna",
-      "crovia_vs_causari"
-    ],
-    "mcp_model_arg": "model",
-    "seal_svc": [
-      "/trust-root.json",
-      "/trust-root.sig.json",
-      "/health",
-      "/v1/stats"
-    ]
-  },
-  "headline_numbers": {
-    "signed_observations": {
-      "source": "/registry/data/_home_pulse.json",
-      "path": "ledger.n_envelopes_total",
-      "valid": true
-    },
-    "bitcoin_anchors": {
-      "source": "/registry/data/_home_pulse.json",
-      "path": "anchors.distinct_roots",
-      "valid": true,
-      "rule": "distinct merkle_root with a confirmed Bitcoin timestamp; re-anchors of an unchanged root do not count"
-    },
-    "silence_days": {
-      "source": "/registry/data/silence_index.json",
-      "path": "total_silence_days",
-      "valid": true,
-      "rule": "observation-bounded: sum over targets of days between consecutive negative anchored observations; shown only in the 2026 archive section with 'observation paused 2026-06-01'"
-    },
-    "lacuna_records": {
-      "source": "/registry/data/_home_pulse.json",
-      "path": "ledger.by_axiom_type.AX.LAC",
-      "valid": false,
-      "rule": "target_id must be an AI model id (org/model), not an internal collector, path or test id; since 2026-09-19 the home page no longer shows this number — LACUNA candidates are read from TACET targets.json (negative_anchored_epochs)"
-    },
-    "tacet_epochs": {
-      "source": "/registry/data/tacet/latest.json",
-      "path": "epochs",
-      "valid": true,
-      "rule": "one signed epoch sheet per hour since genesis; anchored count shown alongside from anchored_epochs"
-    },
-    "tacet_models": {
-      "source": "/registry/data/tacet/targets.json",
-      "path": "count",
-      "valid": true,
-      "rule": "distinct target ids with at least one signed snapshot"
-    },
-    "tacet_negative_snapshots": {
-      "source": "/registry/data/tacet/latest.json",
-      "path": "negative_snapshots_total",
-      "valid": true,
-      "rule": "snapshots whose predicate result is false; counts toward silence only once the epoch is anchored"
-    }
-  },
-  "internal_target_patterns": [
-    "^spider:",
-    "^tpa_v1$",
-    "^autonomous_observer$",
-    "^forensic_dossier$",
-    "^oracle_scanner$",
-    "^wayback_hf_collector$",
-    "^robots_txt_collector$",
-    "^arxiv_paper_collector$",
-    "^/",
-    "^test-",
-    "^croviatrust/",
-    "^Crovia/"
-  ],
-  "repos": {
-    "crovia-seal": {
-      "role": "The Seal standard: spec, drafts, reference implementations, conformance, verifier, integrations.",
-      "state": "active"
-    },
-    "crovia-core-engine": {
-      "role": "Crovia Substrate: collectors, observer, sealer, anchoring, public index builders, ops.",
-      "state": "active"
-    },
-    "countersign": {
-      "role": "Witness protocol and home of TACET (verifiable map, epoch sheets, silence proofs).",
-      "state": "active"
-    },
-    "crovia-evidence-lab": {
-      "role": "Public data plane: datasets, leaderboards, reproducible capsules.",
-      "state": "active"
-    },
-    "causari": {
-      "role": "Sibling product: code provenance for AI agents; reference Seal issuer.",
-      "state": "active"
-    },
-    "crovia-core": {
-      "role": "archived",
-      "state": "archive"
-    },
-    "crovia-wedge": {
-      "role": "archived",
-      "state": "archive"
-    },
-    "causari-audit-demo": {
-      "role": "archived",
-      "state": "archive"
-    }
-  },
-  "forbidden_words": [
-    "hid",
-    "refused",
-    "violated",
-    "Hubble",
-    "payout layer"
-  ],
-  "smoke_markers": {
-    "/": "Silence you can",
-    "/registry/": "Crovia Registry",
-    "/registry/lacuna/": "LACUNA",
-    "/registry/seal/": "Open Provenance Receipt",
-    "/registry/seal/verify/": "crovia.seal.v1",
-    "/registry/explore/": "Evidence Explorer",
-    "/registry/verify/": "Crovia Passport",
-    "/registry/compliance/": "Compliance",
-    "/whitepaper.html": "Verifiable Silence",
-    "/registry/tacet/": "TACET"
-  },
-  "retired_path_targets": {
-    "/check.html": "/registry/verify/",
-    "/how-to-read.html": "/",
-    "/absence-clock.html": "/registry/lacuna/",
-    "/alive.html": "/",
-    "/observatory/": "/registry/",
-    "/registry/tpa/": "/registry/verify/?mode=passport",
-    "/registry/ranking/": "/registry/compliance/",
-    "/registry/risk/": "/registry/compliance/?view=risk",
-    "/registry/enterprise/": "/registry/compliance/?view=orgs",
-    "/registry/outreach/": "/registry/compliance/",
-    "/registry/substrate/": "/registry/explore/?mode=graph",
-    "/registry/omissions/": "/registry/explore/?stream=omissions",
-    "/registry/forensics/": "/registry/explore/?mode=dossier",
-    "/registry/chains/": "/registry/explore/?mode=graph",
-    "/registry/diamond/": "/registry/explore/?mode=graph",
-    "/registry/lineage/": "/registry/explore/?mode=graph",
-    "/registry/pont/": "/registry/explore/?type=pont",
-    "/registry/v/": "/registry/verify/?mode=axiom",
-    "/registry/cep/": "/registry/verify/?mode=lab"
-  },
-  "access_policy": {
-    "decided": "2026-09-19",
-    "public": "all /registry/data/ files, CC-BY-4.0, direct fetch, 15 req/min per IP",
-    "professional": [
-      "/registry/data/forensic_dossiers.json",
-      "/registry/data/forensic_report.json"
-    ],
-    "paid_services": [
-      "per-organisation forensic dossiers",
-      "TPA certification reports",
-      "witnessed TACET silence proofs (k/n)",
-      "hosted Seal issuance"
-    ]
-  },
-  "tacet": {
-    "base": "/registry/data/tacet/",
-    "map_id": "urn:crovia:tacet:map:disclosure",
-    "genesis": "2026-09-19T18:00:00Z",
-    "epoch_seconds": 3600,
-    "files": [
-      "trust_root.json",
-      "latest.json",
-      "index.json",
-      "targets.json",
-      "sheets/{epoch}.json",
-      "snapshots/{epoch}.jsonl",
-      "changes/{epoch}.json",
-      "values/{key_hex}.json",
-      "ots/{epoch}.ots",
-      "proofs/index.json",
-      "proofs/{slug}.seal.json",
-      "badges/{name}.json"
-    ],
-    "operator_pubkey_hex": "28d7faeb726187b05dec60bc744f8b055c719ba294815050e8b6831da5889712",
-    "observer_pubkey_hex": "672c95c94ae6193d66d213611c98642443f0ac04c6f0e0fa2e52ba9dca55ea31",
-    "issuer_id": "urn:crovia:seal-issuer:tacet",
-    "issuer_pubkey_hex": "628c15f65550e527a50b85a17b502010bc6c18e7249254483454e884eada837c",
-    "badges": {
-      "names": [
-        "epochs",
-        "models",
-        "negative",
-        "latest"
-      ],
-      "schema": "shields.io endpoint v1",
-      "source": "latest.json and targets.json, CANON §4 definitions",
-      "render": "https://img.shields.io/endpoint?url=<encoded badge URL>"
-    },
-    "browser_verifier": "/registry/seal/verify/?url=<proof URL under /registry/data/tacet/>"
+ "schema": "crovia.canon.v1",
+ "revised": "2026-09-19",
+ "identity": {
+  "name": "Crovia Trust",
+  "short": "Crovia",
+  "domain": "croviatrust.com",
+  "mirror": "registry.croviatrust.com",
+  "seal_host": "seal.croviatrust.com",
+  "contact": "info@croviatrust.com",
+  "trust_contact": "trust@croviatrust.com",
+  "github": "https://github.com/croviatrust",
+  "git_author": "Crovia Trust <info@croviatrust.com>",
+  "one_liner": "Crovia records what AI providers disclose about training data, and the absence of it, as signed, Bitcoin-anchored facts.",
+  "sibling": {
+   "name": "Causari",
+   "url": "https://causari.dev",
+   "repo": "https://github.com/croviatrust/causari"
   }
+ },
+ "seal": {
+  "seal_version": "crovia.seal.v1",
+  "seal_id_prefix": "cs_",
+  "signature_keys": [
+   "alg",
+   "canon",
+   "domain",
+   "payload_hash_alg",
+   "sig_hex"
+  ],
+  "signature_domain": "CROVIA-SEAL-v1",
+  "canon": "csc-1",
+  "spec_version": "v0.5",
+  "ietf_draft": "draft-crovia-seal-01",
+  "ietf_draft_datatracker": "https://datatracker.ietf.org/doc/draft-crovia-seal/",
+  "ietf_draft_mirror": "https://croviatrust.com/registry/seal/spec/draft-crovia-seal-01.txt",
+  "spec_url": "https://croviatrust.com/registry/seal/spec/",
+  "spec_source_url": "https://croviatrust.com/registry/seal/spec/SPEC.md",
+  "spec_sha256": "ed125588b40c88a71373cd5db9679b2d55de77f2db16ec6a2336be9d39f5c8e8",
+  "vectors_manifest_url": "https://croviatrust.com/registry/seal/spec/vectors/v1/manifest.json",
+  "conformance_tests": 41,
+  "verifier_url": "https://croviatrust.com/registry/seal/verify/",
+  "trust_root_url": "https://seal.croviatrust.com/trust-root.json",
+  "trust_root_sig_url": "https://seal.croviatrust.com/trust-root.sig.json",
+  "issuer_pubkey_hex": "b6149a4278a9e66fc08dba86929a0ff0f6c50d610701f597a8e390c67a28d949",
+  "production_issuers": [
+   "urn:crovia:seal-issuer:causari",
+   "urn:crovia:seal-issuer:crovia-trust"
+  ],
+  "forbidden_markers": [
+   "crovia-seal-v1",
+   "\"Ed25519:",
+   "crovia.receipt.v1 is a Crovia Seal"
+  ],
+  "receipt_package_names": {
+   "pypi": "crovia-receipt",
+   "npm": "@crovia/receipt"
+  },
+  "reference_package_names": {
+   "pypi": "crovia-seal"
+  }
+ },
+ "pages": [
+  "/",
+  "/whitepaper.html",
+  "/whitepaper-v2-2026-03.html",
+  "/proof.html",
+  "/registry/",
+  "/registry/explore/",
+  "/registry/verify/",
+  "/registry/compliance/",
+  "/registry/tacet/",
+  "/registry/lacuna/",
+  "/registry/api/",
+  "/registry/seal/",
+  "/registry/seal/spec/",
+  "/registry/seal/threat-model/",
+  "/registry/seal/verify/",
+  "/registry/seal/log/",
+  "/registry/provenance/",
+  "/registry/embed/silence.html",
+  "/llms.txt",
+  "/llms-full.txt",
+  "/robots.txt",
+  "/sitemap.xml",
+  "/.well-known/ai-plugin.json",
+  "/.well-known/openapi.yaml",
+  "/m/",
+  "/m/Qwen/Qwen3-32B/"
+ ],
+ "retired_paths": [
+  "/check.html",
+  "/how-to-read.html",
+  "/absence-clock.html",
+  "/alive.html",
+  "/observatory/",
+  "/registry/cep/",
+  "/registry/chains/",
+  "/registry/enterprise/",
+  "/registry/forensics/",
+  "/registry/omissions/",
+  "/registry/outreach/",
+  "/registry/ranking/",
+  "/registry/substrate/",
+  "/registry/tpa/",
+  "/registry/v/",
+  "/registry/diamond/",
+  "/registry/lineage/",
+  "/registry/risk/",
+  "/registry/pont/",
+  "/registry/cci/",
+  "/registry/e/"
+ ],
+ "data_files": [
+  "/registry/data/_home_pulse.json",
+  "/registry/data/silence_index.json",
+  "/registry/data/lineage_graph.json",
+  "/registry/data/observatory/feed.json",
+  "/registry/data/pipeline_status.json",
+  "/registry/data/transparency_index.json",
+  "/registry/data/seal/public_log.jsonl",
+  "/registry/data/seal/transparency_log.json",
+  "/registry/data/substrate/collectors.json",
+  "/registry/data/substrate/latest_seal.json",
+  "/registry/data/substrate/ots_anchors.json",
+  "/registry/data/substrate/quality_report.json",
+  "/registry/data/substrate/recent.json",
+  "/registry/data/substrate/trust_root.json",
+  "/registry/data/substrate/diamond.json",
+  "/registry/data/substrate/lacuna_candidates.json",
+  "/registry/data/_smoke.json",
+  "/registry/data/tacet/trust_root.json",
+  "/registry/data/tacet/latest.json",
+  "/registry/data/tacet/index.json",
+  "/registry/data/tacet/proofs/index.json",
+  "/registry/data/global_ranking.json",
+  "/registry/data/model_records.json"
+ ],
+ "private_files": [
+  "/registry/data/forensic_dossiers.json",
+  "/registry/data/forensic_report.json"
+ ],
+ "heavy_files": [
+  "/registry/data/substrate/chains.json",
+  "/registry/data/substrate/consensus.json",
+  "/registry/data/substrate/predecessors_map.json",
+  "/registry/data/substrate/target_index.json",
+  "/registry/data/tpa_cep.json",
+  "/registry/data/search_targets.json"
+ ],
+ "apis": {
+  "anchor_post": "https://croviatrust.com/api/anchor",
+  "mcp": "https://croviatrust.com/mcp",
+  "mcp_tools": [
+   "crovia_pulse",
+   "lookup_model",
+   "get_lacuna",
+   "crovia_vs_causari"
+  ],
+  "mcp_model_arg": "model",
+  "seal_svc": [
+   "/trust-root.json",
+   "/trust-root.sig.json",
+   "/health",
+   "/v1/stats"
+  ]
+ },
+ "headline_numbers": {
+  "signed_observations": {
+   "source": "/registry/data/_home_pulse.json",
+   "path": "ledger.n_envelopes_total",
+   "valid": true
+  },
+  "bitcoin_anchors": {
+   "source": "/registry/data/_home_pulse.json",
+   "path": "anchors.distinct_roots",
+   "valid": true,
+   "rule": "distinct merkle_root with a confirmed Bitcoin timestamp; re-anchors of an unchanged root do not count"
+  },
+  "silence_days": {
+   "source": "/registry/data/silence_index.json",
+   "path": "total_silence_days",
+   "valid": true,
+   "rule": "observation-bounded: sum over targets of days between consecutive negative anchored observations; shown only in the 2026 archive section with 'observation paused 2026-06-01'"
+  },
+  "lacuna_records": {
+   "source": "/registry/data/_home_pulse.json",
+   "path": "ledger.by_axiom_type.AX.LAC",
+   "valid": false,
+   "rule": "target_id must be an AI model id (org/model), not an internal collector, path or test id; since 2026-09-19 the home page no longer shows this number — LACUNA candidates are read from TACET targets.json (negative_anchored_epochs)"
+  },
+  "tacet_epochs": {
+   "source": "/registry/data/tacet/latest.json",
+   "path": "epochs",
+   "valid": true,
+   "rule": "one signed epoch sheet per hour since genesis; anchored count shown alongside from anchored_epochs"
+  },
+  "tacet_models": {
+   "source": "/registry/data/tacet/targets.json",
+   "path": "count",
+   "valid": true,
+   "rule": "distinct target ids with at least one signed snapshot"
+  },
+  "tacet_negative_snapshots": {
+   "source": "/registry/data/tacet/latest.json",
+   "path": "negative_snapshots_total",
+   "valid": true,
+   "rule": "snapshots whose predicate result is false; counts toward silence only once the epoch is anchored"
+  }
+ },
+ "internal_target_patterns": [
+  "^spider:",
+  "^tpa_v1$",
+  "^autonomous_observer$",
+  "^forensic_dossier$",
+  "^oracle_scanner$",
+  "^wayback_hf_collector$",
+  "^robots_txt_collector$",
+  "^arxiv_paper_collector$",
+  "^/",
+  "^test-",
+  "^croviatrust/",
+  "^Crovia/"
+ ],
+ "repos": {
+  "crovia-seal": {
+   "role": "The Seal standard: spec, drafts, reference implementations, conformance, verifier, integrations.",
+   "state": "active"
+  },
+  "crovia-core-engine": {
+   "role": "Crovia Substrate: collectors, observer, sealer, anchoring, public index builders, ops.",
+   "state": "active"
+  },
+  "countersign": {
+   "role": "Witness protocol and home of TACET (verifiable map, epoch sheets, silence proofs).",
+   "state": "active"
+  },
+  "crovia-evidence-lab": {
+   "role": "Public data plane: datasets, leaderboards, reproducible capsules.",
+   "state": "active"
+  },
+  "causari": {
+   "role": "Sibling product: code provenance for AI agents; reference Seal issuer.",
+   "state": "active"
+  },
+  "crovia-core": {
+   "role": "archived",
+   "state": "archive"
+  },
+  "crovia-wedge": {
+   "role": "archived",
+   "state": "archive"
+  },
+  "causari-audit-demo": {
+   "role": "archived",
+   "state": "archive"
+  }
+ },
+ "forbidden_words": [
+  "hid",
+  "refused",
+  "violated",
+  "Hubble",
+  "payout layer",
+  "continuity grade",
+  "Continuity dossier"
+ ],
+ "smoke_markers": {
+  "/": "Silence you can",
+  "/registry/": "Crovia Registry",
+  "/registry/lacuna/": "LACUNA",
+  "/registry/seal/": "Open Provenance Receipt",
+  "/registry/seal/verify/": "crovia.seal.v1",
+  "/registry/explore/": "Evidence Explorer",
+  "/registry/verify/": "Crovia Passport",
+  "/registry/compliance/": "Compliance",
+  "/whitepaper.html": "Verifiable Silence",
+  "/registry/tacet/": "TACET"
+ },
+ "retired_path_targets": {
+  "/check.html": "/registry/verify/",
+  "/how-to-read.html": "/",
+  "/absence-clock.html": "/registry/lacuna/",
+  "/alive.html": "/",
+  "/observatory/": "/registry/",
+  "/registry/tpa/": "/registry/verify/?mode=passport",
+  "/registry/ranking/": "/registry/compliance/",
+  "/registry/risk/": "/registry/compliance/?view=risk",
+  "/registry/enterprise/": "/registry/compliance/?view=orgs",
+  "/registry/outreach/": "/registry/compliance/",
+  "/registry/substrate/": "/registry/explore/?mode=graph",
+  "/registry/omissions/": "/registry/explore/?stream=omissions",
+  "/registry/forensics/": "/registry/explore/?mode=dossier",
+  "/registry/chains/": "/registry/explore/?mode=graph",
+  "/registry/diamond/": "/registry/explore/?mode=graph",
+  "/registry/lineage/": "/registry/explore/?mode=graph",
+  "/registry/pont/": "/registry/explore/?type=pont",
+  "/registry/v/": "/registry/verify/?mode=axiom",
+  "/registry/cep/": "/registry/verify/?mode=lab",
+  "/registry/cci/": "/registry/compliance/",
+  "/registry/e/": "/registry/explore/"
+ },
+ "access_policy": {
+  "decided": "2026-09-19",
+  "public": "all /registry/data/ files, CC-BY-4.0, direct fetch, 15 req/min per IP",
+  "professional": [
+   "/registry/data/forensic_dossiers.json",
+   "/registry/data/forensic_report.json"
+  ],
+  "paid_services": [
+   "per-organisation forensic dossiers",
+   "TPA certification reports",
+   "witnessed TACET silence proofs (k/n)",
+   "hosted Seal issuance"
+  ]
+ },
+ "tacet": {
+  "base": "/registry/data/tacet/",
+  "map_id": "urn:crovia:tacet:map:disclosure",
+  "genesis": "2026-09-19T18:00:00Z",
+  "epoch_seconds": 3600,
+  "files": [
+   "trust_root.json",
+   "latest.json",
+   "index.json",
+   "targets.json",
+   "sheets/{epoch}.json",
+   "snapshots/{epoch}.jsonl",
+   "changes/{epoch}.json",
+   "values/{key_hex}.json",
+   "ots/{epoch}.ots",
+   "proofs/index.json",
+   "proofs/{slug}.seal.json",
+   "badges/{name}.json"
+  ],
+  "operator_pubkey_hex": "28d7faeb726187b05dec60bc744f8b055c719ba294815050e8b6831da5889712",
+  "observer_pubkey_hex": "672c95c94ae6193d66d213611c98642443f0ac04c6f0e0fa2e52ba9dca55ea31",
+  "issuer_id": "urn:crovia:seal-issuer:tacet",
+  "issuer_pubkey_hex": "628c15f65550e527a50b85a17b502010bc6c18e7249254483454e884eada837c",
+  "badges": {
+   "names": [
+    "epochs",
+    "models",
+    "negative",
+    "latest"
+   ],
+   "schema": "shields.io endpoint v1",
+   "source": "latest.json and targets.json, CANON §4 definitions",
+   "render": "https://img.shields.io/endpoint?url=<encoded badge URL>"
+  },
+  "browser_verifier": "/registry/seal/verify/?url=<proof URL under /registry/data/tacet/>"
+ }
 }
