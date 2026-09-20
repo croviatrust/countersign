@@ -5,7 +5,7 @@
 <title>Verify a Crovia Seal &mdash; in your browser, offline</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#000000">
-<meta name="description" content="Paste any Crovia Seal (crovia.seal.v1) and verify it right here: CSC-1 canonicalization, Ed25519 signature, hash chain. No server, no account — the page works offline.">
+<meta name="description" content="Paste any Crovia Seal (crovia.seal.v1), TACET silence proof or PNX proof of non-exfiltration and verify it right here: CSC-1 canonicalization, Ed25519 signatures, sparse Merkle paths. No server, no account — the page works offline.">
 <meta property="og:title" content="Verify a Crovia Seal — in your browser, offline">
 <meta property="og:description" content="Cryptographic verification of AI-output receipts, entirely client-side.">
 <meta property="og:image" content="https://croviatrust.com/og-seal.png?v=20260919">
@@ -151,12 +151,28 @@
     </div>
   </div>
 
+  <div class="vf-sec" id="pnxSec">
+    <h2>Verify a PNX proof (Proof of Non-Exfiltration)</h2>
+    <p>A PNX proof is the TACET profile <span class="mono">crovia.pnx.v1</span>: an egress witness fingerprinted
+       every outbound body of an AI agent run into a depth-256 sparse Merkle map and signed the run sheet; the proof
+       carries, per protected asset, non-inclusion (or inclusion) paths against that root. Paste the bare proof or the
+       sealed bundle above. The page re-does <a href="/registry/tacet/spec/#pnx-6-verification">PNX §6</a> here:
+       witness signature, parameter consistency, every path, every verdict. Without the asset bytes it proves
+       non-inclusion of the listed keys only and says so; paste a single asset in the box below to have its
+       fingerprints recomputed byte for byte. Same checks as <span class="mono">tacet-pnx verify</span>.</p>
+    <div class="vf-row" style="margin-top:10px">
+      <button class="vf-btn" id="btnPnx">Load a PNX conformance proof</button>
+    </div>
+  </div>
+
   <div class="vf-sec">
-    <h2>Have the original AI output?</h2>
+    <h2>Have the original AI output — or the protected asset?</h2>
     <p>A seal never carries content — only hash commitments. Paste the exact output
        text below and Verify again: the tool re-hashes it and checks it against
-       <span style="font-family:var(--mono)">subject.output_hash</span> of the (first) seal.</p>
-    <textarea id="contentInput" class="small" spellcheck="false" placeholder="exact AI output text (optional)"></textarea>
+       <span style="font-family:var(--mono)">subject.output_hash</span> of the (first) seal.
+       For a single-asset PNX proof the same box takes the asset itself: its SHA-256, detection class
+       and fingerprint set are recomputed and compared with the proof.</p>
+    <textarea id="contentInput" class="small" spellcheck="false" placeholder="exact AI output text, or the protected asset of a single-asset PNX proof (optional)"></textarea>
   </div>
 
   <div class="vf-sec">
@@ -176,9 +192,10 @@
   </div>
 </main>
 
-<script src="/registry/seal/verify/seal-core.js?v=20260919e"></script>
-<script src="/registry/seal/verify/ots-verify.js?v=20260919e"></script>
-<script src="/registry/seal/verify/tacet-verify.js?v=20260919e"></script>
+<script src="/registry/seal/verify/seal-core.js?v=20260920a"></script>
+<script src="/registry/seal/verify/ots-verify.js?v=20260920a"></script>
+<script src="/registry/seal/verify/tacet-verify.js?v=20260920a"></script>
+<script src="/registry/seal/verify/pnx-verify.js?v=20260920a"></script>
 <script>
 "use strict";
 
@@ -202,6 +219,24 @@ async function run() {
       const lines = raw.split("\n").map(l => l.trim()).filter(Boolean);
       try { seals = lines.map(l => JSON.parse(l)); }
       catch (_) { throw new Error("input is not valid JSON (one seal, or one seal per line)"); }
+    }
+
+    if (single && window.verifyPnx && (isPnxEnvelope(single) || isPnxProof(single))) {
+      const proof = isPnxEnvelope(single) ? single.proof : single;
+      const content = $("contentInput").value;
+      // One pasted asset can be checked byte for byte when the proof covers exactly one asset.
+      const assets = content && proof.assets.length === 1 ? { [proof.assets[0].label]: enc.encode(content) } : null;
+      const r = await verifyPnx(single, steps, assets ? { assets } : {});
+      const n = Object.keys(r.assets).length, present = Object.values(r.assets).filter(v => v === "present").length;
+      const what = r.verdict === "absent" ? n + " asset(s) proven absent from the witnessed egress"
+                 : r.verdict === "present" ? present + " of " + n + " asset(s) <b>present</b> in the witnessed egress — signed evidence of exposure"
+                 : "mixed: no asset present, but some are below the detection threshold";
+      verdict.className = "vf-verdict ok";
+      verdict.innerHTML = "&#10003;&nbsp; VALID <span class='sub'>PNX proof (" + (r.sealed ? "sealed, " : "") + "run <b>" + escapeHtml(r.run) + "</b>, witness "
+        + escapeHtml(r.witness) + "): verdict <b>" + r.verdict.toUpperCase() + "</b> — " + what + "; " + r.bodies + " bodies, " + r.bytes + " bytes witnessed"
+        + (r.hashOnly ? ". Hash-only: asset bytes not supplied, so this proves non-inclusion of the listed keys, not of any asset." : ".") + "</span>";
+      renderSteps(steps, stepsEl);
+      return;
     }
 
     if (single && window.isTacetEnvelope && isTacetEnvelope(single)) {
@@ -251,7 +286,8 @@ function renderSteps(steps, stepsEl) {
 /* Load a seal or proof by URL (?url= or the button): only from this site's public TACET directory or the
    spec's conformance vectors. */
 const PROOF_BASE = "/registry/data/tacet/";
-const URL_BASES = [PROOF_BASE, "/registry/seal/spec/vectors/"];
+const URL_BASES = [PROOF_BASE, "/registry/seal/spec/vectors/", "/registry/tacet/spec/vectors/"];
+const PNX_VECTOR = "/registry/tacet/spec/vectors/v1/pnx_004_sealed.json";
 function proofUrlAllowed(u) {
   try {
     const url = new URL(u, location.origin);
@@ -280,6 +316,19 @@ $("btnTacet").addEventListener("click", async () => {
     await loadProof(list[0].url || (PROOF_BASE + "proofs/" + list[0].slug + ".seal.json"));
   } catch (e) {
     $("report").style.display = "block"; $("verdict").className = "vf-verdict bad"; $("verdict").textContent = "could not list live proofs (" + e.message + ")";
+  }
+});
+/* The `clean` case of pnx_004_sealed.json: a PNX proof over two assets, verdict absent, inside a crovia.seal.v1. */
+$("btnPnx").addEventListener("click", async () => {
+  try {
+    const vec = await (await fetch(PNX_VECTOR, { cache: "no-store" })).json();
+    const b = vec.clean;
+    $("sealInput").value = JSON.stringify({ seal: b.seal, query: b.query, proof: b.proof }, null, 2);
+    $("contentInput").value = "";
+    $("pnxSec").scrollIntoView({ block: "nearest" });
+    await run();
+  } catch (e) {
+    $("report").style.display = "block"; $("verdict").className = "vf-verdict bad"; $("verdict").textContent = "could not load " + PNX_VECTOR + " (" + e.message + ")";
   }
 });
 {
