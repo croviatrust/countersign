@@ -32,11 +32,11 @@ Last revised: 2026-09-19.
 | The ledger | **Crovia Substrate** (AXIOM ledger) | Append-only log of Ed25519-signed observation envelopes, Merkle-sealed hourly, batch-anchored to Bitcoin via OpenTimestamps. | `live` |
 | Absence records | **LACUNA** | A signed statement that, over a defined observation window, no contemporaneous disclosure satisfying a published predicate was found on the monitored surfaces of a target. | `observatory (v0)` until TACET ships. Never `certificate` unless a signed artifact exists for that target. |
 | Receipt standard | **Crovia Seal** | Tamper-evident receipt for AI outputs. IETF `draft-crovia-seal-01`. | `standard (Internet-Draft)` |
-| Silence proofs | **TACET** | Transparency log for AI training disclosure in which non-inclusion (silence) is a first-class, portable, offline-verifiable proof. | `live` since 2026-09-19T18:00Z (hourly epochs, Bitcoin-anchored); spec `v0.1-draft`, reference `0.2.x`. |
+| Silence proofs | **TACET** | Transparency log for AI training disclosure in which non-inclusion (silence) is a first-class, portable, offline-verifiable proof. | `live` since 2026-09-19T18:00Z (hourly epochs, Bitcoin-anchored); spec `v0.1-draft`, reference `0.3.x` (adds the PNX egress profile). |
 | Witnessing | **Countersign** | Independent CT-style witnessing of Crovia epoch heads and surface snapshots. | `v0.1` |
 | Code provenance | **Causari** | Sibling product; not part of the ledger. | `live` |
 
-Names retired from public copy: "Hubble", "Global AI Training Omissions" (as a product name), "CROVIA Core Engine — payout layer", "Oracle scanner", "Wedge", "Diamond Archive", "CEP Terminal", "Proof of Non-Training" (unless re-specified).
+Names retired from public copy: "Hubble", "Global AI Training Omissions" (as a product name), "CROVIA Core Engine — payout layer", "Oracle scanner", "Wedge", "Diamond Archive", "CEP Terminal", "Crovia Continuity Index" and any A–F vendor grade, "Proof of Non-Training" (unless re-specified).
 
 ## 3. Crovia Seal — the one and only format
 
@@ -85,7 +85,7 @@ Anything not listed here is not advertised anywhere (pages, `llms.txt`, `ai-plug
 ### Pages (`croviatrust.com`)
 `/`, `/whitepaper.html`, `/whitepaper-v2-2026-03.html` (superseded, noindex), `/proof.html`, `/registry/`, `/registry/tacet/`, `/registry/explore/`, `/registry/verify/`, `/registry/compliance/`, `/registry/lacuna/`, `/registry/api/`, `/registry/seal/`, `/registry/seal/spec/`, `/registry/seal/threat-model/`, `/registry/seal/verify/`, `/registry/seal/log/`, `/registry/provenance/`, `/registry/embed/silence.html`, `/llms.txt`, `/llms-full.txt`, `/robots.txt`, `/sitemap.xml`, `/.well-known/ai-plugin.json`, `/.well-known/openapi.yaml`.
 
-Retired paths must return **301** to the paths above and must not appear in any probe, sitemap or link: `/check.html`, `/how-to-read.html`, `/absence-clock.html`, `/alive.html`, `/observatory/`, `/registry/{cep,chains,enterprise,forensics,omissions,outreach,ranking,substrate,tpa,v,diamond,lineage,risk,pont}/`. The exact destination of each is recorded in `canon/canon.json` → `retired_path_targets` (it mirrors the nginx map in production, e.g. `/registry/tpa/` → `/registry/verify/?mode=passport`, `/registry/substrate/` → `/registry/explore/?mode=graph`); a legacy page stays reachable only with `?legacy=1`.
+Retired paths must return **301** to the paths above and must not appear in any probe, sitemap or link: `/check.html`, `/how-to-read.html`, `/absence-clock.html`, `/alive.html`, `/observatory/`, `/registry/{cep,chains,enterprise,forensics,omissions,outreach,ranking,substrate,tpa,v,diamond,lineage,risk,pont,cci,e}/`. The exact destination of each is recorded in `canon/canon.json` → `retired_path_targets` (it mirrors the nginx map in production, e.g. `/registry/tpa/` → `/registry/verify/?mode=passport`, `/registry/substrate/` → `/registry/explore/?mode=graph`); a legacy page stays reachable only with `?legacy=1`.
 
 ### Data (`/registry/data/`)
 `_home_pulse.json`, `silence_index.json`, `lineage_graph.json`, `observatory/feed.json`, `pipeline_status.json`, `transparency_index.json`, `seal/public_log.jsonl`, `seal/transparency_log.json`, `substrate/{collectors,latest_seal,ots_anchors,quality_report,recent,trust_root,diamond,lacuna_candidates}.json`, `_smoke.json`.

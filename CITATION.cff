@@ -9,8 +9,8 @@ authors:
 repository-code: https://github.com/croviatrust/countersign
 url: https://croviatrust.com/registry/tacet/
 license: Apache-2.0
-version: 0.2.0
-date-released: 2026-09-19
+version: 0.3.0
+date-released: '2026-09-20'
 keywords:
   - AI transparency
   - training data disclosure

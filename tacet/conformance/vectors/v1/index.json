@@ -9,8 +9,8 @@
     "silence_003_level3.json": "dc12f566e75d98f3051152f58080d306715b0e92f684ba7b0b7210121e8dcead",
     "silence_004_before_disclosure.json": "ea6a2d93335784bea434aaa1aec73365e8dc25f1f5c20c28dedb63aeb1fb97a9",
     "snapshots_001_negative.json": "140c2d10f3fb144cec30f918c0f3d2ef2c20ebf5e8eab28db330ffa69e7b865b",
-    "wrapped_001_level3.json": "1666751a6c71951f6823d40ff26e10ab09fe8ff9afcff8499b56ddd6289de2cc",
-    "wrapped_002_invalid.json": "5c8b0ac44629c8d85f2313c91da40ea074c728eba165541045a93b7c89260d4d"
+    "wrapped_001_level3.json": "35ad3b9ed85f3bf9c7686d416ddbd9955f136db21d699d4d04071ff89b7ec655",
+    "wrapped_002_invalid.json": "5373116cbcc673f3dd7522f04daf9fa0f492049a6b5c0b9484a542ad1805b3fd"
   },
   "vectors_version": "crovia.tacet.vectors.v1"
 }
