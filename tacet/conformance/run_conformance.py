@@ -136,8 +136,102 @@ def main() -> int:
         verdict, detail = ots_mod.verify_sheet_anchor(data, sh, n.get("block_height", c["block_height"]), src)
         case(f"ots/negative/{n['name']}: verdict {n['expect']}", verdict is n["expect"], detail)
 
+    pnx_cases()
+
     print(f"\n{passed} passed, {failed} failed")
     return 0 if failed == 0 else 1
+
+
+def pnx_cases() -> None:
+    """PNX profile (PNX.md §9): the fingerprint function, proofs against a witnessed run, faults, sealed delivery."""
+    from tacet import egress
+    from tacet.canonical import canonicalize
+    from tacet.keys import verify_signature
+
+    unhex = bytes.fromhex
+    hx = lambda bs: sorted(b.hex() for b in bs)  # noqa: E731
+
+    v = load("pnx_001_fingerprints.json")
+    salt = unhex(v["salt_hex"])
+    p = v["params"]
+    case("pnx/001: parameters of crovia.pnx.v1", (p["k_gram"], p["window"], p["threshold"]) == (egress.K_GRAM, egress.WINDOW, egress.THRESHOLD)
+         and p["threshold"] == p["k_gram"] + p["window"] - 1)
+    case("pnx/001: present leaf value is SHA-256 of the domain string", egress.PRESENT.hex() == v["present_leaf_value"])
+    ex = v["stream"]["example"]
+    case("pnx/001: fixture byte stream reproduces", fixtures_stream(ex["label"], ex["n"]).hex() == ex["hex"])
+    case("pnx/001: salted k-gram hashes", [h.hex() for h in egress.kgram_hashes(unhex(v["kgram_hashes"]["data_hex"]), salt)] == v["kgram_hashes"]["hashes"])
+    case("pnx/001: winnowed fingerprints", hx(egress.fingerprints(unhex(v["winnowing"]["data_hex"]), salt)) == v["winnowing"]["fingerprints"])
+    case("pnx/001: body shorter than one window selects the single minimum",
+         hx(egress.fingerprints(unhex(v["winnowing_short"]["data_hex"]), salt)) == v["winnowing_short"]["fingerprints"])
+    for c in v["detection_classes"]:
+        klass, fps = egress.asset_fingerprints(unhex(c["asset_hex"]), salt)
+        case(f"pnx/001: {c['asset_len']}-byte asset is {c['detection']}", klass == c["detection"] and hx(fps) == c["fingerprints"])
+    g = v["guarantee"]
+    secret, noise = unhex(g["secret_hex"]), unhex(g["noise_hex"])
+    sfp = set(egress.asset_fingerprints(secret, salt)[1])
+    case("pnx/001: secret fingerprints", hx(sfp) == g["secret_fingerprints"])
+    hit = [bool(sfp & egress.fingerprints(noise[:o] + secret + noise[o:], salt)) for o in g["offsets"]]
+    case(f"pnx/001: winnowing guarantee holds at all {len(hit)} offsets", all(hit), f"missed at offsets {[o for o, h in zip(g['offsets'], hit) if not h]}")
+    js = v["json_strings"]
+    case("pnx/001: json-strings-v1 derived bodies", [b.hex() for b in egress.json_strings(unhex(js["body_hex"]))] == js["derived_hex"])
+    case("pnx/001: non-JSON body yields no derived bodies", egress.json_strings(unhex(js["non_json_body_hex"])) == [])
+    case("pnx/001: epoch leaf key pnx/<run_id>", egress.epoch_leaf_key(v["epoch_leaf_key"]["run_id"]).hex() == v["epoch_leaf_key"]["key"])
+
+    v = load("pnx_002_proofs.json")
+    run, sheet = v["run"], v["sheet"]
+    w = egress.EgressWitness(run_id=run["run_id"], salt=unhex(run["salt_hex"]), normalization=tuple(run["normalization"]))
+    for b in run["bodies"]:
+        w.ingest(unhex(b["body_hex"]), b["at"])
+    case("pnx/002: run root rebuilt from the bodies", egress.prefixed(w.root) == sheet["root"] and len(w._map) == sheet["fingerprints"])
+    case("pnx/002: sheet egress counters rebuilt", sheet["egress"] == {"bodies": w.bodies, "bytes": w.bytes_seen, "first_at": w.first_at, "last_at": w.last_at})
+    unsigned = {k: x for k, x in sheet.items() if k != "signature"}
+    case("pnx/002: sheet signature (CROVIA-PNX-SHEET-v1 over CSC-1)",
+         verify_signature(run["witness_pubkey_hex"], egress.DOMAIN_SHEET + canonicalize(unsigned), unhex(sheet["signature"]["sig_hex"])))
+    case("pnx/002: verify_sheet accepts", egress.verify_sheet(sheet) == [])
+    for name, vec in v["proofs"].items():
+        assets = {k: unhex(x) for k, x in vec["assets_hex"].items()}
+        r = egress.verify_pnx(vec["proof"], assets)
+        case(f"pnx/002 {name}: verifies with asset bytes", r.ok, "; ".join(r.errors))
+        case(f"pnx/002 {name}: verdicts {vec['expect']['verdict']}", r.verdict == vec["expect"]["verdict"] and r.assets == vec["expect"]["assets"], str(r.assets))
+        case(f"pnx/002 {name}: proof regenerated from the run is identical", w.prove(sheet, [(a, assets[a]) for a in (x["label"] for x in vec["proof"]["assets"])]) == vec["proof"])
+        r = egress.verify_pnx(vec["proof"])
+        case(f"pnx/002 {name}: hash-only mode accepts and warns",
+             r.ok is v["hash_only"]["expect"]["ok"] and any(v["hash_only"]["expect"]["warning_contains"] in m for m in r.warnings), "; ".join(r.errors + r.warnings))
+
+    for name, vec in load("pnx_003_invalid.json").items():
+        r = egress.verify_pnx(vec["proof"], {k: unhex(x) for k, x in vec["assets_hex"].items()})
+        case(f"pnx/003 invalid/{name} rejected", not r.ok and any(vec["expect_error_contains"] in e for e in r.errors), "; ".join(r.errors) or "accepted")
+        case(f"pnx/003 invalid/{name}: hash-only verdict {'accepts' if vec['hash_only_ok'] else 'rejects'}",
+             egress.verify_pnx(vec["proof"]).ok is vec["hash_only_ok"])
+
+    try:
+        import crovia_seal  # noqa: F401
+        from tacet.pnx import verify_any
+    except ImportError:
+        print("  [SKIP] pnx/004 sealed bundles (crovia_seal reference not installed)")
+        return
+    v = load("pnx_004_sealed.json")
+    for name, vec in ({"clean": v["clean"], "exposure": v["exposure"]} | v["invalid"]).items():
+        r, outer = verify_any({"seal": vec["seal"], "query": vec["query"], "proof": vec["proof"]},
+                              {k: unhex(x) for k, x in vec["assets_hex"].items()})
+        exp = vec["expect"]
+        if exp["ok"]:
+            case(f"pnx/004 {name}: Seal and PNX proof verify, verdict {exp['verdict']}",
+                 r.ok and outer["seal_ok"] and r.verdict == exp["verdict"], "; ".join(r.errors))
+        else:
+            case(f"pnx/004 invalid/{name} rejected (seal signature {'valid' if exp['seal_signature_ok'] else 'invalid'})",
+                 not r.ok and outer["seal_signature_ok"] is exp["seal_signature_ok"] and any(vec["expect_error_contains"] in e for e in r.errors),
+                 "; ".join(r.errors) or "accepted")
+
+
+def fixtures_stream(label: str, n: int) -> bytes:
+    """The vectors' byte source, restated here so a port need not import tacet.fixtures."""
+    out = b""
+    i = 0
+    while len(out) < n:
+        out += hashlib_sha256(f"tacet-pnx-fixture:{label}:{i}".encode())
+        i += 1
+    return out[:n]
 
 
 if __name__ == "__main__":
