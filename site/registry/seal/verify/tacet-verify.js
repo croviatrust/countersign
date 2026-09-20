@@ -312,5 +312,8 @@
   }
 
   window.verifyTacetEnvelope = verifyTacetEnvelope;
-  window.isTacetEnvelope = obj => !!(obj && typeof obj === "object" && obj.seal && obj.proof && obj.query && !obj.seal_version);
+  window.isTacetEnvelope = obj => !!(obj && typeof obj === "object" && obj.seal && obj.proof && obj.query && !obj.seal_version
+                                     && obj.proof.proof_version === PROOF_VERSION);
+  /* Sparse Merkle map primitives shared with pnx-verify.js (same map, same domains). */
+  window.tacetSmt = { DEPTH, emptyTable, fullPath, rootFromPath, leafHash: (key, value) => sha256(cat(D_LEAF, key, value)) };
 })();
