@@ -1,10 +1,13 @@
 {
-  "name": "crovia",
-  "description": "Crovia MCP server — query the public AI training-data disclosure ledger. Tools: crovia_pulse, lookup_model, get_lacuna, crovia_vs_causari.",
+  "name": "com.croviatrust/crovia",
+  "title": "Crovia — verifiable silence (TACET) and Crovia Seal",
+  "description": "Signed, Bitcoin-anchored observations of AI training-data disclosure; verifies silence proofs and seals. Tools: crovia_status, lookup_model, search_models, get_silence_proof, verify_seal, silence_report, explain, crovia_vs_causari.",
   "transport": "streamable-http",
   "endpoint": "https://croviatrust.com/mcp",
-  "protocolVersion": "2024-11-05",
+  "protocolVersions": ["2025-06-18", "2025-03-26", "2024-11-05"],
   "auth": "none",
+  "registry": "https://registry.modelcontextprotocol.io/v0/servers/com.croviatrust%2Fcrovia/versions/latest",
   "documentation": "https://croviatrust.com/llms.txt",
+  "source": "https://github.com/croviatrust/countersign/tree/main/ops/mcp",
   "disambiguation": "Crovia (croviatrust.com) = what AI PROVIDERS DISCLOSE about TRAINING DATA. Distinct from Causari (causari.dev) = what AI AGENTS DO to a CODEBASE."
 }

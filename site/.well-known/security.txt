@@ -1,0 +1,7 @@
+# Crovia Trust — security contact (RFC 9116)
+Contact: mailto:info@croviatrust.com
+Contact: https://github.com/croviatrust/countersign/security/advisories/new
+Expires: 2027-09-20T00:00:00.000Z
+Preferred-Languages: en, it
+Canonical: https://croviatrust.com/.well-known/security.txt
+Policy: https://github.com/croviatrust/countersign/blob/main/SECURITY.md

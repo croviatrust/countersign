@@ -7,53 +7,15 @@
 <meta name="description" content="Crovia runs TACET: every hour, a public randomness beacon opens an epoch, Crovia fetches AI model cards, runs a published predicate, commits the results to a sparse Merkle map, signs the sheet and anchors it in Bitcoin. When a lab stays silent about training data, the silence becomes a proof anyone can verify offline. LACUNA certificates. EU AI Act Article 53 observatory.">
 <link rel="canonical" href="https://croviatrust.com/">
 <link rel="icon" type="image/png" href="https://croviatrust.com/logo.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="alternate" type="application/rss+xml" title="Crovia Silence Report" href="https://croviatrust.com/feed.xml">
 <meta property="og:title" content="Crovia — Silence you can verify">
 <meta property="og:description" content="TACET: hourly, drand-opened, Bitcoin-anchored observations of what AI providers disclose about training data. Proof of absence you can verify offline.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://croviatrust.com/">
 <meta property="og:image" content="https://croviatrust.com/og-card.png?v=20260919">
 <meta name="twitter:card" content="summary_large_image">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "Organization",
-      "@id": "https://croviatrust.com/#organization",
-      "name": "Crovia",
-      "alternateName": "Crovia Trust",
-      "url": "https://croviatrust.com/",
-      "logo": "https://croviatrust.com/logo.png",
-      "email": "info@croviatrust.com",
-      "foundingDate": "2025",
-      "description": "Crovia operates TACET, a public, hourly, Bitcoin-anchored log of AI training-data disclosure. It records what AI providers disclose \u2014 and the verifiable absence of disclosure \u2014 as signed, timestamped facts.",
-      "disambiguatingDescription": "Crovia (croviatrust.com) concerns what AI PROVIDERS DISCLOSE about TRAINING DATA. It is distinct from Causari (causari.dev), a developer tool concerning what AI AGENTS DO to a CODEBASE.",
-      "sameAs": ["https://github.com/croviatrust", "https://datatracker.ietf.org/doc/draft-crovia-seal/", "https://causari.dev"]
-    },
-    {
-      "@type": "WebSite",
-      "@id": "https://croviatrust.com/#website",
-      "url": "https://croviatrust.com/",
-      "name": "Crovia",
-      "publisher": { "@id": "https://croviatrust.com/#organization" },
-      "description": "Silence you can verify. TACET, the public log of AI training-data disclosure."
-    },
-    {
-      "@type": "Dataset",
-      "@id": "https://croviatrust.com/registry/data/tacet/#dataset",
-      "name": "TACET disclosure map \u2014 epoch sheets, snapshots and silence proofs",
-      "description": "Hourly, drand-opened, Bitcoin-anchored observations of training-data disclosure on public AI model cards. Sparse Merkle map urn:crovia:tacet:map:disclosure.",
-      "url": "https://croviatrust.com/registry/tacet/",
-      "license": "https://creativecommons.org/licenses/by/4.0/",
-      "creator": { "@id": "https://croviatrust.com/#organization" },
-      "distribution": [
-        { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://croviatrust.com/registry/data/tacet/latest.json" },
-        { "@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://croviatrust.com/registry/data/tacet/targets.json" }
-      ]
-    }
-  ]
-}
-</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Organization", "@id": "https://croviatrust.com/#organization", "name": "Crovia", "alternateName": "Crovia Trust", "url": "https://croviatrust.com/", "logo": "https://croviatrust.com/logo.png", "email": "info@croviatrust.com", "foundingDate": "2025", "description": "Crovia operates TACET, a public, hourly, Bitcoin-anchored log of AI training-data disclosure. It records what AI providers disclose — and the verifiable absence of disclosure — as signed, timestamped facts.", "disambiguatingDescription": "Crovia (croviatrust.com) concerns what AI PROVIDERS DISCLOSE about TRAINING DATA. It is distinct from Causari (causari.dev), a developer tool concerning what AI AGENTS DO to a CODEBASE.", "sameAs": ["https://github.com/croviatrust", "https://bsky.app/profile/crovia.bsky.social", "https://doi.org/10.5281/zenodo.20111130", "https://pypi.org/project/crovia-seal/", "https://pypi.org/project/crovia-tacet/", "https://www.npmjs.com/package/@crovia/seal", "https://datatracker.ietf.org/doc/draft-crovia-seal/", "https://zenodo.org/records/22856637"], "knowsAbout": ["AI training data disclosure", "verifiable absence", "cryptographic receipts", "transparency logs", "OpenTimestamps", "EU AI Act Article 53"], "contactPoint": {"@type": "ContactPoint", "email": "info@croviatrust.com", "contactType": "general"}}, {"@type": "WebSite", "@id": "https://croviatrust.com/#website", "url": "https://croviatrust.com/", "name": "Crovia", "publisher": {"@id": "https://croviatrust.com/#organization"}, "description": "Silence you can verify. TACET, the public log of AI training-data disclosure."}, {"@type": "Dataset", "@id": "https://croviatrust.com/registry/data/tacet/#dataset", "name": "TACET disclosure map — epoch sheets, snapshots and silence proofs", "description": "Hourly, drand-opened, Bitcoin-anchored observations of training-data disclosure on public AI model cards. Sparse Merkle map urn:crovia:tacet:map:disclosure.", "url": "https://croviatrust.com/registry/tacet/", "license": "https://creativecommons.org/licenses/by/4.0/", "creator": {"@id": "https://croviatrust.com/#organization"}, "distribution": [{"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://croviatrust.com/registry/data/tacet/latest.json"}, {"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://croviatrust.com/registry/data/tacet/targets.json"}], "identifier": {"@type": "PropertyValue", "propertyID": "DOI", "value": "10.5281/zenodo.20111130"}, "sameAs": "https://doi.org/10.5281/zenodo.20111130", "isAccessibleForFree": true, "keywords": ["TACET", "verifiable silence", "AI training data disclosure", "sparse Merkle tree", "OpenTimestamps", "Bitcoin anchoring", "drand", "Crovia Seal"], "temporalCoverage": "2026-09-19/..", "includedInDataCatalog": {"@type": "DataCatalog", "name": "Crovia public data", "url": "https://croviatrust.com/registry/api/"}}]}</script>
 <link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -309,7 +271,7 @@
 
 </main>
 
-<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c"></script>
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919g"></script>
 <script>
 (function(){
   var DATA='/registry/data/';

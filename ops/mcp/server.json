@@ -1,0 +1,59 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.croviatrust/crovia",
+  "title": "Crovia — verifiable silence (TACET) and Crovia Seal",
+  "description": "Signed, Bitcoin-anchored observations of AI training-data disclosure; verifies silence proofs, seals",
+  "version": "2.0.0",
+  "websiteUrl": "https://croviatrust.com/",
+  "repository": {
+    "url": "https://github.com/croviatrust/countersign",
+    "source": "github",
+    "subfolder": "ops/mcp"
+  },
+  "icons": [
+    {
+      "src": "https://croviatrust.com/assets/icon-192.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "192x192"
+      ]
+    },
+    {
+      "src": "https://croviatrust.com/assets/icon-512.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "512x512"
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://croviatrust.com/mcp"
+    }
+  ],
+  "_meta": {
+    "io.modelcontextprotocol.registry/publisher-provided": {
+      "tools": [
+        "crovia_status",
+        "lookup_model",
+        "search_models",
+        "get_silence_proof",
+        "verify_seal",
+        "silence_report",
+        "explain",
+        "crovia_vs_causari"
+      ],
+      "resources": [
+        "crovia://llms.txt",
+        "crovia://llms-full.txt",
+        "crovia://canon.json",
+        "crovia://tacet/latest.json",
+        "crovia://report.json"
+      ],
+      "auth": "none",
+      "data_license": "CC-BY-4.0",
+      "docs": "https://croviatrust.com/llms.txt"
+    }
+  }
+}

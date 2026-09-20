@@ -58,7 +58,7 @@ A silence figure without an observed_to date is not a Crovia figure.
 
 ## Machine endpoints
 
-- MCP (Streamable HTTP): https://croviatrust.com/mcp
+- MCP (Streamable HTTP): https://croviatrust.com/mcp — listed in the official MCP Registry as com.croviatrust/crovia; tools: crovia_status, lookup_model, search_models, get_silence_proof, verify_seal, silence_report, explain, crovia_vs_causari; resources: llms.txt, canon.json, tacet/latest.json, report.json. No auth.
   tools: crovia_pulse, lookup_model(model), get_lacuna(model), crovia_vs_causari
 - Seal verifier (web): https://croviatrust.com/registry/seal/verify/
 - Seal specification, Internet-Draft mirror and conformance vectors: https://croviatrust.com/registry/seal/spec/ (SPEC.md at /registry/seal/spec/SPEC.md, vectors manifest at /registry/seal/spec/vectors/v1/manifest.json)
