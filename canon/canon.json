@@ -158,9 +158,13 @@
   "anchor_post": "https://croviatrust.com/api/anchor",
   "mcp": "https://croviatrust.com/mcp",
   "mcp_tools": [
-   "crovia_pulse",
+   "crovia_status",
    "lookup_model",
-   "get_lacuna",
+   "search_models",
+   "get_silence_proof",
+   "verify_seal",
+   "silence_report",
+   "explain",
    "crovia_vs_causari"
   ],
   "mcp_model_arg": "model",
@@ -169,7 +173,9 @@
    "/trust-root.sig.json",
    "/health",
    "/v1/stats"
-  ]
+  ],
+  "mcp_status_tool": "crovia_status",
+  "mcp_registry": "com.croviatrust/crovia"
  },
  "headline_numbers": {
   "signed_observations": {

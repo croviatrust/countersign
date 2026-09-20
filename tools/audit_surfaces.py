@@ -913,9 +913,10 @@ class Audit:
             self.add("mcp", endpoint, "high", sorted(expected), f"missing={sorted(expected - names)}, extra={sorted(names - expected)}", "MCP tool set differs from canon")
         else:
             self.add("mcp", endpoint, "info", sorted(expected), sorted(names), "MCP tool set matches canon")
-        pulse_text = self._mcp_tool_text(2, "crovia_pulse", {})
-        if pulse_text is not None:
-            self.add("mcp", endpoint, "info", "crovia_pulse answers", clip(pulse_text), "MCP crovia_pulse response")
+        status_tool = self.canon["apis"].get("mcp_status_tool", "crovia_status")
+        status_text = self._mcp_tool_text(2, status_tool, {})
+        if status_text is not None:
+            self.add("mcp", endpoint, "info", f"{status_tool} answers", clip(status_text), f"MCP {status_tool} response")
         self._assess_lookup(endpoint)
 
     def _assess_lookup(self, endpoint: str) -> None:
@@ -933,10 +934,11 @@ class Audit:
         except ValueError:
             self.add("mcp", endpoint, "medium", "lookup_model returns JSON text", clip(text), "lookup_model text content is not JSON")
             return
-        status = str(lookup.get("disclosure_status", "")) if isinstance(lookup, dict) else ""
-        lacuna_empty = isinstance(lookup, dict) and "lacuna" in lookup and not lookup.get("lacuna")
-        observed = f"lookup_model({target}) -> disclosure_status={status!r}, lacuna={clip(lookup.get('lacuna') if isinstance(lookup, dict) else None, 80)}"
-        if "no_absence" in status or lacuna_empty:
+        # MCP 2.0 answers with a verdict plus observation-bounded figures; older servers used disclosure_status/lacuna
+        verdict = str(lookup.get("verdict", lookup.get("disclosure_status", ""))) if isinstance(lookup, dict) else ""
+        has_figures = isinstance(lookup, dict) and any(lookup.get(k) for k in ("live", "silence_proof", "archive_2026", "lacuna"))
+        observed = f"lookup_model({target}) -> verdict={verdict!r}, figures={'present' if has_figures else 'none'}"
+        if "no_absence" in verdict or verdict in ("unknown", "not_found") or not has_figures:
             self.add("mcp", endpoint, "critical", f"lookup_model agrees that {target} is the top silent model", observed, "featured model contradicts MCP lookup")
         else:
             self.add("mcp", endpoint, "info", "lookup_model consistent with pulse", observed, "featured model confirmed by MCP lookup")
