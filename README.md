@@ -51,8 +51,7 @@ trusted.
 **On the command line, same checks, pure Python, standard library only for the anchors:**
 
 ```bash
-pip install crovia-tacet-operator \
-  "crovia-seal @ git+https://github.com/croviatrust/crovia-seal#subdirectory=reference/python"
+pip install crovia-tacet-operator crovia-seal
 
 curl -sO https://croviatrust.com/registry/data/tacet/proofs/Qwen__Qwen3-32B.seal.json
 tacet-operator verify Qwen__Qwen3-32B.seal.json

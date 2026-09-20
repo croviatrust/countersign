@@ -92,8 +92,10 @@ end-to-end by the agent and stop at the one click that must be a human's.
 
 ## 5. Open asks (one-click list for Tarik)
 
-1. PyPI / npm Trusted Publishing for `crovia-tacet`, `crovia-tacet-operator`,
-   `crovia-seal` and set `PYPI_TRUSTED_PUBLISHER` / `NPM_TRUSTED_PUBLISHER`.
-2. Upload the generated social previews to `countersign` and `crovia-seal`.
+1. ~~PyPI / npm Trusted Publishing~~ done 2026-09-20: `crovia-tacet` 0.3.0,
+   `crovia-tacet-operator` 0.3.0, `crovia-seal` 0.6.0 on PyPI; `@crovia/seal`
+   0.6.0 on npm with provenance. Every install snippet on the site and in the
+   READMEs is now registry-only.
+2. ~~Social previews~~ done 2026-09-20.
 3. When item 5 lands: submit `draft-crovia-tacet-00` on datatracker.
 4. When item 4 lands: publish `pnx-action` to the Marketplace.

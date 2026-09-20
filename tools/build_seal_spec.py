@@ -255,7 +255,7 @@ def build(seal_repo: Path, out_dir: Path) -> None:
       <div class="sp-stat"><div class="n">v{html.escape(meta.get('version', '0.5').split()[0])}</div><div class="l">{html.escape(meta.get('status', 'frozen except for additive fields'))}</div></div>
       <a class="sp-stat" href="{DATATRACKER}" rel="noopener"><div class="n">{html.escape(latest or 'draft-crovia-seal')}</div><div class="l">Internet-Draft · IETF datatracker ↗</div></a>
       <a class="sp-stat" href="#vectors"><div class="n">{total_tests} tests</div><div class="l">{vinfo['seals']} seals · {vinfo['canonical']} CSC-1 cases · {vinfo['invalid']} invalid</div></a>
-      <a class="sp-stat" href="{REPO}" rel="noopener"><div class="n">{html.escape(ref_version)}</div><div class="l">reference implementation · Python ↗</div></a>
+      <a class="sp-stat" href="{REPO}" rel="noopener"><div class="n">{html.escape(ref_version)}</div><div class="l">reference · PyPI crovia-seal · npm @crovia/seal ↗</div></a>
       <a class="sp-stat" href="/registry/seal/spec/SPEC.md"><div class="n">{spec_hash[:12]}…</div><div class="l">SHA-256 of SPEC.md as rendered</div></a>
     </div>
   </section>
@@ -288,8 +288,8 @@ cd crovia-seal && python3 conformance/run_conformance.py
   <div class="sp-head"><h2 id="related">Draft, code, related</h2><div class="meta">everything the draft refers to, in one place</div></div>
   <div class="sp-grid">
     <div class="sp-card"><div class="k">Internet-Draft</div><h3>{html.escape(latest or 'draft-crovia-seal')}</h3><p>Independent Submission, Informational. <a href="{DATATRACKER}" rel="noopener">Datatracker ↗</a> · mirrored here: <a href="/registry/seal/spec/{latest}.txt">.txt</a> · <a href="/registry/seal/spec/{latest}.xml">.xml</a> · <a href="/registry/seal/spec/{latest}.html">.html</a>. The draft is not modified; this page is its companion.</p></div>
-    <div class="sp-card"><div class="k">Reference implementation</div><h3>crovia-seal {html.escape(ref_version)}</h3><p>Python, Apache-2.0: canonicalization, signing, chain and verification. <a href="{REPO}" rel="noopener">github.com/croviatrust/crovia-seal ↗</a></p><pre>pip install "crovia-seal @ git+{REPO}#subdirectory=reference/python"
-python3 -c "from crovia_seal.seal import verify_seal"</pre></div>
+    <div class="sp-card"><div class="k">Reference implementation</div><h3>crovia-seal {html.escape(ref_version)}</h3><p>Python and TypeScript, Apache-2.0: canonicalization, signing, chain and verification, both passing the {total_tests} tests above. <a href="{REPO}" rel="noopener">github.com/croviatrust/crovia-seal ↗</a> · <a href="https://pypi.org/project/crovia-seal/" rel="noopener">PyPI</a> · <a href="https://www.npmjs.com/package/@crovia/seal" rel="noopener">npm</a></p><pre>pip install crovia-seal        # PyPI, Python ≥ 3.10
+npm install @crovia/seal       # npm, ESM, provenance attested</pre></div>
     <div class="sp-card"><div class="k">Verify</div><h3>In your browser, offline</h3><p>Paste any Seal — or open a vector with the links above. CSC-1 bytes, Ed25519 signature and chain links are checked locally; nothing is uploaded. <a href="/registry/seal/verify/">Open the verifier</a>.</p></div>
     <div class="sp-card"><div class="k">Companions</div><h3>Threat model, log, trust root</h3><p><a href="/registry/seal/threat-model/">Threat model</a> · <a href="/registry/seal/log/">Transparency log</a> · <a href="/trust-root.json">Issuer trust root</a> · <a href="/registry/seal/">Seal overview</a> · <a href="https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md" rel="noopener">TACET, the first profile that wraps Seals ↗</a></p></div>
   </div>

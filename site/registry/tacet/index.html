@@ -155,13 +155,8 @@
   <section class="tc-section" id="verify">
     <div class="tc-head"><div><h2>Don't trust the page. Verify the file.</h2><p class="sub">Two independent verifiers, same checks. <a href="/registry/seal/verify/">In your browser</a>: operator signatures and chaining, the empty slot under every depth-256 root, observer signatures and inclusion of each negative snapshot, the silence block — and, with network checks on, every <span class="mono">.ots</span> proof parsed in the page and its merkle root matched to the Bitcoin block header. Or offline, with the reference implementation below. Neither needs a Bitcoin node, an OpenTimestamps client, or a Crovia server.</p></div></div>
     <div class="tc-grid2">
-      <div class="tc-code"><span class="c"># reference + operator (Python ≥ 3.10)</span>
-git clone https://github.com/croviatrust/countersign
-git clone https://github.com/croviatrust/crovia-seal
-pip install -e countersign/tacet/reference/python \
-            -e crovia-seal/reference/python \
-            -e countersign/tacet/operator
-pip install opentimestamps-client
+      <div class="tc-code"><span class="c"># operator + Seal reference, both from PyPI (Python ≥ 3.10)</span>
+pip install crovia-tacet-operator crovia-seal
 
 <span class="c"># pick a proof from /registry/data/tacet/proofs/</span>
 curl -sO https://croviatrust.com/registry/data/tacet/proofs/<span class="a" id="v-slug">mistralai__Mistral-7B-v0.1</span>.seal.json
@@ -218,7 +213,7 @@ tacet-operator verify <span class="a" id="v-slug2">mistralai__Mistral-7B-v0.1</s
   </div>
 </footer>
 
-<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919c" defer></script>
+<script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919g" defer></script>
 <script>
 (function(){
   var B='/registry/data/tacet/';
