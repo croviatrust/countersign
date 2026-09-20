@@ -246,7 +246,7 @@
       '<a href="/registry/seal/log/">Seal Transparency Log</a>' +
       '<a href="/registry/seal/spec/">Seal spec &#8599;</a>' +
       '<a href="https://datatracker.ietf.org/doc/draft-crovia-seal/" target="_blank" rel="noopener">IETF draft &#8599;</a>' +
-      '<a href="https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md" target="_blank" rel="noopener">TACET spec &#8599;</a>' +
+      '<a href="/registry/tacet/spec/">TACET spec</a>' +
       '<a href="https://github.com/croviatrust" target="_blank" rel="noopener">GitHub &#8599;</a>' +
       '<a href="mailto:info@croviatrust.com">Contact &#9993;</a>' +
       '</div></div>';

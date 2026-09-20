@@ -1,0 +1,324 @@
+{
+  "epoch_snapshot_hashes": {
+    "0": [
+      "979939c2e255c9c47f8057691915cd9d65cc7ccaf1ac89e337c1c2aef80c9035",
+      "9683e8dd52de40e5d2854e137c7ceaedff853b78e4bcafbd48de5323a1a9cd54"
+    ],
+    "1": [
+      "a398580cdf3567b69ac7013a586f4f2e41ac4beeb9b2caaaaf5ceb237afb58d2",
+      "af12c1cd3dea34088f9808c87709534401acd390bd7e58c8c19d7f4f264969c4"
+    ],
+    "10": [
+      "cd1da90a99f5cb7d6ca9ee737725a914d776623d5d50006011cd32678d916f4e",
+      "f6a7ea749a3832f3a24b8044303bb2b425f8e17cdeeb9ccec64f55f6219079fd"
+    ],
+    "11": [
+      "b1e52ff531e44dfd932fb6c3a00be4d058037699e6cbcfb8ba95150c7908610b",
+      "fea047a3701db00f206f21723fd990862e43d0e25f7e3517cdf1bd0b9d775c51"
+    ],
+    "2": [
+      "efd607a1f691a1ebaa49ba4ab521efac218d5c3f03b40d826083412cc728f8e3",
+      "30116f88da740ed461162493a58b6c63833150161faa1458e9e55e2bf6ac9376"
+    ],
+    "3": [
+      "6c266378af4173e2077c2e3388f16a9d78bd09828361fbc280545c73b55066e4",
+      "f51424d0e65f83ddab4e04543800349ebe36baa0e0b8cf32f3378b98186e7d79"
+    ],
+    "4": [
+      "f8acbea98d4961f7c03e1fefcb9ed9a3b977ea5f34c89800056db1ab6fe7016f",
+      "8aefd510cae8fc5bc5e9680f850d3084b8644e015cec8d7bc1d10037e1c2f861"
+    ],
+    "5": [
+      "98ae8c761d9f61d2d7368866872a1ec8eeecc60d9af620fea174feb46722e77d",
+      "82af55306585580525e0c206fcb66885f03d262d3dc085a81a29d1fddfd920f1"
+    ],
+    "6": [
+      "5940c142c846166bfbb6421238660ebc7e265b7a24e54777acfd3af6562f18a8",
+      "30ebc43d7894536188067480b1303f3306d7dca230efa5357a151acc1305cea7"
+    ],
+    "7": [],
+    "8": [],
+    "9": []
+  },
+  "negative_snapshots": [
+    {
+      "beacon_round": 6478166,
+      "body_len": 25,
+      "body_sha256": "sha256:83fcf56d3aa2b2d33d7fce819f6086ce7012dc66ca011d10e4ccf5b2292b980e",
+      "epoch": 0,
+      "fetched_at": "2026-09-19T00:17:00Z",
+      "http_status": 200,
+      "observer": {
+        "id": "urn:crovia:observer:fixture-1",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "2e3556fff1b7abd096c2eb58b5face399bb85fe9d7a2344700391055561a8b6e"
+        }
+      },
+      "predicate": {
+        "code_hash": "sha256:5ffefc7f818946fe0c516993098d2ab00388be1baac79452182c92d75715d51f",
+        "id": "crovia.pred.art53-summary",
+        "version": "1.0.0"
+      },
+      "resolved_ip": "203.0.113.10",
+      "result": false,
+      "signature": {
+        "alg": "ed25519",
+        "domain": "TACET-SNAPSHOT-v1",
+        "sig_hex": "e4cddc8e4b054f21121a9d67923209ec7c46a88f94b59fba4bf1858d7edcf8b9ac8d06eaf2d4b2fe4d2ec2f68b3248f3d6b10a31b8ea080594768a5e1902c20c"
+      },
+      "snapshot_version": "crovia.tacet.snapshot.v1",
+      "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
+      "target_id": "meta-llama/Llama-3.1-8B",
+      "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
+    },
+    {
+      "beacon_round": 6478286,
+      "body_len": 25,
+      "body_sha256": "sha256:46313eccab81df6e8121e8e2c7f2b03f76346b3318289fe5c1d0f38cc53efa34",
+      "epoch": 1,
+      "fetched_at": "2026-09-19T01:17:00Z",
+      "http_status": 200,
+      "observer": {
+        "id": "urn:crovia:observer:fixture-1",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "2e3556fff1b7abd096c2eb58b5face399bb85fe9d7a2344700391055561a8b6e"
+        }
+      },
+      "predicate": {
+        "code_hash": "sha256:5ffefc7f818946fe0c516993098d2ab00388be1baac79452182c92d75715d51f",
+        "id": "crovia.pred.art53-summary",
+        "version": "1.0.0"
+      },
+      "resolved_ip": "203.0.113.10",
+      "result": false,
+      "signature": {
+        "alg": "ed25519",
+        "domain": "TACET-SNAPSHOT-v1",
+        "sig_hex": "088123c644f143845251fe3717375ca1fea7c9fef3b6d430636410c5bc13e2765e621754af4e7c0d29079f5cf8809e20e57aa959373c92a153aaa1fd9336eb05"
+      },
+      "snapshot_version": "crovia.tacet.snapshot.v1",
+      "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
+      "target_id": "meta-llama/Llama-3.1-8B",
+      "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
+    },
+    {
+      "beacon_round": 6478406,
+      "body_len": 25,
+      "body_sha256": "sha256:b9f6750a00c9a8e4d1a131eddf7b0bb5157c30145a0f57b02636885272f4afdf",
+      "epoch": 2,
+      "fetched_at": "2026-09-19T02:17:00Z",
+      "http_status": 200,
+      "observer": {
+        "id": "urn:crovia:observer:fixture-1",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "2e3556fff1b7abd096c2eb58b5face399bb85fe9d7a2344700391055561a8b6e"
+        }
+      },
+      "predicate": {
+        "code_hash": "sha256:5ffefc7f818946fe0c516993098d2ab00388be1baac79452182c92d75715d51f",
+        "id": "crovia.pred.art53-summary",
+        "version": "1.0.0"
+      },
+      "resolved_ip": "203.0.113.10",
+      "result": false,
+      "signature": {
+        "alg": "ed25519",
+        "domain": "TACET-SNAPSHOT-v1",
+        "sig_hex": "aa518839b0a671d69672ef6df7b88cfa070b4eeb6e704851ff0e423661fa187f2a0c9e2487285889e63e0d103da23a9948efa0c073d1257340b023ed0cf30608"
+      },
+      "snapshot_version": "crovia.tacet.snapshot.v1",
+      "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
+      "target_id": "meta-llama/Llama-3.1-8B",
+      "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
+    },
+    {
+      "beacon_round": 6478526,
+      "body_len": 25,
+      "body_sha256": "sha256:51a7ae16f9adaa1a28e07c3b2b048ceb76d09655888013c53c454ce3163a2b98",
+      "epoch": 3,
+      "fetched_at": "2026-09-19T03:17:00Z",
+      "http_status": 200,
+      "observer": {
+        "id": "urn:crovia:observer:fixture-1",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "2e3556fff1b7abd096c2eb58b5face399bb85fe9d7a2344700391055561a8b6e"
+        }
+      },
+      "predicate": {
+        "code_hash": "sha256:5ffefc7f818946fe0c516993098d2ab00388be1baac79452182c92d75715d51f",
+        "id": "crovia.pred.art53-summary",
+        "version": "1.0.0"
+      },
+      "resolved_ip": "203.0.113.10",
+      "result": false,
+      "signature": {
+        "alg": "ed25519",
+        "domain": "TACET-SNAPSHOT-v1",
+        "sig_hex": "cdbfb2432095eaa807db391877b55c45078f1737f2c739a3577638b876d7077f38eb2198ff0f4ab6251ca47e31ac37bb27dfa673d176f97b68dcc09e15262408"
+      },
+      "snapshot_version": "crovia.tacet.snapshot.v1",
+      "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
+      "target_id": "meta-llama/Llama-3.1-8B",
+      "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
+    },
+    {
+      "beacon_round": 6478646,
+      "body_len": 25,
+      "body_sha256": "sha256:5e8b80e51a6e7f6a68972966cd598a9848bfeb718d260e5227a7f01f9e3a74e9",
+      "epoch": 4,
+      "fetched_at": "2026-09-19T04:17:00Z",
+      "http_status": 200,
+      "observer": {
+        "id": "urn:crovia:observer:fixture-1",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "2e3556fff1b7abd096c2eb58b5face399bb85fe9d7a2344700391055561a8b6e"
+        }
+      },
+      "predicate": {
+        "code_hash": "sha256:5ffefc7f818946fe0c516993098d2ab00388be1baac79452182c92d75715d51f",
+        "id": "crovia.pred.art53-summary",
+        "version": "1.0.0"
+      },
+      "resolved_ip": "203.0.113.10",
+      "result": false,
+      "signature": {
+        "alg": "ed25519",
+        "domain": "TACET-SNAPSHOT-v1",
+        "sig_hex": "9793b68bc79e5b5c3cd8f5d49a0dea8b044aa36ed9d2e8c595814c239cc052601d6a97c55d1ccfc838b5d0a99a27a9ed9281118177bfa7b4dffc8e3c15981d01"
+      },
+      "snapshot_version": "crovia.tacet.snapshot.v1",
+      "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
+      "target_id": "meta-llama/Llama-3.1-8B",
+      "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
+    },
+    {
+      "beacon_round": 6478766,
+      "body_len": 25,
+      "body_sha256": "sha256:ea6bc9c28bb8940d67605c932ff8365bd103f7709010002e875abe6601741215",
+      "epoch": 5,
+      "fetched_at": "2026-09-19T05:17:00Z",
+      "http_status": 200,
+      "observer": {
+        "id": "urn:crovia:observer:fixture-1",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "2e3556fff1b7abd096c2eb58b5face399bb85fe9d7a2344700391055561a8b6e"
+        }
+      },
+      "predicate": {
+        "code_hash": "sha256:5ffefc7f818946fe0c516993098d2ab00388be1baac79452182c92d75715d51f",
+        "id": "crovia.pred.art53-summary",
+        "version": "1.0.0"
+      },
+      "resolved_ip": "203.0.113.10",
+      "result": false,
+      "signature": {
+        "alg": "ed25519",
+        "domain": "TACET-SNAPSHOT-v1",
+        "sig_hex": "62954542d24220413bd0b522452cab3c48013d9bb0371a76d2aaaf3140506ffff033bbb210f0bdd58ed39753792be782e6a256055efd6f60b4e44c954e43aa0f"
+      },
+      "snapshot_version": "crovia.tacet.snapshot.v1",
+      "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
+      "target_id": "meta-llama/Llama-3.1-8B",
+      "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
+    },
+    {
+      "beacon_round": 6478886,
+      "body_len": 25,
+      "body_sha256": "sha256:bbf993f8f0343afee44d34227be102b6dd0776abda1392e42bd423bd5698cf74",
+      "epoch": 6,
+      "fetched_at": "2026-09-19T06:17:00Z",
+      "http_status": 200,
+      "observer": {
+        "id": "urn:crovia:observer:fixture-1",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "2e3556fff1b7abd096c2eb58b5face399bb85fe9d7a2344700391055561a8b6e"
+        }
+      },
+      "predicate": {
+        "code_hash": "sha256:5ffefc7f818946fe0c516993098d2ab00388be1baac79452182c92d75715d51f",
+        "id": "crovia.pred.art53-summary",
+        "version": "1.0.0"
+      },
+      "resolved_ip": "203.0.113.10",
+      "result": false,
+      "signature": {
+        "alg": "ed25519",
+        "domain": "TACET-SNAPSHOT-v1",
+        "sig_hex": "af7e3a5f8ab5901c9b8c0801ab71ce710174ab3ca9d33e5fbeefa1734e81ed6264de60a89afb879d051bd48b3c6ccd3dbe72434b5bb011f3b3b6248b501f7b0f"
+      },
+      "snapshot_version": "crovia.tacet.snapshot.v1",
+      "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
+      "target_id": "meta-llama/Llama-3.1-8B",
+      "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
+    },
+    {
+      "beacon_round": 6479366,
+      "body_len": 26,
+      "body_sha256": "sha256:87226847a4d5fcc78d4d74b3237c25cadcf4c78474fe73f1f8e9dc407849b6e5",
+      "epoch": 10,
+      "fetched_at": "2026-09-19T10:17:00Z",
+      "http_status": 200,
+      "observer": {
+        "id": "urn:crovia:observer:fixture-1",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "2e3556fff1b7abd096c2eb58b5face399bb85fe9d7a2344700391055561a8b6e"
+        }
+      },
+      "predicate": {
+        "code_hash": "sha256:5ffefc7f818946fe0c516993098d2ab00388be1baac79452182c92d75715d51f",
+        "id": "crovia.pred.art53-summary",
+        "version": "1.0.0"
+      },
+      "resolved_ip": "203.0.113.10",
+      "result": false,
+      "signature": {
+        "alg": "ed25519",
+        "domain": "TACET-SNAPSHOT-v1",
+        "sig_hex": "59057d43d90c911912afa7178075b186f7da825676c3de9e5ee156e7ea455a2c84ee51f0ea1c9a2e90183423b4e00ca4ccbb592059385b488a9437799074c90c"
+      },
+      "snapshot_version": "crovia.tacet.snapshot.v1",
+      "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
+      "target_id": "meta-llama/Llama-3.1-8B",
+      "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
+    },
+    {
+      "beacon_round": 6479486,
+      "body_len": 26,
+      "body_sha256": "sha256:bff0daefeb929931ee944a1bb9bffec961471e24749e43abd29f1a97279f00be",
+      "epoch": 11,
+      "fetched_at": "2026-09-19T11:17:00Z",
+      "http_status": 200,
+      "observer": {
+        "id": "urn:crovia:observer:fixture-1",
+        "pubkey": {
+          "alg": "ed25519",
+          "key_hex": "2e3556fff1b7abd096c2eb58b5face399bb85fe9d7a2344700391055561a8b6e"
+        }
+      },
+      "predicate": {
+        "code_hash": "sha256:5ffefc7f818946fe0c516993098d2ab00388be1baac79452182c92d75715d51f",
+        "id": "crovia.pred.art53-summary",
+        "version": "1.0.0"
+      },
+      "resolved_ip": "203.0.113.10",
+      "result": false,
+      "signature": {
+        "alg": "ed25519",
+        "domain": "TACET-SNAPSHOT-v1",
+        "sig_hex": "96dc909f0be0a01b5e68e54e79b6b6d566415ad08077ccb68d12f8b2282548b7134787201d87b143b19941905e4e619b8ffc15c58032185007495f57ef943608"
+      },
+      "snapshot_version": "crovia.tacet.snapshot.v1",
+      "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
+      "target_id": "meta-llama/Llama-3.1-8B",
+      "tls_cert_sha256": "sha256:06298432e8066b29e2223bcc23aa9504b56ae508fabf3435508869b9c3190e22"
+    }
+  ]
+}

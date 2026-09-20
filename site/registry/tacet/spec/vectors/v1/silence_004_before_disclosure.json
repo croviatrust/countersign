@@ -1,0 +1,321 @@
+{
+  "disclosure_epoch": 5,
+  "expect": {
+    "non_inclusion_after_disclosure": false,
+    "ok": true
+  },
+  "paths_after_disclosure": {
+    "10": {
+      "bitmap": "f400000000000000000000000000000000000000000000000000000000000000",
+      "siblings": [
+        "d7756ed42c65736aa59cae858e4f0552792478b74d079cdfb93e70bba8386db9",
+        "9386b7a543a00b3f20f666daddec05ff21c3adb7367239497066da4d34ba01b3",
+        "4e6fe3db9388f49133950830ad989a0902166fc39de6482e6b5fe2813309d6e0",
+        "8c8536be0050089943ec33caeeeea3262446680e276ef7385c8cf1a661490bd7",
+        "44391a8c0736bba72d618f662fdc3543a3f9fefe3e45c335cfe1437503376190"
+      ]
+    },
+    "11": {
+      "bitmap": "f400000000000000000000000000000000000000000000000000000000000000",
+      "siblings": [
+        "d7756ed42c65736aa59cae858e4f0552792478b74d079cdfb93e70bba8386db9",
+        "9386b7a543a00b3f20f666daddec05ff21c3adb7367239497066da4d34ba01b3",
+        "4e6fe3db9388f49133950830ad989a0902166fc39de6482e6b5fe2813309d6e0",
+        "8c8536be0050089943ec33caeeeea3262446680e276ef7385c8cf1a661490bd7",
+        "44391a8c0736bba72d618f662fdc3543a3f9fefe3e45c335cfe1437503376190"
+      ]
+    },
+    "5": {
+      "bitmap": "f000000000000000000000000000000000000000000000000000000000000000",
+      "siblings": [
+        "9386b7a543a00b3f20f666daddec05ff21c3adb7367239497066da4d34ba01b3",
+        "4e6fe3db9388f49133950830ad989a0902166fc39de6482e6b5fe2813309d6e0",
+        "8c8536be0050089943ec33caeeeea3262446680e276ef7385c8cf1a661490bd7",
+        "44391a8c0736bba72d618f662fdc3543a3f9fefe3e45c335cfe1437503376190"
+      ]
+    },
+    "6": {
+      "bitmap": "f000000000000000000000000000000000000000000000000000000000000000",
+      "siblings": [
+        "9386b7a543a00b3f20f666daddec05ff21c3adb7367239497066da4d34ba01b3",
+        "4e6fe3db9388f49133950830ad989a0902166fc39de6482e6b5fe2813309d6e0",
+        "8c8536be0050089943ec33caeeeea3262446680e276ef7385c8cf1a661490bd7",
+        "44391a8c0736bba72d618f662fdc3543a3f9fefe3e45c335cfe1437503376190"
+      ]
+    },
+    "7": {
+      "bitmap": "f000000000000000000000000000000000000000000000000000000000000000",
+      "siblings": [
+        "9386b7a543a00b3f20f666daddec05ff21c3adb7367239497066da4d34ba01b3",
+        "4e6fe3db9388f49133950830ad989a0902166fc39de6482e6b5fe2813309d6e0",
+        "8c8536be0050089943ec33caeeeea3262446680e276ef7385c8cf1a661490bd7",
+        "44391a8c0736bba72d618f662fdc3543a3f9fefe3e45c335cfe1437503376190"
+      ]
+    },
+    "8": {
+      "bitmap": "f400000000000000000000000000000000000000000000000000000000000000",
+      "siblings": [
+        "d7756ed42c65736aa59cae858e4f0552792478b74d079cdfb93e70bba8386db9",
+        "9386b7a543a00b3f20f666daddec05ff21c3adb7367239497066da4d34ba01b3",
+        "4e6fe3db9388f49133950830ad989a0902166fc39de6482e6b5fe2813309d6e0",
+        "8c8536be0050089943ec33caeeeea3262446680e276ef7385c8cf1a661490bd7",
+        "44391a8c0736bba72d618f662fdc3543a3f9fefe3e45c335cfe1437503376190"
+      ]
+    },
+    "9": {
+      "bitmap": "f400000000000000000000000000000000000000000000000000000000000000",
+      "siblings": [
+        "d7756ed42c65736aa59cae858e4f0552792478b74d079cdfb93e70bba8386db9",
+        "9386b7a543a00b3f20f666daddec05ff21c3adb7367239497066da4d34ba01b3",
+        "4e6fe3db9388f49133950830ad989a0902166fc39de6482e6b5fe2813309d6e0",
+        "8c8536be0050089943ec33caeeeea3262446680e276ef7385c8cf1a661490bd7",
+        "44391a8c0736bba72d618f662fdc3543a3f9fefe3e45c335cfe1437503376190"
+      ]
+    }
+  },
+  "proof": {
+    "from_epoch": 0,
+    "key": "acb635d78c54c9e5810306e9561d2241fa045eb34852d3bc7870342f272d5379",
+    "map_id": "urn:crovia:tacet:map:disclosure",
+    "paths": {
+      "deltas": [
+        {
+          "changed": [],
+          "epoch": 1
+        },
+        {
+          "changed": [
+            [
+              253,
+              "4e6fe3db9388f49133950830ad989a0902166fc39de6482e6b5fe2813309d6e0"
+            ]
+          ],
+          "epoch": 2
+        },
+        {
+          "changed": [],
+          "epoch": 3
+        },
+        {
+          "changed": [],
+          "epoch": 4
+        }
+      ],
+      "initial": {
+        "bitmap": "f000000000000000000000000000000000000000000000000000000000000000",
+        "siblings": [
+          "9386b7a543a00b3f20f666daddec05ff21c3adb7367239497066da4d34ba01b3",
+          "2b92ec71017761cd749a2a49e2100e05325339a25e98a6c14a739cdd65840329",
+          "8c8536be0050089943ec33caeeeea3262446680e276ef7385c8cf1a661490bd7",
+          "44391a8c0736bba72d618f662fdc3543a3f9fefe3e45c335cfe1437503376190"
+        ]
+      }
+    },
+    "proof_version": "crovia.tacet.silence.v1",
+    "sheets": [
+      {
+        "closed": {
+          "anchored_digest": "sha256:f20e70e5900cc3f9bddf766634136118eff6d207076aa3afd87dda8f8956956e",
+          "block_height": 956000,
+          "block_time": "2026-09-19T01:40:00Z",
+          "kind": "ots",
+          "proof_ref": "ots://fixture/0.ots",
+          "status": "bitcoin"
+        },
+        "epoch": 0,
+        "epoch_end": "2026-09-19T01:00:00Z",
+        "epoch_start": "2026-09-19T00:00:00Z",
+        "map_id": "urn:crovia:tacet:map:disclosure",
+        "opened": {
+          "chain_hash": "8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce",
+          "kind": "drand",
+          "randomness": "b031d753cee014e8a74da261a54481a6d6d19ea64cbc15e0b00b0ed6b9461e69",
+          "round": 6478166,
+          "signature": "4c33e15d4eaf568339a75bddef10fac5d6071cb5bf04b9cbcc7d405a2e8d52c53cbcf75747f832adbf01a4a290d7ea21043dd2c3964447a3b2e7089e45a04787"
+        },
+        "operator": {
+          "id": "urn:crovia:tacet:operator:fixture",
+          "pubkey": {
+            "alg": "ed25519",
+            "key_hex": "c88d1afc2ba507fb200380067a38cd3754f2489544028cc9134f1cee1f9223b9"
+          }
+        },
+        "prev_sheet_hash": null,
+        "root": "sha256:86f38324d791670fd4849d253f5cb0e5ed3fe50270a689fae3e566db2e856789",
+        "sheet_version": "crovia.tacet.epoch.v1",
+        "signature": {
+          "alg": "ed25519",
+          "domain": "TACET-EPOCH-v1",
+          "sig_hex": "4b5c9305e1de12395a98ae539420258c909aa1b91d690f8c520920275a23cb2dd3977f52ab6223a3893268385aea768ed9f98281422f65a1544829e8462b3707"
+        },
+        "size": 20,
+        "snapshots_root": "sha256:38a2093fc3c38f96d78e826309990af9cca675f5eccc358185fe3ab63108def6"
+      },
+      {
+        "closed": {
+          "anchored_digest": "sha256:7282633fa08defaefa993f932de4bda1ff36afd95cfac41ecb5e45e643c0e709",
+          "block_height": 956001,
+          "block_time": "2026-09-19T02:40:00Z",
+          "kind": "ots",
+          "proof_ref": "ots://fixture/1.ots",
+          "status": "bitcoin"
+        },
+        "epoch": 1,
+        "epoch_end": "2026-09-19T02:00:00Z",
+        "epoch_start": "2026-09-19T01:00:00Z",
+        "map_id": "urn:crovia:tacet:map:disclosure",
+        "opened": {
+          "chain_hash": "8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce",
+          "kind": "drand",
+          "randomness": "83b903f14682a9f228f094ab30deb28a9ba8ee3260d88ccac4a156409d38b47d",
+          "round": 6478286,
+          "signature": "209fc107540ab96fbfadc8abc71e881dc4928035ef1f7d785af47d7521bf9f912d3fc5e88d6d3cd428fcc6691cadc59cb8b2303fd62e96e5814c376a027cf84c"
+        },
+        "operator": {
+          "id": "urn:crovia:tacet:operator:fixture",
+          "pubkey": {
+            "alg": "ed25519",
+            "key_hex": "c88d1afc2ba507fb200380067a38cd3754f2489544028cc9134f1cee1f9223b9"
+          }
+        },
+        "prev_sheet_hash": "sha256:f20e70e5900cc3f9bddf766634136118eff6d207076aa3afd87dda8f8956956e",
+        "root": "sha256:86f38324d791670fd4849d253f5cb0e5ed3fe50270a689fae3e566db2e856789",
+        "sheet_version": "crovia.tacet.epoch.v1",
+        "signature": {
+          "alg": "ed25519",
+          "domain": "TACET-EPOCH-v1",
+          "sig_hex": "33ebd70d13c497bdac7bd3a8577521052cab40ff11ba71c8f887925bd84a016740483efc699b26ad409989e71230eed79a3e7688e0437f07039adee08507210e"
+        },
+        "size": 20,
+        "snapshots_root": "sha256:8f66044f9d9f63b5253b867c99c5dc50e63a46058b3f3f1e191486aa7f3e022e"
+      },
+      {
+        "closed": {
+          "anchored_digest": "sha256:5a4d49c41042f74bef31c1e1bdbd14f67c03d525217c6891ee5be396120fb597",
+          "block_height": 956002,
+          "block_time": "2026-09-19T03:40:00Z",
+          "kind": "ots",
+          "proof_ref": "ots://fixture/2.ots",
+          "status": "bitcoin"
+        },
+        "epoch": 2,
+        "epoch_end": "2026-09-19T03:00:00Z",
+        "epoch_start": "2026-09-19T02:00:00Z",
+        "map_id": "urn:crovia:tacet:map:disclosure",
+        "opened": {
+          "chain_hash": "8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce",
+          "kind": "drand",
+          "randomness": "add655f95597de11aa55e246f888ff36a7111a16a98e72f49eb2cf7e3b392acb",
+          "round": 6478406,
+          "signature": "f95de5e8e71b286fc18f16d4e398bc213ba2c2191075cd5e77c0d6ea75792b671b24f365b7a194201b5e134a9aa6702017b16ed5b01c92780ed36dc176dcdb2b"
+        },
+        "operator": {
+          "id": "urn:crovia:tacet:operator:fixture",
+          "pubkey": {
+            "alg": "ed25519",
+            "key_hex": "c88d1afc2ba507fb200380067a38cd3754f2489544028cc9134f1cee1f9223b9"
+          }
+        },
+        "prev_sheet_hash": "sha256:7282633fa08defaefa993f932de4bda1ff36afd95cfac41ecb5e45e643c0e709",
+        "root": "sha256:9fc468a2c2b589a4f7bfc983349789f78da7bfe2b7f2925e642320d928535eff",
+        "sheet_version": "crovia.tacet.epoch.v1",
+        "signature": {
+          "alg": "ed25519",
+          "domain": "TACET-EPOCH-v1",
+          "sig_hex": "49bea073575ebbdef0fcba09cb5653b481c86cc2aeb955971d616f33e5b25abee8c11a361b7f5599fe32b77ce5419aee821cfab8356ea282a44d8127e8465a01"
+        },
+        "size": 21,
+        "snapshots_root": "sha256:e4fc62d5321e456c91aa8296d2f688f5c908c24ca2b08b7c80dc3cd4bdb71647"
+      },
+      {
+        "closed": {
+          "anchored_digest": "sha256:d2682c88d803b89b9acce6d94e090e9065d0681b8f219612dd4663db13c9f58e",
+          "block_height": 956003,
+          "block_time": "2026-09-19T04:40:00Z",
+          "kind": "ots",
+          "proof_ref": "ots://fixture/3.ots",
+          "status": "bitcoin"
+        },
+        "epoch": 3,
+        "epoch_end": "2026-09-19T04:00:00Z",
+        "epoch_start": "2026-09-19T03:00:00Z",
+        "map_id": "urn:crovia:tacet:map:disclosure",
+        "opened": {
+          "chain_hash": "8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce",
+          "kind": "drand",
+          "randomness": "105ecafa13e92d9460527f45247f3acdf7920e8c7d90d944eb049c1220de3b4f",
+          "round": 6478526,
+          "signature": "40e987725c8fe650a5367a91df527a82ef719c37b9d863609f85dde225fa275a3a9993dc9c5fedfa06beaeb6c3e561521bd97c5648c48d710a4de9a13965d9e1"
+        },
+        "operator": {
+          "id": "urn:crovia:tacet:operator:fixture",
+          "pubkey": {
+            "alg": "ed25519",
+            "key_hex": "c88d1afc2ba507fb200380067a38cd3754f2489544028cc9134f1cee1f9223b9"
+          }
+        },
+        "prev_sheet_hash": "sha256:5a4d49c41042f74bef31c1e1bdbd14f67c03d525217c6891ee5be396120fb597",
+        "root": "sha256:9fc468a2c2b589a4f7bfc983349789f78da7bfe2b7f2925e642320d928535eff",
+        "sheet_version": "crovia.tacet.epoch.v1",
+        "signature": {
+          "alg": "ed25519",
+          "domain": "TACET-EPOCH-v1",
+          "sig_hex": "39cb77e39b7cc8dad96e9b69f812a933031fe0bbe01a7c6d9c475c001afb57216d7c89185be876b20990f99bcad84b2bd2855bddb106a8433e4aad3c0ee3c804"
+        },
+        "size": 21,
+        "snapshots_root": "sha256:47a5bb12cc45db830ef2cfa8af9c7e874f226a855f25f24b3d87a4766520e893"
+      },
+      {
+        "closed": {
+          "anchored_digest": "sha256:403f60d8e3ad60a07bde13824f81aa0b951091c1d283abd2595e5f8b459e7870",
+          "block_height": 956004,
+          "block_time": "2026-09-19T05:40:00Z",
+          "kind": "ots",
+          "proof_ref": "ots://fixture/4.ots",
+          "status": "bitcoin"
+        },
+        "epoch": 4,
+        "epoch_end": "2026-09-19T05:00:00Z",
+        "epoch_start": "2026-09-19T04:00:00Z",
+        "map_id": "urn:crovia:tacet:map:disclosure",
+        "opened": {
+          "chain_hash": "8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce",
+          "kind": "drand",
+          "randomness": "35e9a236f10db19ce5118f347cc2e0a21305a0a70e17500bd3bcadf5364f1328",
+          "round": 6478646,
+          "signature": "cc24542c50edcc3f69958a97cbb693c8c8bd58a7eb66f064358e5f8ccc5a84015140049fb7522f63c3ceb1f188cdd6cfbf9ac3c8b78bda1d6aa356a97d2bcab6"
+        },
+        "operator": {
+          "id": "urn:crovia:tacet:operator:fixture",
+          "pubkey": {
+            "alg": "ed25519",
+            "key_hex": "c88d1afc2ba507fb200380067a38cd3754f2489544028cc9134f1cee1f9223b9"
+          }
+        },
+        "prev_sheet_hash": "sha256:d2682c88d803b89b9acce6d94e090e9065d0681b8f219612dd4663db13c9f58e",
+        "root": "sha256:9fc468a2c2b589a4f7bfc983349789f78da7bfe2b7f2925e642320d928535eff",
+        "sheet_version": "crovia.tacet.epoch.v1",
+        "signature": {
+          "alg": "ed25519",
+          "domain": "TACET-EPOCH-v1",
+          "sig_hex": "018271ca1111efaf98e729c76d80f53e601981fe740f8e0f42a2b164b19ef6e683728f569f7f26055635e11ad601b368f699404ce129eb8ad94dcbd2e44d4d0f"
+        },
+        "size": 21,
+        "snapshots_root": "sha256:6013755035c3cc16dbce2ffa47df820d685afbeed9b264371901eba4d8421e42"
+      }
+    ],
+    "silence": {
+      "map_epochs": 5,
+      "observed_epochs": 0,
+      "observed_from": null,
+      "observed_to": null,
+      "silence_days": "0.00",
+      "silence_seconds": 0
+    },
+    "snapshots": [],
+    "strength": 1,
+    "target_id": "vendor30/model-30",
+    "to_epoch": 4,
+    "witnesses": {}
+  }
+}

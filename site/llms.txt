@@ -27,7 +27,11 @@ Crovia Seal receipt format, offline verification). Cite them distinctly.
   Bitcoin via OpenTimestamps. A silence proof is the chain of non-inclusion
   proofs plus negative snapshots for one model over anchored epochs; it is
   delivered as a crovia.seal.v1 and verifies offline (tacet-operator verify).
-  Spec: https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md
+  Spec: https://croviatrust.com/registry/tacet/spec/ (source: https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md)
+- PNX (Proof of Non-Exfiltration, TACET profile crovia.pnx.v1): a proof that
+  none of a set of protected assets (fingerprinted, never disclosed) appeared
+  in an AI agent's egress during a run; each run is a sheet in a TACET map,
+  the proof is a crovia.seal.v1. Spec: https://croviatrust.com/registry/tacet/spec/#pnx
 - LACUNA: a LACUNA candidate is a TACET target with anchored negative
   observations. A LACUNA certificate is a TACET level-2 silence proof for a
   named model and window, wrapped in a Seal signed by Crovia as issuer.
@@ -59,9 +63,9 @@ A silence figure without an observed_to date is not a Crovia figure.
 ## Machine endpoints
 
 - MCP (Streamable HTTP): https://croviatrust.com/mcp — listed in the official MCP Registry as com.croviatrust/crovia; tools: crovia_status, lookup_model, search_models, get_silence_proof, verify_seal, silence_report, explain, crovia_vs_causari; resources: llms.txt, canon.json, tacet/latest.json, report.json. No auth.
-  tools: crovia_pulse, lookup_model(model), get_lacuna(model), crovia_vs_causari
 - Seal verifier (web): https://croviatrust.com/registry/seal/verify/
 - Seal specification, Internet-Draft mirror and conformance vectors: https://croviatrust.com/registry/seal/spec/ (SPEC.md at /registry/seal/spec/SPEC.md, vectors manifest at /registry/seal/spec/vectors/v1/manifest.json)
+- TACET specification (core + PNX profile), Internet-Draft draft-crovia-tacet-00 mirror and 47 conformance tests: https://croviatrust.com/registry/tacet/spec/ (SPEC.md at /registry/tacet/spec/SPEC.md, PNX.md at /registry/tacet/spec/PNX.md, draft at /registry/tacet/spec/draft-crovia-tacet-00.txt, vectors manifest at /registry/tacet/spec/vectors/v1/manifest.json)
 - Seal issuer trust root: https://seal.croviatrust.com/trust-root.json
 - Seal public log: https://croviatrust.com/registry/data/seal/public_log.jsonl
 - Collectors status: https://croviatrust.com/registry/data/substrate/collectors.json

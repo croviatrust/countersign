@@ -1,0 +1,758 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE rfc [
+  <!ENTITY nbsp    "&#160;">
+  <!ENTITY zwsp   "&#8203;">
+  <!ENTITY nbhy   "&#8209;">
+  <!ENTITY wj     "&#8288;">
+]>
+<rfc xmlns:xi="http://www.w3.org/2001/XInclude"
+     ipr="trust200902"
+     docName="draft-crovia-tacet-00"
+     category="info"
+     submissionType="independent"
+     tocInclude="true"
+     tocDepth="3"
+     symRefs="true"
+     sortRefs="true"
+     version="3">
+
+  <front>
+    <title abbrev="TACET">TACET: Verifiable Silence Proofs over a Sparse Merkle Transparency Map, with the PNX Profile for Proof of Non-Exfiltration</title>
+    <seriesInfo name="Internet-Draft" value="draft-crovia-tacet-00"/>
+    <author fullname="Tarik En Nakhai" surname="En Nakhai" initials="T.">
+      <organization>Crovia Trust</organization>
+      <address>
+        <postal>
+          <street/>
+          <country>IT</country>
+        </postal>
+        <email>info@croviatrust.com</email>
+        <uri>https://croviatrust.com</uri>
+      </address>
+    </author>
+    <date year="2026" month="September" day="20"/>
+    <area>Security</area>
+    <workgroup>Independent Submission</workgroup>
+    <keyword>transparency log</keyword>
+    <keyword>sparse Merkle tree</keyword>
+    <keyword>non-inclusion proof</keyword>
+    <keyword>verifiable absence</keyword>
+    <keyword>AI training data</keyword>
+    <keyword>OpenTimestamps</keyword>
+    <keyword>drand</keyword>
+    <keyword>non-exfiltration</keyword>
+
+    <abstract>
+      <t>
+        Existing transparency logs prove presence: a certificate was logged, a binary was
+        published, a key was registered. TACET is a transparency map whose primary product is a
+        portable, offline-verifiable proof of absence over time: that for a given subject, no
+        record satisfying a public predicate existed in the map, and none was found on the
+        subject's monitored public surfaces, across a contiguous range of epochs bounded below by
+        a public randomness beacon and above by a Bitcoin block. This document specifies the map
+        (a depth-256 sparse Merkle tree), the signed epoch sheet, surface snapshots and
+        predicates, the delta-encoded silence proof with its three strength levels, the
+        monotonicity rule under which silence never accrues without observation, the anchor check
+        that needs no Bitcoin node, and the wrapping of proofs in Crovia Seal receipts. It further
+        specifies PNX, a profile that applies the same construction to the outbound traffic of an
+        AI agent to prove that labelled assets were not exfiltrated during a run.
+      </t>
+    </abstract>
+  </front>
+
+  <middle>
+
+    <section anchor="intro">
+      <name>Introduction</name>
+      <t>
+        A transparency log is a public, append-only record that lets anyone check that a
+        statement was made and when. Certificate Transparency <xref target="RFC6962"/> and its
+        descendants prove that something was logged. Many regulatory and contractual questions,
+        however, are questions about what did not happen: that a required disclosure had not been
+        published by a given date; that a protected file did not leave a perimeter during a
+        session; that a claim was not withdrawn. Today such negatives are asserted, not proven.
+      </t>
+      <t>
+        TACET (Latin: "it is silent", the notation a composer writes on a part that does not
+        play) turns the sentence "no record satisfying predicate P was observed for subject S
+        between time A and time B" from the signed opinion of an observer into an arithmetic fact
+        that anyone can check against a public randomness beacon, the Bitcoin block chain, and the
+        signatures of independent witnesses. It uses only established primitives: SHA-256, Ed25519
+        <xref target="RFC8032"/>, sparse Merkle trees, a canonical JSON profile derived from
+        <xref target="RFC8785"/>, the drand randomness beacon, and OpenTimestamps attestations.
+        The contribution is the object and the protocol, not new cryptography.
+      </t>
+      <t>
+        TACET was designed for one concrete case, the disclosure of training data by providers of
+        general-purpose AI models on their public model surfaces, and this document uses that case
+        in its examples. The construction is generic: <xref target="pnx"/> applies it unchanged
+        to the egress traffic of an AI agent, where the question is whether any of a set of
+        protected assets was sent out.
+      </t>
+      <t>
+        Two properties are central. First, silence never accrues without observation: the silence
+        figure of a subject is a function of anchored, negative observations only, and stops
+        growing the moment observation stops. Second, a TACET proof is non-accusatory by
+        construction: it states a property of the map and of committed surface snapshots under a
+        published predicate and carries no verdict about the subject's conduct.
+      </t>
+    </section>
+
+    <section anchor="conventions">
+      <name>Conventions and Terminology</name>
+      <t>
+        The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD
+        NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be
+        interpreted as described in BCP 14 <xref target="RFC2119"/> <xref target="RFC8174"/> when,
+        and only when, they appear in all capitals, as shown here.
+      </t>
+      <dl newline="false" spacing="normal">
+        <dt>Target</dt><dd>A subject identified by a canonical target_id (<xref target="ids"/>).</dd>
+        <dt>Slot</dt><dd>The position of a target in the verifiable map.</dd>
+        <dt>Value</dt><dd>What a slot holds: nothing, a commitment, a disclosure, or a retraction.</dd>
+        <dt>Epoch</dt><dd>A fixed observation period (default one hour, aligned to UTC). Each epoch produces one epoch sheet.</dd>
+        <dt>Epoch sheet</dt><dd>The signed head of the map for one epoch, with its temporal bounds.</dd>
+        <dt>Snapshot</dt><dd>A commitment to the bytes fetched from one public surface of a target during an epoch, with the result of the predicate.</dd>
+        <dt>Predicate</dt><dd>A published, versioned, deterministic rule that decides whether fetched bytes constitute a disclosure.</dd>
+        <dt>Silence proof</dt><dd>A proof that a slot was empty across a range of epochs, at one of three strength levels.</dd>
+        <dt>Witness</dt><dd>An independent party that countersigns epoch sheets it has verified.</dd>
+        <dt>Operator</dt><dd>The party running the map and issuing epoch sheets.</dd>
+        <dt>H(x)</dt><dd>SHA-256(x) <xref target="RFC6234"/>. Hashes of objects are written in text as "sha256:" followed by 64 lowercase hexadecimal characters.</dd>
+        <dt>CSC-1</dt><dd>The canonical JSON profile of Crovia Seal <xref target="I-D.crovia-seal"/>: a subset of <xref target="RFC8785"/> with UTF-16 code-unit key ordering, no floating-point numbers, integers within plus or minus (2^53 - 1), and no insignificant whitespace.</dd>
+      </dl>
+    </section>
+
+    <section anchor="encoding">
+      <name>Canonical Encoding</name>
+      <section anchor="ids">
+        <name>Target Identifiers</name>
+        <t>
+          A target_id is a UTF-8 string of the form "organization/model" as used by the hosting
+          platform (for example "meta-llama/Llama-3.1-8B"). Normalisation is Unicode NFC and
+          trimming of ASCII whitespace; there is no case folding, because platform identifiers are
+          case-sensitive. Identifiers that are not of this form, or that denote internal
+          infrastructure of the operator (collectors, file paths, test identifiers), MUST NOT be
+          inserted into the map. An operator MUST publish its exclusion rules.
+        </t>
+        <t>
+          The slot key of a target is H(UTF-8(target_id)), a 256-bit value read most significant
+          bit first as the path from the root of the map.
+        </t>
+      </section>
+      <section anchor="canon">
+        <name>Canonical JSON</name>
+        <t>
+          All TACET objects are canonicalised with CSC-1. The hash of an object is
+          H(CSC-1(object)). Because CSC-1 has no floating-point numbers, quantities such as
+          silence_days are carried as decimal strings, and the normative quantity is always an
+          integer (<xref target="monotonicity"/>).
+        </t>
+      </section>
+      <section anchor="domains">
+        <name>Domain Separation</name>
+        <t>
+          Every signature and every hash of a TACET structure is domain-separated by a fixed
+          ASCII prefix followed by a single 0x0A byte:
+        </t>
+        <table anchor="domain-table">
+          <name>Domain separation prefixes</name>
+          <thead><tr><th>Purpose</th><th>Prefix bytes (before 0x0A)</th></tr></thead>
+          <tbody>
+            <tr><td>Empty leaf</td><td>TACET-EMPTY-v1</td></tr>
+            <tr><td>Leaf hash</td><td>TACET-LEAF-v1</td></tr>
+            <tr><td>Inner node</td><td>TACET-NODE-v1</td></tr>
+            <tr><td>Epoch sheet signature</td><td>TACET-EPOCH-v1</td></tr>
+            <tr><td>Witness countersignature</td><td>TACET-WITNESS-v1</td></tr>
+            <tr><td>Snapshot hash</td><td>TACET-SNAPSHOT-v1</td></tr>
+            <tr><td>PNX fingerprint (<xref target="pnx"/>)</td><td>CROVIA-PNX-FP-v1</td></tr>
+            <tr><td>PNX present leaf value</td><td>CROVIA-PNX-PRESENT-v1</td></tr>
+            <tr><td>PNX run sheet signature</td><td>CROVIA-PNX-SHEET-v1</td></tr>
+          </tbody>
+        </table>
+      </section>
+    </section>
+
+    <section anchor="map">
+      <name>The Verifiable Map</name>
+      <section anchor="map-structure">
+        <name>Structure</name>
+        <t>
+          The map is a sparse Merkle tree of depth 256. A key's slot is the leaf reached by
+          following its bits from the root, with bit value 0 meaning left.
+        </t>
+        <sourcecode type="pseudocode"><![CDATA[
+EMPTY[0]      = H("TACET-EMPTY-v1\n")
+EMPTY[d]      = H("TACET-NODE-v1\n" || EMPTY[d-1] || EMPTY[d-1])
+                for 1 <= d <= 256
+leaf(key, v)  = H("TACET-LEAF-v1\n" || key || value_hash(v))
+node(l, r)    = H("TACET-NODE-v1\n" || l || r)
+]]></sourcecode>
+        <t>
+          EMPTY[d] is the hash of an empty subtree of height d; the root of an empty map is
+          EMPTY[256]. value_hash(v) is defined in <xref target="values"/>.
+        </t>
+      </section>
+      <section anchor="map-proofs">
+        <name>Inclusion and Non-Inclusion Proofs</name>
+        <t>
+          A proof for key k at root R is the list of the 256 sibling hashes on the path from the
+          leaf to the root, leaf side first. A proof is compact if siblings equal to the
+          corresponding EMPTY[d] are omitted and replaced by a 256-bit bitmap in which bit d is set
+          if and only if the sibling at height d is present.
+        </t>
+        <ul>
+          <li>Inclusion: recomputing the root from leaf(k, v) and the siblings yields R.</li>
+          <li>Non-inclusion: recomputing the root from EMPTY[0] and the siblings yields R.</li>
+        </ul>
+        <t>
+          For a map holding n keys, a compact non-inclusion proof contains at most
+          ceil(log2 n) + 1 hashes with overwhelming probability, plus 32 bytes of bitmap.
+        </t>
+      </section>
+      <section anchor="values">
+        <name>Slot Values and Transitions</name>
+        <t>A slot value is one of the following objects:</t>
+        <sourcecode type="json"><![CDATA[
+{"kind": "commitment", "commit_hash": "sha256:...",
+ "committer": {"alg": "ed25519", "key_hex": "..."},
+ "seal_hash": "sha256:..."}
+
+{"kind": "disclosure", "summary_hash": "sha256:...",
+ "summary_url": "https://...", "snapshot_hash": "sha256:...",
+ "seal_hash": "sha256:...", "reveals": "sha256:..." | null}
+
+{"kind": "retraction", "of": "sha256:...", "seal_hash": "sha256:..."}
+]]></sourcecode>
+        <t>
+          value_hash(v) = H(CSC-1(v)). seal_hash is the hash of the Crovia Seal object by which
+          the party asserting the value signed it. commit_hash = H(summary_bytes || salt) with a
+          32-byte salt that is revealed at disclosure time in "reveals".
+        </t>
+        <t>
+          A slot moves only forward: empty to commitment to disclosure; empty to disclosure;
+          disclosure to retraction. A slot MUST never return to empty. Consequently a
+          non-inclusion proof at epoch e implies non-inclusion at every earlier epoch of the same
+          map, and silence is a monotone predicate on epochs.
+        </t>
+      </section>
+    </section>
+
+    <section anchor="sheets">
+      <name>Epoch Sheets and the Temporal Sandwich</name>
+      <t>
+        At the start of each epoch the operator fetches the current round of a drand beacon
+        <xref target="DRAND"/> whose chain hash is pinned in the trust root. At the end of the
+        epoch it computes the map root and signs an epoch sheet:
+      </t>
+      <sourcecode type="json"><![CDATA[
+{
+  "sheet_version": "crovia.tacet.epoch.v1",
+  "map_id": "urn:crovia:tacet:map:disclosure",
+  "epoch": 4123,
+  "epoch_start": "2026-09-19T09:00:00Z",
+  "epoch_end":   "2026-09-19T10:00:00Z",
+  "root": "sha256:...",
+  "prev_sheet_hash": "sha256:...",
+  "size": 6867,
+  "opened": {"kind": "drand", "chain_hash": "...", "round": 1234567,
+             "randomness": "...", "signature": "..."},
+  "snapshots_root": "sha256:...",
+  "operator": {"id": "urn:crovia:tacet:operator:crovia-trust",
+               "pubkey": {"alg": "ed25519", "key_hex": "..."}},
+  "signature": {"alg": "ed25519", "domain": "TACET-EPOCH-v1",
+                "sig_hex": "..."},
+  "closed": {"kind": "ots", "status": "pending" | "bitcoin",
+             "anchored_digest": "sha256:...", "block_height": 956737,
+             "proof_ref": "..."}
+}
+]]></sourcecode>
+      <ul>
+        <li>sheet_hash = H(CSC-1(sheet without the members "signature" and "closed")). The signature is Ed25519 over "TACET-EPOCH-v1" || 0x0A || CSC-1(sheet without "signature" and "closed").</li>
+        <li>prev_sheet_hash chains sheets; the genesis sheet carries null.</li>
+        <li>"opened" binds the epoch to a randomness value that did not exist before epoch_start: nothing in the epoch could have been produced earlier. This is the lower time bound.</li>
+        <li>"closed" is an OpenTimestamps attestation <xref target="OTS"/> of sheet_hash confirmed in a Bitcoin block: the sheet existed before that block. This is the upper time bound. The member is filled in after confirmation and is outside the signed region; verifiers check it independently (<xref target="anchor"/>). anchored_digest MUST equal sheet_hash; proof_ref locates the attestation file; block_height is the Bitcoin block carrying it.</li>
+        <li>snapshots_root is the Merkle tree hash, computed as in <xref target="RFC6962"/>, of all snapshot hashes taken during the epoch, so that every observation is bound to the epoch's temporal bounds.</li>
+      </ul>
+      <t>
+        An epoch whose closed.status is "bitcoin" is anchored. Only anchored epochs contribute to
+        silence at strength 2 or above (<xref target="strength"/>).
+      </t>
+    </section>
+
+    <section anchor="snapshots">
+      <name>Surface Snapshots and Predicates</name>
+      <section anchor="surfaces">
+        <name>Surfaces</name>
+        <t>
+          For each target the operator publishes a surface list: the public URLs where the
+          target's disclosure is expected to appear (model card, vendor documentation page,
+          repository README, a regulator-mandated summary location). Surface lists are versioned
+          objects stored in the map under the reserved key H("surfaces/" || target_id), so that
+          changes to what is monitored are themselves logged.
+        </t>
+      </section>
+      <section anchor="snapshot">
+        <name>Snapshot Object</name>
+        <sourcecode type="json"><![CDATA[
+{
+  "snapshot_version": "crovia.tacet.snapshot.v1",
+  "target_id": "meta-llama/Llama-3.1-8B",
+  "surface_url": "https://huggingface.co/meta-llama/Llama-3.1-8B",
+  "fetched_at": "2026-09-19T09:17:02Z",
+  "epoch": 4123,
+  "beacon_round": 1234567,
+  "http_status": 200,
+  "body_sha256": "sha256:...",
+  "body_len": 48213,
+  "tls_cert_sha256": "sha256:..." | null,
+  "resolved_ip": "..." | null,
+  "predicate": {"id": "crovia.pred.hf-card-training-data",
+                "version": "1.0.0", "code_hash": "sha256:..."},
+  "result": false,
+  "observer": {"id": "urn:crovia:observer:hetzner-1",
+               "pubkey": {"alg": "ed25519", "key_hex": "..."}},
+  "signature": {"alg": "ed25519", "domain": "TACET-SNAPSHOT-v1",
+                "sig_hex": "..."}
+}
+]]></sourcecode>
+        <t>
+          snapshot_hash = H("TACET-SNAPSHOT-v1" || 0x0A || CSC-1(snapshot without "signature")).
+          beacon_round MUST equal the opened.round of the epoch the snapshot belongs to. A snapshot
+          with result false is a negative snapshot.
+        </t>
+      </section>
+      <section anchor="predicates">
+        <name>Predicates</name>
+        <t>
+          A predicate is a pure function from bytes to a boolean, published as source code with a
+          code_hash, a semantic version, and test vectors. Predicates MUST be re-executable by
+          third parties on archived copies of the surface, so that a negative snapshot can be
+          independently re-derived from public data. The operator MUST NOT change a predicate's
+          behaviour without incrementing its version.
+        </t>
+        <t>
+          A predicate's documentation MUST state what it does not recognise. Verifiers weighing a
+          proof SHOULD read the predicate's stated limits alongside the surfaces it was run on. A
+          negative snapshot means "this predicate did not match these bytes"; it does not mean
+          that no disclosure exists in a form the predicate does not recognise.
+        </t>
+      </section>
+    </section>
+
+    <section anchor="silence">
+      <name>Silence Proofs</name>
+      <section anchor="silence-object">
+        <name>Object</name>
+        <sourcecode type="json"><![CDATA[
+{
+  "proof_version": "crovia.tacet.silence.v1",
+  "map_id": "urn:crovia:tacet:map:disclosure",
+  "target_id": "meta-llama/Llama-3.1-8B",
+  "key": "<64 hex>",
+  "from_epoch": 2000,
+  "to_epoch": 4123,
+  "strength": 1 | 2 | 3,
+  "sheets": [ <epoch sheet>, ... ],
+  "paths": {
+    "initial": {"bitmap": "<64 hex>", "siblings": ["<64 hex>", ...]},
+    "deltas": [ {"epoch": 2001,
+                 "changed": [[height, "<64 hex>" | null], ...]},
+                ... ]
+  },
+  "snapshots": [ <negative snapshot>, ... ],
+  "witnesses": { "<sheet_hash>":
+                 [ {"id": "...", "pubkey": {...},
+                    "sig_hex": "..."} ] },
+  "silence": {
+    "map_epochs": 2124,
+    "observed_epochs": 2117,
+    "observed_from": "2026-06-24T10:00:00Z",
+    "observed_to":   "2026-09-19T10:00:00Z",
+    "silence_seconds": 7513200,
+    "silence_days": "86.96"
+  }
+}
+]]></sourcecode>
+        <t>
+          silence_days is a decimal string; silence_seconds is the normative integer. Level-3
+          proofs additionally carry "witness_set": {"k": 2, "n": 3, "ids": [...]}.
+        </t>
+      </section>
+      <section anchor="deltas">
+        <name>Delta-Encoded Non-Inclusion Chains</name>
+        <t>
+          A naive proof over N epochs carries N compact paths. TACET encodes the path for
+          from_epoch once (paths.initial) and, for each subsequent epoch, only the siblings that
+          changed (paths.deltas[i].changed, a list of pairs (height, new_hash); a sibling that
+          becomes the default is encoded with new_hash null). The verifier reconstructs the path
+          incrementally, recomputes the root for every epoch from EMPTY[0], and checks it against
+          sheets[i].root. A sibling changes only when a key sharing that prefix with the target
+          changed in that epoch, so deltas are small and often empty. The proof MUST include every
+          sheet in [from_epoch, to_epoch]; sheets chain via prev_sheet_hash, so a gap is detectable.
+        </t>
+      </section>
+      <section anchor="strength">
+        <name>Strength Levels</name>
+        <table anchor="strength-table">
+          <name>Strength levels of a silence proof</name>
+          <thead><tr><th>Level</th><th>Name</th><th>What is proven</th><th>Required content</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>map-silence</td><td>The slot was empty in every epoch of the range.</td><td>sheets, paths</td></tr>
+            <tr><td>2</td><td>surface-silence</td><td>Level 1, and for every observed epoch at least one negative snapshot for the target exists, is included under snapshots_root, and carries the epoch's beacon round.</td><td>plus snapshots with Merkle inclusion against snapshots_root; only anchored epochs counted</td></tr>
+            <tr><td>3</td><td>witnessed-silence (k of n)</td><td>Level 2, and every sheet in the range carries at least k valid witness countersignatures from the declared witness set of size n.</td><td>plus witnesses</td></tr>
+          </tbody>
+        </table>
+        <t>
+          A level-1 proof states only that nobody put a disclosure in this map. It MUST be
+          displayed as "map silence", never as evidence about the world. Level 2 is the minimum
+          for any public statement about a target.
+        </t>
+      </section>
+      <section anchor="monotonicity">
+        <name>Monotonicity Rule</name>
+        <sourcecode type="pseudocode"><![CDATA[
+observed_epochs = #{ e in [from, to] :
+                     sheet(e).closed.status == "bitcoin" and
+                     exists negative snapshot s for target
+                     with s.epoch == e }
+silence_seconds = sum over observed epochs e of
+                  (epoch_end(e) - epoch_start(e))
+silence_days    = floor(silence_seconds * 100 / 86400) / 100,
+                  rendered with exactly two decimals
+                  ("0.12", "86.96")
+]]></sourcecode>
+        <t>
+          silence_days is truncated, never rounded: a verifier that recomputes it MUST produce the
+          same string byte for byte, and a proof MUST NOT display more silence than its anchored
+          seconds support (10800 seconds is "0.12", not "0.13").
+        </t>
+        <t>
+          Epochs without a negative snapshot (observer down, surface unreachable, predicate
+          error) contribute nothing. Unanchored epochs contribute nothing. Time between two sheets
+          that no epoch covers contributes nothing. silence_days therefore cannot grow while
+          observation is paused, and a verifier can recompute it from the proof alone.
+          observed_to MUST accompany every displayed silence figure.
+        </t>
+      </section>
+      <section anchor="verification">
+        <name>Verification Algorithm</name>
+        <ol>
+          <li>Verify each sheet's operator signature; verify prev_sheet_hash chaining over the range; verify map_id and monotonically increasing epoch numbers.</li>
+          <li>For each sheet, verify that "opened" is a valid round of the pinned drand chain whose time is at most epoch_start plus a tolerance, and, if closed.status is "bitcoin", verify the OpenTimestamps attestation of sheet_hash (<xref target="anchor"/>) and record the block height.</li>
+          <li>Reconstruct the path per epoch from "paths"; for each epoch recompute the root from EMPTY[0]; require equality with sheets[i].root.</li>
+          <li>Level 2 and above: verify each snapshot's observer signature, beacon_round, result false, target_id, and its inclusion in the epoch's snapshots_root. Recompute "silence" per <xref target="monotonicity"/> and require equality with the proof's "silence" member.</li>
+          <li>Level 3: verify witness signatures over each sheet_hash; require at least k.</li>
+          <li>Verify the outer Seal (<xref target="wrapping"/>).</li>
+        </ol>
+      </section>
+      <section anchor="anchor">
+        <name>Checking the Bitcoin Anchor without a Bitcoin Node</name>
+        <t>
+          The file at closed.proof_ref is a standard OpenTimestamps proof (magic bytes
+          0x00 "OpenTimestamps" 0x00 0x00 "Proof" 0x00 0xbf 0x89 0xe2 0xe8 0x84 0xe8 0x92 0x94,
+          version 1). Its file digest is SHA-256 of the 32 raw bytes of sheet_hash, stamped as a
+          file. A verifier first checks that the proof's file hash operation is sha256 and that its
+          file digest equals H(unhex(sheet_hash)); it then walks the operation tree (append,
+          prepend, sha256, ripemd160, sha1, reverse, hexlify) from that digest.
+        </t>
+        <t>
+          Every leaf that is a Bitcoin block header attestation for height h states that the
+          32-byte message at that leaf is the Merkle root of block h, in internal byte order. The
+          anchor verifies if and only if at least one such leaf has h equal to closed.block_height
+          and its message equals the Merkle root in that block's header, obtained from any header
+          source the verifier trusts: a full node, a headers file, or a public explorer. Pending
+          (calendar) attestations are ignored. A verifier that cannot reach a header source MUST
+          report the anchor as unchecked, never as failed, and MUST expose the height and the
+          expected Merkle root so that a human can check them elsewhere.
+        </t>
+      </section>
+    </section>
+
+    <section anchor="witnesses">
+      <name>Witnesses</name>
+      <t>
+        A witness is any party that fetches epoch sheets, independently verifies signature,
+        chaining, "opened" and "closed", and publishes countersignatures
+        Ed25519("TACET-WITNESS-v1" || 0x0A || sheet_hash). A witness MAY additionally run its own
+        observer and publish its own snapshots; a snapshot from a second observer for the same
+        target and epoch strengthens a level-2 proof and is included in the "snapshots" list.
+        Witness identities and keys are published in a witness list stored in the map under
+        H("witnesses"). Witnesses are optional and permissionless; the operator cannot back-date,
+        forward-date, or silently rewrite an epoch without being caught by anyone holding a prior
+        epoch sheet, a beacon value, or a Bitcoin anchor.
+      </t>
+    </section>
+
+    <section anchor="wrapping">
+      <name>Seal Wrapping (Portable Proof)</name>
+      <t>
+        A silence proof is delivered as a crovia.seal.v1 object <xref target="I-D.crovia-seal"/>,
+        unmodified. TACET adds no field, no modality and no anchor kind to the Seal specification,
+        so any conformant Seal verifier can verify the outer layer.
+      </t>
+      <table anchor="seal-table">
+        <name>Seal fields of a wrapped silence proof</name>
+        <thead><tr><th>Seal field</th><th>Content</th></tr></thead>
+        <tbody>
+          <tr><td>subject.input_hash, input_len</td><td>hash and length of CSC-1(query), where query = {"query_version": "crovia.tacet.query.v1", "map_id", "target_id", "from_epoch", "to_epoch", "min_strength"}</td></tr>
+          <tr><td>subject.output_hash, output_len</td><td>hash and length of CSC-1(silence proof)</td></tr>
+          <tr><td>subject.modality</td><td>"text"</td></tr>
+          <tr><td>generator.id, generator.version</td><td>"crovia/tacet" and the implementation version</td></tr>
+          <tr><td>generator.params</td><td>{"map_id": ..., "strength": "2", "epochs": "2000-4123"} (strings)</td></tr>
+          <tr><td>chain</td><td>the previous silence proof Seal for the same target, so that a target's proofs form a chain</td></tr>
+          <tr><td>anchor</td><td>{"kind": "crovia-beacon", ...} with the drand round current at emission</td></tr>
+          <tr><td>checks</td><td>{"tacet": {"strength", "silence_days", "last_negative_snapshot_at"}}, a non-normative human-readable summary</td></tr>
+        </tbody>
+      </table>
+      <t>
+        The proof file is {"seal": seal, "query": query, "proof": silence proof}. Verification:
+        verify the Seal; check that seal.subject.input_hash equals H(CSC-1(query)) and that
+        output_hash equals H(CSC-1(proof)); then run <xref target="verification"/>. A verifier that
+        implements only Crovia Seal can still establish who issued the proof, a lower bound on
+        when, and that the bytes are intact.
+      </t>
+    </section>
+
+    <section anchor="commit">
+      <name>Commit-then-Reveal for Providers</name>
+      <t>
+        A provider MAY pre-register a subject's disclosure before release. It computes
+        commit_hash = H(summary_bytes || salt) and emits a Seal whose output_hash is commit_hash;
+        the operator, or any relay, inserts a "commitment" value into the target's slot, and the
+        epoch sheet's temporal bounds prove when. At release the provider publishes the summary at
+        a surface URL and emits a Seal over its bytes; the operator inserts a "disclosure" value
+        with "reveals" set to the salt, and verifiers check H(summary || salt) == commit_hash.
+      </t>
+      <t>
+        The provider obtains a proof of timely, unchanged publication that does not depend on the
+        operator's honesty, and a guarantee against false silence claims: a silence proof for a
+        committed slot is impossible by construction, because the slot is not empty. The three
+        observable states of a target are never-committed, committed-unrevealed and revealed, and
+        TACET reports which one applies.
+      </t>
+    </section>
+
+    <section anchor="pnx">
+      <name>PNX: Proof of Non-Exfiltration (Profile crovia.pnx.v1)</name>
+      <section anchor="pnx-problem">
+        <name>Problem</name>
+        <t>
+          Organisations run AI agents with read access to source code, secrets and customer data.
+          When an incident is suspected, or an auditor asks, the only available evidence is the
+          vendor's own log: self-reported, mutable, and silent about what was not sent. PNX applies
+          the TACET construction (salted fingerprints, a sparse Merkle map, a signed sheet, a beacon
+          opening and a Bitcoin closing) to the outbound traffic of an agent, so that the statement
+          "during this run none of these protected assets left the perimeter" can be checked
+          offline by a party who trusts neither the organisation nor the vendor.
+        </t>
+      </section>
+      <section anchor="pnx-roles">
+        <name>Roles</name>
+        <dl newline="false">
+          <dt>Egress witness</dt><dd>Holds a signing key and sees outbound bodies in clear (a local model proxy, an egress proxy, a CI sidecar). Produces fingerprints, the sparse Merkle map and the signed run sheet.</dd>
+          <dt>Prover</dt><dd>The operator of the agent; holds the protected assets. Produces the PNX proof: per asset, non-inclusion or inclusion paths against the run root.</dd>
+          <dt>Verifier</dt><dd>An auditor, customer, regulator or court; holds the proof and optionally the assets. Produces a verdict, offline.</dd>
+          <dt>TACET epoch</dt><dd>Carries the run root as a leaf, giving it a drand round before and a Bitcoin block after.</dd>
+        </dl>
+        <t>Only the run sheet and the proof ever leave the perimeter. Neither contains traffic bytes or asset bytes.</t>
+      </section>
+      <section anchor="pnx-fp">
+        <name>Fingerprinting</name>
+        <t>
+          Parameters of crovia.pnx.v1: k_gram = 32, window = 16, hash = SHA-256,
+          threshold = k_gram + window - 1 = 47. For a byte string B and a 16-byte per-run salt:
+        </t>
+        <ol>
+          <li>h_i = H("CROVIA-PNX-FP-v1" || 0x0A || salt || B[i : i + 32]) for 0 &lt;= i &lt;= |B| - 32.</li>
+          <li>Over every window of 16 consecutive h_i, select the minimum; on ties, the rightmost. The set of selected hashes is FP(B). This is winnowing <xref target="WINNOWING"/>.</li>
+        </ol>
+        <t>
+          Guarantee: if an asset A and a body B share any substring of at least 47 bytes, then
+          FP(A) and FP(B) intersect. This is a property of winnowing, not of the hash: the shared
+          substring contains at least one full window of 16 k-grams, whose minimum is selected
+          identically on both sides.
+        </t>
+        <t>
+          Assets between 32 and 46 bytes are checked with all their k-gram hashes (class
+          "partial": detection is possible, not guaranteed). Assets shorter than 32 bytes are
+          "undetectable" and MUST NOT be counted as clean.
+        </t>
+      </section>
+      <section anchor="pnx-sheet">
+        <name>Run Sheet</name>
+        <sourcecode type="json"><![CDATA[
+{
+  "profile": "crovia.pnx.v1",
+  "run_id": "ci-4711/agent-review",
+  "salt_hex": "...16 bytes...",
+  "params": {"k_gram": 32, "window": 16, "threshold": 47,
+             "hash": "sha256"},
+  "egress": {"bodies": 212, "bytes": 1834112,
+             "first_at": "...", "last_at": "..."},
+  "fingerprints": 118201,
+  "root": "sha256:...",
+  "closed_at": "2026-09-19T22:00:00Z",
+  "witness": {"id": "...",
+              "pubkey": {"alg": "ed25519", "key_hex": "..."}},
+  "signature": {"alg": "ed25519", "domain": "CROVIA-PNX-SHEET-v1",
+                "sig_hex": "..."}
+}
+]]></sourcecode>
+        <t>
+          Every fingerprint is a key of a depth-256 sparse Merkle map as in <xref target="map"/>,
+          whose leaf value is the constant H("CROVIA-PNX-PRESENT-v1" || 0x0A). The signature covers
+          the CSC-1 encoding of the sheet without the "signature" member, prefixed by the domain
+          string and 0x0A. To inherit TACET's temporal bounds, the witness or the operator commits
+          "root" into the current epoch map under the key H("pnx/" || run_id); from then on the
+          run root is provably older than a Bitcoin block and younger than a drand round.
+        </t>
+      </section>
+      <section anchor="pnx-proof">
+        <name>Proof and Verdicts</name>
+        <t>
+          For each labelled asset the prover recomputes FP(A) with the run salt and attaches, per
+          fingerprint, a compact sibling path against "root": a non-inclusion proof when the key
+          is absent, an inclusion proof when present. Verdicts per asset are "absent",
+          "absent-partial", "present" and "undetectable". The proof's overall verdict is "present"
+          if any asset is present, "absent" if every asset is "absent", otherwise "mixed". The same
+          object is therefore both a clean bill and, when a fingerprint is in the map, a signed,
+          anchored record that a specific protected string left the perimeter during a bounded
+          window.
+        </t>
+      </section>
+      <section anchor="pnx-verify">
+        <name>Verification</name>
+        <ol>
+          <li>Check the sheet: profile, parameter consistency, Ed25519 signature.</li>
+          <li>If the asset bytes are supplied, recompute the asset digest, the detection class and the fingerprint set; refuse the proof if any differ. If they are not supplied, verify the paths for the listed keys and emit a warning: the result then proves non-inclusion of those keys, not of any asset.</li>
+          <li>Verify each path against "root".</li>
+          <li>Recompute every verdict and the overall verdict; refuse on mismatch.</li>
+          <li>Optionally, verify the epoch leaf H("pnx/" || run_id) against the run root, the epoch sheet signature, the drand round and the Bitcoin anchor as in <xref target="verification"/>.</li>
+        </ol>
+        <t>No network access is needed for steps 1 to 4.</t>
+      </section>
+      <section anchor="pnx-limits">
+        <name>What a PNX Proof Does Not Claim</name>
+        <ul>
+          <li>Nothing about bytes the witness did not see: traffic that bypassed the proxy, TLS the proxy could not terminate, side channels.</li>
+          <li>Nothing about paraphrase, translation, summarisation or encodings the witness did not normalise; crovia.pnx.v1 fingerprints raw bytes.</li>
+          <li>Nothing about assets shorter than 32 bytes.</li>
+          <li>The witness must be honest about what it ingested. Countersigning of the same egress by several witnesses removes the single point of trust; a single-witness sheet is a statement by that witness.</li>
+        </ul>
+      </section>
+    </section>
+
+    <section anchor="layout">
+      <name>Public Data Layout</name>
+      <t>The operator publishes, content-addressed and immutable once anchored:</t>
+      <sourcecode type="text"><![CDATA[
+/tacet/<map_id>/sheets/<epoch>.json       epoch sheet
+/tacet/<map_id>/snapshots/<epoch>.jsonl   snapshots of the epoch
+/tacet/<map_id>/values/<epoch>.jsonl      slot writes of the epoch
+/tacet/<map_id>/witness/<epoch>.jsonl     countersignatures received
+/tacet/<map_id>/HEAD.json                 latest sheet and pointers
+]]></sourcecode>
+      <t>Consumers fetch HEAD.json and only the sheets they need; no consumer needs a whole-history file.</t>
+    </section>
+
+    <section anchor="security">
+      <name>Security Considerations</name>
+      <ul>
+        <li>Back-dating an epoch is prevented by "opened": beacon randomness is unpredictable. Forward-dating is prevented by "closed": the Bitcoin block time.</li>
+        <li>A split view (showing different sheets to different parties) is detected by witnesses and by any two consumers comparing sheet_hash for the same epoch; the OpenTimestamps anchor commits to one hash per epoch.</li>
+        <li>Selective observation (not fetching a surface in order to manufacture silence) cannot inflate silence: an epoch without a negative snapshot contributes zero. It can only reduce the proven silence, which is the conservative failure mode.</li>
+        <li>Predicate gaming by an operator is bounded by predicate publication and reproducibility on archived copies of the surface.</li>
+        <li>Compromise of the operator key: sheets remain chained and anchored; a compromised key can produce forged sheets only going forward, and only until witnesses refuse to countersign an unchained head. Key rotation is logged in the map under H("operator").</li>
+        <li>A silence proof is not a proof that a disclosure exists nowhere. It is a proof about the map and about the listed surfaces under the listed predicate; the proof carries both so that its scope is explicit.</li>
+        <li>PNX fingerprints reveal nothing about the traffic or the assets beyond membership of salted 32-byte grams; the salt is per run and the sheet contains no bytes of either.</li>
+      </ul>
+    </section>
+
+    <section anchor="iana">
+      <name>IANA Considerations</name>
+      <t>This document has no IANA actions.</t>
+    </section>
+
+    <section anchor="impl">
+      <name>Implementation Status</name>
+      <t>
+        This section records the status of known implementations at the time of publication, in
+        the spirit of <xref target="RFC7942"/>; it is to be removed before publication as an RFC.
+      </t>
+      <ul>
+        <li>crovia-tacet (Python, Apache-2.0): reference implementation of the map, sheets, silence proofs, the anchor check of <xref target="anchor"/> and the PNX profile; crovia-tacet-operator: the operator that runs the public map. Published on PyPI; source at https://github.com/croviatrust/countersign.</li>
+        <li>A browser verifier (JavaScript, no dependencies) that verifies wrapped silence proofs including the drand round and the Bitcoin anchor, at https://croviatrust.com/registry/seal/verify/.</li>
+        <li>A public map, urn:crovia:tacet:map:disclosure, operated by Crovia Trust since 2026-09-19 with hourly epochs, published at https://croviatrust.com/registry/data/tacet/.</li>
+        <li>Conformance vectors for both TACET and the Seal wrapper in the repository above; both implementations pass them.</li>
+      </ul>
+    </section>
+
+  </middle>
+
+  <back>
+    <references>
+      <name>References</name>
+      <references>
+        <name>Normative References</name>
+        <reference anchor="RFC2119" target="https://www.rfc-editor.org/info/rfc2119">
+          <front><title>Key words for use in RFCs to Indicate Requirement Levels</title><author initials="S." surname="Bradner"/><date year="1997" month="March"/></front>
+          <seriesInfo name="BCP" value="14"/><seriesInfo name="RFC" value="2119"/><seriesInfo name="DOI" value="10.17487/RFC2119"/>
+        </reference>
+        <reference anchor="RFC8174" target="https://www.rfc-editor.org/info/rfc8174">
+          <front><title>Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words</title><author initials="B." surname="Leiba"/><date year="2017" month="May"/></front>
+          <seriesInfo name="BCP" value="14"/><seriesInfo name="RFC" value="8174"/><seriesInfo name="DOI" value="10.17487/RFC8174"/>
+        </reference>
+        <reference anchor="RFC6234" target="https://www.rfc-editor.org/info/rfc6234">
+          <front><title>US Secure Hash Algorithms (SHA and SHA-based HMAC and HKDF)</title><author initials="D." surname="Eastlake 3rd"/><author initials="T." surname="Hansen"/><date year="2011" month="May"/></front>
+          <seriesInfo name="RFC" value="6234"/><seriesInfo name="DOI" value="10.17487/RFC6234"/>
+        </reference>
+        <reference anchor="RFC8032" target="https://www.rfc-editor.org/info/rfc8032">
+          <front><title>Edwards-Curve Digital Signature Algorithm (EdDSA)</title><author initials="S." surname="Josefsson"/><author initials="I." surname="Liusvaara"/><date year="2017" month="January"/></front>
+          <seriesInfo name="RFC" value="8032"/><seriesInfo name="DOI" value="10.17487/RFC8032"/>
+        </reference>
+        <reference anchor="RFC8785" target="https://www.rfc-editor.org/info/rfc8785">
+          <front><title>JSON Canonicalization Scheme (JCS)</title><author initials="A." surname="Rundgren"/><author initials="B." surname="Jordan"/><author initials="S." surname="Erdtman"/><date year="2020" month="June"/></front>
+          <seriesInfo name="RFC" value="8785"/><seriesInfo name="DOI" value="10.17487/RFC8785"/>
+        </reference>
+        <reference anchor="RFC6962" target="https://www.rfc-editor.org/info/rfc6962">
+          <front><title>Certificate Transparency</title><author initials="B." surname="Laurie"/><author initials="A." surname="Langley"/><author initials="E." surname="Kasper"/><date year="2013" month="June"/></front>
+          <seriesInfo name="RFC" value="6962"/><seriesInfo name="DOI" value="10.17487/RFC6962"/>
+        </reference>
+        <reference anchor="I-D.crovia-seal" target="https://datatracker.ietf.org/doc/draft-crovia-seal/">
+          <front><title>The Crovia Seal: A Cryptographic Receipt Format for AI-Generated Output Provenance</title><author initials="T." surname="En Nakhai"><organization>Crovia Trust</organization></author><date year="2026" month="May"/></front>
+          <seriesInfo name="Internet-Draft" value="draft-crovia-seal-01"/>
+        </reference>
+      </references>
+      <references>
+        <name>Informative References</name>
+        <reference anchor="RFC7942" target="https://www.rfc-editor.org/info/rfc7942">
+          <front><title>Improving Awareness of Running Code: The Implementation Status Section</title><author initials="Y." surname="Sheffer"/><author initials="A." surname="Farrel"/><date year="2016" month="July"/></front>
+          <seriesInfo name="BCP" value="205"/><seriesInfo name="RFC" value="7942"/><seriesInfo name="DOI" value="10.17487/RFC7942"/>
+        </reference>
+        <reference anchor="DRAND" target="https://drand.love/docs/specification/">
+          <front><title>drand: Distributed Randomness Beacon, Specification</title><author><organization>League of Entropy</organization></author><date year="2024"/></front>
+        </reference>
+        <reference anchor="OTS" target="https://opentimestamps.org/">
+          <front><title>OpenTimestamps: Scalable, Trust-Minimized, Distributed Timestamping with Bitcoin</title><author initials="P." surname="Todd"/><date year="2016" month="September"/></front>
+        </reference>
+        <reference anchor="WINNOWING" target="https://doi.org/10.1145/872757.872770">
+          <front><title>Winnowing: Local Algorithms for Document Fingerprinting</title><author initials="S." surname="Schleimer"/><author initials="D. S." surname="Wilkerson"/><author initials="A." surname="Aiken"/><date year="2003" month="June"/></front>
+          <refcontent>Proceedings of the 2003 ACM SIGMOD International Conference on Management of Data, pp. 76-85</refcontent>
+        </reference>
+        <reference anchor="SMT" target="https://eprint.iacr.org/2016/683">
+          <front><title>Efficient Sparse Merkle Trees: Caching Strategies and Secure (Non-)Membership Proofs</title><author initials="R." surname="Dahlberg"/><author initials="T." surname="Pulls"/><author initials="R." surname="Peeters"/><date year="2016"/></front>
+          <refcontent>IACR Cryptology ePrint Archive, Report 2016/683</refcontent>
+        </reference>
+      </references>
+    </references>
+
+    <section anchor="ack" numbered="false">
+      <name>Acknowledgements</name>
+      <t>
+        The sparse Merkle tree construction follows the analysis of Dahlberg, Pulls and Peeters
+        <xref target="SMT"/>. The temporal sandwich combines the League of Entropy's drand beacon
+        with Peter Todd's OpenTimestamps. The name TACET is borrowed from musical notation.
+      </t>
+    </section>
+  </back>
+</rfc>

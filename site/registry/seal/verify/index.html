@@ -135,11 +135,11 @@
     <p>A TACET proof is a <span class="mono">crovia.seal.v1</span> wrapped around a
        <span class="mono">crovia.tacet.silence.v1</span> object. Paste the whole file
        (<span class="mono">{"seal":…,"query":…,"proof":…}</span>) above, or load one from the live log.
-       The page then re-does <a href="https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md#85-verification" target="_blank" rel="noopener">SPEC §8.5</a>
+       The page then re-does <a href="/registry/tacet/spec/#tacet-85-verification-algorithm">SPEC §8.5</a>
        here: operator signatures and hash chain of every epoch sheet, the empty slot under each sheet's
        depth-256 sparse Merkle root, observer signatures and inclusion of every negative snapshot, and the
        silence figure under the monotonicity rule. With network checks on it also does
-       <a href="https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md#86-checking-the-bitcoin-anchor-without-a-bitcoin-node" target="_blank" rel="noopener">§8.6</a>:
+       <a href="/registry/tacet/spec/#tacet-86-checking-the-bitcoin-anchor-without-a-bitcoin-node">§8.6</a>:
        it parses each sheet's OpenTimestamps proof and matches its merkle root to the Bitcoin block header
        from a public explorer. Same checks as <span class="mono">tacet-operator verify</span>; no Bitcoin node,
        no <span class="mono">ots</span> client, no Crovia server trusted.</p>

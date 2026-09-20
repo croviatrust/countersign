@@ -78,7 +78,7 @@ hold a negative snapshot for the target. Hours without observation, unanchored
 hours and operator downtime contribute nothing. Every silence figure carries
 observed_to.
 
-Specification: https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md
+Specification: https://croviatrust.com/registry/tacet/spec/ (Internet-Draft draft-crovia-tacet-00, PNX profile, 47 conformance tests; source https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md)
 Genesis: 2026-09-19T18:00:00Z. Epoch: 3600 s.
 
 ## 5. LACUNA
