@@ -132,3 +132,22 @@ def test_sealed_delivery_roundtrip(ws):
     bundle["proof"]["sheet"]["egress"]["bodies"] = 0
     (ws / "r6.bad.json").write_text(json.dumps(bundle))
     assert _run("verify", ws / "r6.bad.json", "--asset", f"api_key={ws / 'secret.txt'}") == 2
+
+
+def test_leak_inside_json_body_is_detected_deterministically(ws):
+    """A file quoted inside a JSON request body arrives with escaped newlines; json-strings-v1 restores the guarantee."""
+    csv = (ws / "protected" / "customers.csv").read_bytes()
+    body = json.dumps({"messages": [{"role": "user", "content": "summarise this file:\n\n" + csv.decode()}]})
+    (ws / "egress" / "gateway.jsonl").write_text(json.dumps({"at": "2026-09-20T10:00:09Z", "body": body}) + "\n")
+    for i in range(5):  # fresh random salt every time: must never be probabilistic
+        assert _run("witness", ws / "egress", "--run-id", f"j{i}", "--key", ws / "w.key.json",
+                    "--sheet", ws / f"j{i}.sheet.json", "--state", ws / f"j{i}.state.json") == 0
+        sheet = json.loads((ws / f"j{i}.sheet.json").read_text())
+        assert sheet["normalization"] == ["json-strings-v1"] and sheet["egress"]["bodies"] == 3
+        assert _run("prove", "--state", ws / f"j{i}.state.json", "--sheet", ws / f"j{i}.sheet.json",
+                    "--assets-dir", ws / "protected", "--out", ws / f"j{i}.proof.json", "--fail-on-present") == 1
+        assert _run("verify", ws / f"j{i}.proof.json", "--assets-dir", ws / "protected") == 1
+    # opting out reproduces the raw-bytes behaviour and records it in the sheet
+    assert _run("witness", ws / "egress", "--run-id", "raw", "--key", ws / "w.key.json", "--raw-bytes-only",
+                "--sheet", ws / "raw.sheet.json", "--state", ws / "raw.state.json") == 0
+    assert json.loads((ws / "raw.sheet.json").read_text())["normalization"] == []

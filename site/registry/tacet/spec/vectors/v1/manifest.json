@@ -5,7 +5,7 @@
   {
    "path": "index.json",
    "bytes": 1166,
-   "sha256": "dea481214d9ccde0d7f8d60e407f8c4bae9fde4aa8b3491d7c6154c1d152125f"
+   "sha256": "1e468b7d643cf01b8f4dcafc7812e4be53bd1d45e5e8ceb850ee1fc332bbc67c"
   },
   {
    "path": "invalid_001.json",
@@ -55,12 +55,12 @@
   {
    "path": "wrapped_001_level3.json",
    "bytes": 52702,
-   "sha256": "be73b952e244d4bc3479eaeddc58f649a8f0af74aef0a4f6b2b9f9887a5959b8"
+   "sha256": "e6687a9f8f1c6267d97a75ec2b0246e876189edca5260f764c240ce4c89ae6b1"
   },
   {
    "path": "wrapped_002_invalid.json",
    "bytes": 301149,
-   "sha256": "59541507b2e7cf3eab04977b975d8e9cbb8d36bae4d91df078768a81542464c5"
+   "sha256": "661b19a4bf71777be88925511a3b9071d2b210758655d44d7a5572580e8c7f7b"
   }
  ]
 }

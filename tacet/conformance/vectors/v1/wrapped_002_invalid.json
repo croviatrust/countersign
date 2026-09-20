@@ -1219,7 +1219,7 @@
           "map_id": "urn:crovia:tacet:map:disclosure",
           "strength": "3"
         },
-        "version": "0.4.0",
+        "version": "0.4.1",
         "weights_hash": null
       },
       "issuer": {
@@ -1236,7 +1236,7 @@
         "canon": "csc-1",
         "domain": "CROVIA-SEAL-v1",
         "payload_hash_alg": "sha256",
-        "sig_hex": "96033265873cd622113cb2a7e000ea4ebbce140e0c9afdf4c9eae20acd0f94d51153b9249ca44ba13119b4112802df4273a16a546ca7d7efd6e911d8e5639d09"
+        "sig_hex": "f218fa99d676550a63bd36eb7a92d3c729205d9cfc10947de901622b91105a02c55961858e91f76683e6c1041ec6de29785f56257ed62f15c689eb898d72e007"
       },
       "subject": {
         "input_hash": "sha256:57dc03b1ef9196fec631cca1a9fb735762610fd3c6db461350ea2bbb58fc1772",
@@ -2173,7 +2173,7 @@
           "map_id": "urn:crovia:tacet:map:disclosure",
           "strength": "2"
         },
-        "version": "0.4.0",
+        "version": "0.4.1",
         "weights_hash": null
       },
       "issuer": {
@@ -2190,7 +2190,7 @@
         "canon": "csc-1",
         "domain": "CROVIA-SEAL-v1",
         "payload_hash_alg": "sha256",
-        "sig_hex": "b11b5e83f1a2a06347ce77ca133b5b7571f1605f0f7e89dfb79ec6c89f45d2eba6664e31573e576bed89aa3cf68f1c5df0fae1a9ec5b1d2e99523d614b870307"
+        "sig_hex": "4425e08e9b88b20b80f34133987339b5383e15a8c21b606c3ba8010c34d99ffb975e5d961c84ee4c731e4a7e5ae99523b058f176bf5fb1c1d1a235abf0f73c09"
       },
       "subject": {
         "input_hash": "sha256:6e8cde47db4653549e9d34962764c75cbf5416b358c4dbf74d666a277b6b6d34",
@@ -3387,7 +3387,7 @@
           "map_id": "urn:crovia:tacet:map:disclosure",
           "strength": "3"
         },
-        "version": "0.4.0",
+        "version": "0.4.1",
         "weights_hash": null
       },
       "issuer": {
@@ -3404,7 +3404,7 @@
         "canon": "csc-1",
         "domain": "CROVIA-SEAL-v1",
         "payload_hash_alg": "sha256",
-        "sig_hex": "6a23b9b456f1402f55a5a0d3c6558b7aa138ca0ef6565d908009af660cca9664cc1bad034f3328fc8f7dc4c69d3aab3de91a889ff5798af82b1e66311bbaeb04"
+        "sig_hex": "27247b43d7eeeda10d8de22c1137eb1a92fd74c55bd5336bb7af3a419e834f1cad416132a813316e3458ea7d9497e8bf19e9543b05abbbca6e0157961532970b"
       },
       "subject": {
         "input_hash": "sha256:57dc03b1ef9196fec631cca1a9fb735762610fd3c6db461350ea2bbb58fc1772",
@@ -4341,7 +4341,7 @@
           "map_id": "urn:crovia:tacet:map:disclosure",
           "strength": "2"
         },
-        "version": "0.4.0",
+        "version": "0.4.1",
         "weights_hash": null
       },
       "issuer": {
@@ -4358,7 +4358,7 @@
         "canon": "csc-1",
         "domain": "CROVIA-SEAL-v1",
         "payload_hash_alg": "sha256",
-        "sig_hex": "82ee00a8ad97934579b061e8853a64294839934953e74c6c749c1dfa61c3e16303906b036c1e8237232f92039a7e576d04ce9455ad297a26537183c3c2178903"
+        "sig_hex": "10514a51669e5873b5ff25721ade3d406c3b4c7cc185cd36e25d5eedd2ebacbe9676bd5ebde5779cac4680d0b044ccb4be05740fe7416c83dd3e735b8182dd0c"
       },
       "subject": {
         "input_hash": "sha256:8d1cf12b38c851e65aa2d3cb8604b2af1f21911280c950e2a4d1284aaf3f708a",
@@ -5588,7 +5588,7 @@
           "map_id": "urn:crovia:tacet:map:disclosure",
           "strength": "3"
         },
-        "version": "0.4.0",
+        "version": "0.4.1",
         "weights_hash": null
       },
       "issuer": {
@@ -5605,7 +5605,7 @@
         "canon": "csc-1",
         "domain": "CROVIA-SEAL-v1",
         "payload_hash_alg": "sha256",
-        "sig_hex": "95964f32e73d85c2a12282088a94561e244bed4dbbb949b92517c406e62a55e8bc63689397560c08a596cde3bef98f56d03f3cff862f486927f3878ef47a9d0e"
+        "sig_hex": "0e5eed7ff60349f012123512bbb26f645fd3e72dadc080a907b61b071f206dc24b5cbc44033b2029d1a40441c79ff6abe4e0054695d9dd2c6d8bfa6d99301c0f"
       },
       "subject": {
         "input_hash": "sha256:57dc03b1ef9196fec631cca1a9fb735762610fd3c6db461350ea2bbb58fc1772",
@@ -6840,7 +6840,7 @@
           "map_id": "urn:crovia:tacet:map:disclosure",
           "strength": "3"
         },
-        "version": "0.4.0",
+        "version": "0.4.1",
         "weights_hash": null
       },
       "issuer": {
@@ -6857,7 +6857,7 @@
         "canon": "csc-1",
         "domain": "CROVIA-SEAL-v1",
         "payload_hash_alg": "sha256",
-        "sig_hex": "0a411d4c1296d329672b52dec48e6faf6e631eb7653aff03b3a7ef528f2ea2b09b83bfa080b0f344da647a2f7c3ac4be5e44aa68c2acf52e22ec568bb2cad80a"
+        "sig_hex": "a091e8ad5da483d2cef9abf69bae2bfbed698be05f868f4672a5c71018d2a70c3effc2466cf3dc01fd8dcf13323830f79baa2922917f03880698142f28a61205"
       },
       "subject": {
         "input_hash": "sha256:57dc03b1ef9196fec631cca1a9fb735762610fd3c6db461350ea2bbb58fc1772",

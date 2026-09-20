@@ -32,7 +32,8 @@ delivered as an unmodified [`crovia.seal.v1`](https://croviatrust.com/registry/s
    assets beyond their SHA-256, is in the proof.
 
 Guarantee: any shared substring of **≥ 47 bytes** between an asset and the egress is always
-detected. Shorter assets are reported as `absent-partial` (best effort) or `undetectable`
+detected, in the raw bytes and inside the decoded string values of JSON request bodies
+(`json-strings-v1`, declared in the run sheet). Shorter assets are reported as `absent-partial` (best effort) or `undetectable`
 and are **never counted as clean**.
 
 ## Usage

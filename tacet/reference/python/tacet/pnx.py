@@ -69,6 +69,7 @@ def witness_to_state(w: EgressWitness) -> dict[str, Any]:
         "state_version": STATE_VERSION, "profile": PROFILE,
         "run_id": w.run_id, "salt_hex": w.salt.hex(), "k_gram": w.k, "window": w.w,
         "bodies": w.bodies, "bytes": w.bytes_seen, "first_at": w.first_at, "last_at": w.last_at,
+        "normalization": sorted(w.normalization),
         "fingerprints": sorted(fp.hex() for fp in w._map.keys()),  # noqa: SIM118 - SparseMerkleMap is not a dict
     }
 
@@ -80,7 +81,8 @@ def witness_from_state(state: dict[str, Any]) -> EgressWitness:
     return EgressWitness(run_id=state["run_id"], salt=bytes.fromhex(state["salt_hex"]),
                          k=int(state["k_gram"]), w=int(state["window"]), _map=m,
                          bodies=int(state["bodies"]), bytes_seen=int(state["bytes"]),
-                         first_at=state.get("first_at"), last_at=state.get("last_at"))
+                         first_at=state.get("first_at"), last_at=state.get("last_at"),
+                         normalization=tuple(state.get("normalization", [])))
 
 
 def save_state(w: EgressWitness, path: Path) -> None:

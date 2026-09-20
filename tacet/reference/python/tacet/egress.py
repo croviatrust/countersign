@@ -32,7 +32,8 @@ What a verified PNX proof does and does not say
 It says: no substring of length ``>= THRESHOLD`` of any listed asset occurred in
 the bytes the witness saw, and (for shorter assets) whether the exact k-grams
 occurred. It does not say anything about traffic that bypassed the witness,
-about paraphrase or re-encoding the witness did not normalise, or about assets
+about paraphrase or re-encoding the witness did not normalise (JSON string
+escapes are normalised by default, see ``json_strings``), or about assets
 shorter than ``K_GRAM`` bytes, which are reported as ``undetectable`` and never
 counted as clean.
 """
@@ -40,8 +41,9 @@ from __future__ import annotations
 
 import hashlib
 import os
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Set, Tuple
+from typing import Any
 
 from .canonical import canonicalize
 from .hashing import prefixed, sha256, unprefixed
@@ -58,6 +60,8 @@ DOMAIN_SHEET = b"CROVIA-PNX-SHEET-v1\n"
 DOMAIN_LEAF_VALUE = b"CROVIA-PNX-PRESENT-v1\n"
 PRESENT = sha256(DOMAIN_LEAF_VALUE)
 
+NORMALIZE_JSON_STRINGS = "json-strings-v1"  # every string value of a JSON body is ingested as a derived body
+
 VERDICT_ABSENT = "absent"            # every fingerprint proven not in the map (guaranteed for len >= THRESHOLD)
 VERDICT_ABSENT_PARTIAL = "absent-partial"  # K_GRAM <= len < THRESHOLD: exact k-grams absent, guarantee does not apply
 VERDICT_PRESENT = "present"          # at least one fingerprint proven in the map
@@ -66,7 +70,7 @@ VERDICT_UNDETECTABLE = "undetectable"  # len < K_GRAM: no k-gram can be formed
 
 # --------------------------------------------------------------------------- fingerprints
 
-def kgram_hashes(data: bytes, salt: bytes, k: int = K_GRAM) -> List[bytes]:
+def kgram_hashes(data: bytes, salt: bytes, k: int = K_GRAM) -> list[bytes]:
     """Salted hash of every k-gram of ``data`` in order (empty if ``len(data) < k``)."""
     if len(salt) != 16:
         raise ValueError("salt must be 16 bytes")
@@ -74,14 +78,14 @@ def kgram_hashes(data: bytes, salt: bytes, k: int = K_GRAM) -> List[bytes]:
     return [hashlib.sha256(prefix + data[i:i + k]).digest() for i in range(len(data) - k + 1)]
 
 
-def winnow(hashes: Sequence[bytes], w: int = WINDOW) -> Set[bytes]:
+def winnow(hashes: Sequence[bytes], w: int = WINDOW) -> set[bytes]:
     """Select the minimum of every window of ``w`` consecutive hashes (rightmost on ties)."""
     n = len(hashes)
     if n == 0:
         return set()
     if n < w:
         return {min(hashes)}
-    out: Set[bytes] = set()
+    out: set[bytes] = set()
     for i in range(n - w + 1):
         window = hashes[i:i + w]
         m = min(window)
@@ -90,12 +94,12 @@ def winnow(hashes: Sequence[bytes], w: int = WINDOW) -> Set[bytes]:
     return out
 
 
-def fingerprints(data: bytes, salt: bytes, k: int = K_GRAM, w: int = WINDOW) -> Set[bytes]:
+def fingerprints(data: bytes, salt: bytes, k: int = K_GRAM, w: int = WINDOW) -> set[bytes]:
     """Winnowed fingerprints of ``data``; the empty set if it is shorter than ``k``."""
     return winnow(kgram_hashes(data, salt, k), w)
 
 
-def asset_fingerprints(asset: bytes, salt: bytes, k: int = K_GRAM, w: int = WINDOW) -> Tuple[str, List[bytes]]:
+def asset_fingerprints(asset: bytes, salt: bytes, k: int = K_GRAM, w: int = WINDOW) -> tuple[str, list[bytes]]:
     """Fingerprints to check for an asset and the detection class they carry.
 
     Assets at or above ``THRESHOLD`` use winnowed fingerprints (guaranteed
@@ -108,6 +112,36 @@ def asset_fingerprints(asset: bytes, salt: bytes, k: int = K_GRAM, w: int = WIND
     if len(asset) >= k + w - 1:
         return "guaranteed", sorted(winnow(hashes, w))
     return "partial", sorted(set(hashes))
+
+
+def json_strings(body: bytes, min_len: int = K_GRAM) -> list[bytes]:
+    """Decoded string values of a JSON body (``json-strings-v1``), in document order.
+
+    LLM request bodies are JSON: a leaked file inside one arrives with its
+    newlines and quotes escaped, so its raw bytes never form a 47-byte run and
+    the winnowing guarantee does not apply. Ingesting the *decoded* strings as
+    derived bodies restores the guarantee for content quoted inside JSON. Only
+    strings that can hold at least one k-gram are returned; non-JSON bodies
+    yield nothing.
+    """
+    import json
+    try:
+        doc = json.loads(body.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError):
+        return []
+    out: list[bytes] = []
+    stack: list[Any] = [doc]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, str):
+            b = node.encode("utf-8")
+            if len(b) >= min_len:
+                out.append(b)
+        elif isinstance(node, dict):
+            stack.extend(reversed(list(node.values())))
+        elif isinstance(node, list):
+            stack.extend(reversed(node))
+    return out
 
 
 # --------------------------------------------------------------------------- witness
@@ -123,16 +157,29 @@ class EgressWitness:
     _map: SparseMerkleMap = field(default_factory=SparseMerkleMap, repr=False)
     bodies: int = 0
     bytes_seen: int = 0
-    first_at: Optional[str] = None
-    last_at: Optional[str] = None
+    first_at: str | None = None
+    last_at: str | None = None
+    normalization: tuple[str, ...] = (NORMALIZE_JSON_STRINGS,)
 
-    def ingest(self, body: bytes, at: str) -> int:
-        """Record one outbound body observed at RFC 3339 time ``at``; returns new fingerprints added."""
+    def _add(self, data: bytes) -> int:
         added = 0
-        for fp in fingerprints(body, self.salt, self.k, self.w):
+        for fp in fingerprints(data, self.salt, self.k, self.w):
             if fp not in self._map:
                 self._map.set(fp, PRESENT)
                 added += 1
+        return added
+
+    def ingest(self, body: bytes, at: str) -> int:
+        """Record one outbound body observed at RFC 3339 time ``at``; returns new fingerprints added.
+
+        The raw bytes are always fingerprinted. With ``json-strings-v1`` enabled
+        (the default) every decoded string value of a JSON body is fingerprinted
+        as well; ``bodies`` and ``bytes`` count the raw body only.
+        """
+        added = self._add(body)
+        if NORMALIZE_JSON_STRINGS in self.normalization:
+            for derived in json_strings(body, self.k):
+                added += self._add(derived)
         self.bodies += 1
         self.bytes_seen += len(body)
         self.first_at = self.first_at or at
@@ -143,14 +190,15 @@ class EgressWitness:
     def root(self) -> bytes:
         return self._map.root()
 
-    def sheet(self, witness: SigningKey, closed_at: str) -> Dict[str, Any]:
+    def sheet(self, witness: SigningKey, closed_at: str) -> dict[str, Any]:
         """Signed run sheet: the only object that has to leave the perimeter."""
-        s: Dict[str, Any] = {
+        s: dict[str, Any] = {
             "profile": PROFILE,
             "run_id": self.run_id,
             "salt_hex": self.salt.hex(),
             "params": {"k_gram": self.k, "window": self.w, "threshold": self.k + self.w - 1, "hash": "sha256"},
             "egress": {"bodies": self.bodies, "bytes": self.bytes_seen, "first_at": self.first_at, "last_at": self.last_at},
+            "normalization": sorted(self.normalization),
             "fingerprints": len(self._map),
             "root": prefixed(self.root),
             "closed_at": closed_at,
@@ -160,14 +208,14 @@ class EgressWitness:
         s["signature"] = {"alg": "ed25519", "domain": DOMAIN_SHEET.strip().decode(), "sig_hex": sig.hex()}
         return s
 
-    def prove(self, sheet: Dict[str, Any], assets: Iterable[Tuple[str, bytes]]) -> Dict[str, Any]:
+    def prove(self, sheet: dict[str, Any], assets: Iterable[tuple[str, bytes]]) -> dict[str, Any]:
         """Proof of Non-Exfiltration for labelled assets against this run's committed root."""
         if unprefixed(sheet["root"]) != self.root:
             raise ValueError("sheet root does not match the witness map")
         out_assets = []
         for label, data in assets:
             klass, fps = asset_fingerprints(data, self.salt, self.k, self.w)
-            entry: Dict[str, Any] = {"label": label, "asset_len": len(data), "detection": klass,
+            entry: dict[str, Any] = {"label": label, "asset_len": len(data), "detection": klass,
                                      "asset_sha256": prefixed(sha256(data)), "fingerprints": []}
             present = 0
             for fp in fps:
@@ -200,17 +248,17 @@ def epoch_leaf_key(run_id: str) -> bytes:
 class PnxVerifyResult:
     ok: bool
     verdict: str
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
-    assets: Dict[str, str] = field(default_factory=dict)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+    assets: dict[str, str] = field(default_factory=dict)
 
 
-def _unsigned(sheet: Dict[str, Any]) -> Dict[str, Any]:
+def _unsigned(sheet: dict[str, Any]) -> dict[str, Any]:
     return {k: v for k, v in sheet.items() if k != "signature"}
 
 
-def verify_sheet(sheet: Dict[str, Any]) -> List[str]:
-    errors: List[str] = []
+def verify_sheet(sheet: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
     if sheet.get("profile") != PROFILE:
         errors.append(f"unknown profile {sheet.get('profile')!r}")
     try:
@@ -222,6 +270,9 @@ def verify_sheet(sheet: Dict[str, Any]) -> List[str]:
     p = sheet.get("params") or {}
     if p.get("hash") != "sha256" or p.get("threshold") != p.get("k_gram", 0) + p.get("window", 0) - 1:
         errors.append("inconsistent params")
+    norm = sheet.get("normalization", [])
+    if not isinstance(norm, list) or any(n not in (NORMALIZE_JSON_STRINGS,) for n in norm):
+        errors.append(f"unknown normalization layers {norm!r}")
     sig = sheet.get("signature") or {}
     try:
         ok = verify_signature(sheet["witness"]["pubkey"]["key_hex"], DOMAIN_SHEET + canonicalize(_unsigned(sheet)),
@@ -233,7 +284,7 @@ def verify_sheet(sheet: Dict[str, Any]) -> List[str]:
     return errors
 
 
-def verify_pnx(proof: Dict[str, Any], assets: Optional[Dict[str, bytes]] = None) -> PnxVerifyResult:
+def verify_pnx(proof: dict[str, Any], assets: dict[str, bytes] | None = None) -> PnxVerifyResult:
     """Verify a PNX proof offline.
 
     With ``assets`` (label -> bytes) the verifier recomputes every fingerprint
@@ -253,7 +304,7 @@ def verify_pnx(proof: Dict[str, Any], assets: Optional[Dict[str, bytes]] = None)
     if assets is None:
         res.warnings.append("assets not supplied: fingerprints taken from the proof, not recomputed")
 
-    computed_verdicts: Dict[str, str] = {}
+    computed_verdicts: dict[str, str] = {}
     for a in proof.get("assets", []):
         label = a.get("label", "?")
         listed = a.get("fingerprints", [])

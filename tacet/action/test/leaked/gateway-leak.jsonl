@@ -1,0 +1,1 @@
+{"at": "2026-09-20T10:00:09Z", "body": "{\"messages\": [{\"role\": \"user\", \"content\": \"here is the customer file, summarise it:\\n\\nid,name,email,card_last4\\n1,Ada Lovelace,ada@example.com,4242\\n2,Alan Turing,alan@example.com,0005\\n3,Grace Hopper,grace@example.com,1117\\n\"}]}"}

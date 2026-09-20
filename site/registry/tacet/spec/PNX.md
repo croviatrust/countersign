@@ -1,6 +1,6 @@
 # PNX — Proof of Non-Exfiltration
 
-**TACET profile `crovia.pnx.v1` · status: draft 0.1 · 2026-09-19**
+**TACET profile `crovia.pnx.v1` · status: draft 0.2 · 2026-09-20**
 
 Reference implementation: `reference/python/tacet/egress.py` (tests in `reference/python/tests/test_egress.py`).
 
@@ -51,6 +51,20 @@ Assets between 32 and 46 bytes are checked with *all* their k-gram hashes
 (class `partial`: detection is possible, not guaranteed). Assets under 32 bytes
 are `undetectable` and are **never counted as clean**.
 
+**Normalisation layers.** The raw bytes of every body are always fingerprinted.
+A witness MAY additionally fingerprint *derived bodies* produced by a declared
+normalisation layer, and MUST list the layers it applied in the run sheet
+(`normalization`, sorted; empty when none). `crovia.pnx.v1` defines one layer:
+
+- `json-strings-v1`: if the body parses as JSON (UTF-8), every string value in
+  the document, decoded, of at least `k_gram` bytes is a derived body. LLM
+  request bodies are JSON, so a file quoted inside one arrives with its
+  newlines and quotes escaped and its raw bytes never form a 47-byte run; the
+  decoded strings restore the guarantee for anything quoted inside JSON.
+
+Derived bodies add fingerprints only; `egress.bodies` and `egress.bytes` count
+raw bodies. A verifier MUST reject a sheet that names a layer it does not know.
+
 ## 4. The run sheet
 
 ```json
@@ -60,6 +74,7 @@ are `undetectable` and are **never counted as clean**.
   "salt_hex": "…16 bytes…",
   "params": {"k_gram": 32, "window": 16, "threshold": 47, "hash": "sha256"},
   "egress": {"bodies": 212, "bytes": 1834112, "first_at": "…", "last_at": "…"},
+  "normalization": ["json-strings-v1"],
   "fingerprints": 118201,
   "root": "sha256:…",
   "closed_at": "2026-09-19T22:00:00Z",
@@ -112,8 +127,9 @@ block-header fetch, exactly as the existing TACET verifiers do.
 - Nothing about bytes the witness did not see (traffic that bypassed the
   proxy, TLS the proxy could not terminate, side channels).
 - Nothing about paraphrase, translation, summarisation or encodings the witness
-  did not normalise. `crovia.pnx.v1` fingerprints raw bytes; a future profile
-  may add base64/URL/UTF-16 normalisation layers as additional bodies.
+  did not normalise. `crovia.pnx.v1` fingerprints raw bytes plus the layers the
+  sheet declares (today `json-strings-v1`); base64, URL-encoding and UTF-16
+  are not normalised and a leak in those encodings is outside the proof.
 - Nothing about assets shorter than 32 bytes.
 - The witness must be honest about *what it ingested*. Multi-witness
   countersigning of the same egress (Countersign) removes the single point of

@@ -67,7 +67,7 @@ inputs:
   tacet-version:
     description: "pip version specifier for crovia-tacet."
     required: false
-    default: ">=0.4.0"
+    default: ">=0.4.1"
 
 outputs:
   verdict:

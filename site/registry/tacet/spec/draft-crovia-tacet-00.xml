@@ -577,6 +577,18 @@ silence_days    = floor(silence_seconds * 100 / 86400) / 100,
           "partial": detection is possible, not guaranteed). Assets shorter than 32 bytes are
           "undetectable" and MUST NOT be counted as clean.
         </t>
+        <t>
+          Normalisation layers. The raw bytes of every body are always fingerprinted. A witness
+          MAY additionally fingerprint derived bodies produced by a declared normalisation layer
+          and MUST list the layers it applied in the run sheet ("normalization", sorted; empty
+          when none). crovia.pnx.v1 defines one layer, "json-strings-v1": if the body parses as
+          UTF-8 JSON, every string value in the document, decoded, of at least k_gram bytes is a
+          derived body. Model request bodies are JSON, so a file quoted inside one arrives with
+          its newlines and quotes escaped and its raw bytes never form a 47-byte run; the decoded
+          strings restore the guarantee for content quoted inside JSON. Derived bodies add
+          fingerprints only; "egress.bodies" and "egress.bytes" count raw bodies. A verifier MUST
+          reject a sheet that names a layer it does not implement.
+        </t>
       </section>
       <section anchor="pnx-sheet">
         <name>Run Sheet</name>
@@ -589,6 +601,7 @@ silence_days    = floor(silence_seconds * 100 / 86400) / 100,
              "hash": "sha256"},
   "egress": {"bodies": 212, "bytes": 1834112,
              "first_at": "...", "last_at": "..."},
+  "normalization": ["json-strings-v1"],
   "fingerprints": 118201,
   "root": "sha256:...",
   "closed_at": "2026-09-19T22:00:00Z",
@@ -635,7 +648,7 @@ silence_days    = floor(silence_seconds * 100 / 86400) / 100,
         <name>What a PNX Proof Does Not Claim</name>
         <ul>
           <li>Nothing about bytes the witness did not see: traffic that bypassed the proxy, TLS the proxy could not terminate, side channels.</li>
-          <li>Nothing about paraphrase, translation, summarisation or encodings the witness did not normalise; crovia.pnx.v1 fingerprints raw bytes.</li>
+          <li>Nothing about paraphrase, translation, summarisation or encodings the witness did not normalise; crovia.pnx.v1 fingerprints raw bytes plus the declared layers (today json-strings-v1). Base64, URL-encoding and UTF-16 are not normalised.</li>
           <li>Nothing about assets shorter than 32 bytes.</li>
           <li>The witness must be honest about what it ingested. Countersigning of the same egress by several witnesses removes the single point of trust; a single-witness sheet is a statement by that witness.</li>
         </ul>

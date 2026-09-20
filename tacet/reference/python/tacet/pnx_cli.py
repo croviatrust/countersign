@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import __version__ as TACET_VERSION
-from .egress import THRESHOLD, VERDICT_ABSENT, EgressWitness
+from .egress import NORMALIZE_JSON_STRINGS, THRESHOLD, VERDICT_ABSENT, EgressWitness
 from .keys import SigningKey
 from .pnx import (
     collect_assets,
@@ -75,7 +75,8 @@ def cmd_keygen(a: argparse.Namespace) -> int:
 
 def cmd_witness(a: argparse.Namespace) -> int:
     key = _witness_key(a)
-    w = load_state(a.state) if a.append and a.state.exists() else EgressWitness(run_id=a.run_id)
+    norm = () if a.raw_bytes_only else (NORMALIZE_JSON_STRINGS,)
+    w = load_state(a.state) if a.append and a.state.exists() else EgressWitness(run_id=a.run_id, normalization=norm)
     if w.run_id != a.run_id:
         raise SystemExit(f"state belongs to run {w.run_id!r}, not {a.run_id!r}")
     n = 0
@@ -170,6 +171,8 @@ def build_parser() -> argparse.ArgumentParser:
     w.add_argument("--state", type=Path, required=True, help="where to write the witness state (private, needed by prove)")
     w.add_argument("--append", action="store_true", help="add to an existing state for the same run")
     w.add_argument("--raw", action="store_true", help="treat .jsonl files as bodies, not capture logs")
+    w.add_argument("--raw-bytes-only", action="store_true",
+                   help="disable json-strings-v1: do not also fingerprint the decoded string values of JSON bodies")
     w.add_argument("--closed-at", help="RFC 3339 close time (default: now)")
     w.set_defaults(fn=cmd_witness)
 
