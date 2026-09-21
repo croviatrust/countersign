@@ -5,9 +5,28 @@ either already live, buildable by the agent alone, or needs exactly one click
 from a human, and says which. No outreach, no cold PRs, no spam: growth has to
 come from artifacts other people *want* to embed, cite, run or verify.
 
-## 0. Where we are (verified 2026-09-20)
+## 0. Where we are (verified 2026-09-21)
 
-Shipped since the last update (all live, all pushed, CI green):
+Causari (2026-09-21, all live at causari.dev, CI green):
+
+- One design system across the site; `/verify` starts with the drop zone;
+  `/faq` (FAQPage JSON-LD, sixteen questions as people type them) and
+  `/compare` (what each instrument counts, cells marked "not stated
+  publicly" where a vendor has not published).
+- A page, a badge and a `latest.json` for every measured repository at
+  `/r/<owner>/<repo>/`, generated from the report bytes; history across
+  reports; text-only badge that follows the weekly report (1 h cache).
+- Survival Report at 100 repositories: `survival_discover.py` fills the list
+  every Sunday from GitHub commit search by the same VERIFIED signals
+  (selection disclosed at `/method#selection`); the audit runs in ten shards.
+- `re hook cursor`: lossless capture from Cursor's native hooks; Cursor is its
+  own row in the integration matrix.
+- `npx causari` / `pipx run causari` launchers with OIDC publishing
+  (`packaging/`); waiting on the owner's one-time trusted-publisher setup.
+- Launch texts for the owner in `causari/drafts/launch/` (Show HN, X,
+  LinkedIn, r/programming, maintainer note). Nobody posts but him.
+
+Crovia (verified 2026-09-20). Shipped since the previous update:
 
 - `draft-crovia-tacet-00` (TACET core + PNX profile) written in xml2rfc v3,
   rendered, mirrored with SPEC.md, PNX.md and the 107-test vectors at
