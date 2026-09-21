@@ -100,7 +100,7 @@ Why this is the lever:
 | 2 | ~~PNX conformance vectors + browser verifier~~ **done: `pnx_001…pnx_004` in `conformance/vectors/v1/`, PNX.md §9, `pnx-verify.js` in the browser verifier; Python runner 107 cases, JS runner 76 cases, both green on the same vectors.** | Two independent verifiers agreeing byte-for-byte is what standards people look for. | none |
 | 3 | ~~`tacet-egress` sidecar~~ **done as `tacet-pnx witness`** (files, directories, `.jsonl` gateway logs). A CONNECT/MITM proxy mode is deferred: it needs a CA in the agent's trust store, which is the customer's decision, not a default. (Python, stdlib + `cryptography`): an HTTP CONNECT/forward proxy that fingerprints request bodies and writes the run sheet; `--assets secrets.txt` produces the proof at exit. | One command turns any agent run into a proof. Works with Cursor, Claude Code, Aider via `HTTPS_PROXY`. | none |
 | 4 | ~~GitHub Action~~ **done: `croviatrust/pnx-action`, on the Marketplace**: wraps a job step in the sidecar, uploads the sheet, posts the proof as a check. | Every PR of every adopter carries a Crovia-verified receipt with a link back. Marketplace listing = discovery without outreach. | — |
-| 5 | ~~Internet-Draft~~ **done: `draft-crovia-tacet-00`** at `/registry/tacet/spec/` (TACET + PNX profile), xml2rfc source in `countersign/ietf/`. | Second I-D beside `draft-crovia-seal`; puts Crovia on datatracker for "verifiable absence". | submit on datatracker (2 clicks) |
+| 5 | ~~Internet-Draft~~ **done: `draft-crovia-tacet-00`** at `/registry/tacet/spec/` (TACET + PNX profile), xml2rfc source in `countersign/ietf/`. | Second I-D beside `draft-crovia-seal`; on datatracker as an Active Internet-Draft since 2026-09-21. | — |
 | 6 | **Paper**: "Verifiable Silence: proving absence for AI disclosure and agent egress" (PDF on site, Zenodo DOI). | Citable object; arXiv later with an endorser. | Zenodo token or 1 upload |
 | 7 | ~~MCP server~~ **done: `com.croviatrust/crovia` 2.0.0 in the official registry** (`verify_seal`, `model_record`, `silence_proof`, `pnx_verify`) + `server.json` for the official MCP registry. | Agents are the new search engine; a tool call is a citation. | registry login (1 click) |
 | 8 | ~~Weekly Silence Report~~ **done** (`/report/`, `/feed.xml`, Zenodo weekly, Bluesky); HF dataset mirror still open — **Weekly Silence Report** page + Atom/JSON feeds + HF dataset mirror of epoch sheets under the Crovia account. | Feeds get aggregated; a dataset on HF is a permanent inbound link, not spam. | HF write token |
@@ -137,10 +137,8 @@ end-to-end by the agent and stop at the one click that must be a human's.
    0.6.0 on npm with provenance. Every install snippet on the site and in the
    READMEs is now registry-only.
 2. ~~Social previews~~ done 2026-09-20.
-3. **Submit `draft-crovia-tacet-00` on datatracker** (2 clicks): upload
-   `tacet/standards/draft-crovia-tacet-00.xml` at
-   https://datatracker.ietf.org/submit/ — the .txt/.html renders are next to it
-   and mirrored at https://croviatrust.com/registry/tacet/spec/.
+3. ~~Submit `draft-crovia-tacet-00` on datatracker~~ done 2026-09-21: Active
+   Internet-Draft (individual), revision 00, https://datatracker.ietf.org/doc/draft-crovia-tacet/ .
 4. ~~Publish `pnx-action` to the Marketplace~~ done 2026-09-20 (v1.0.1;
    `v1` now floats on v1.0.2).
 5. HF write token, when convenient: dataset mirror of the epoch sheets under
