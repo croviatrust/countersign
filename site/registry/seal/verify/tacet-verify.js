@@ -20,7 +20,7 @@
   const D = s => enc.encode(s + "\n");
   const D_EMPTY = D("TACET-EMPTY-v1"), D_LEAF = D("TACET-LEAF-v1"), D_NODE = D("TACET-NODE-v1");
   const D_EPOCH = D("TACET-EPOCH-v1"), D_WITNESS = D("TACET-WITNESS-v1"), D_SNAP = D("TACET-SNAPSHOT-v1");
-  const DRAND = { chain: "8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce", genesis: 1595431050, period: 30, tolerance: 1800 };
+  const DRAND = { chain: "8990e7a9aaed2ffed73dbd7092123d6f289930540d7651336225dc172e51b2ce", genesis: 1595431050, period: 30, tolerance: 3600, lateAfter: 900 };
   const TRUST_ROOT_URL = "/registry/data/tacet/trust_root.json";
   const PROOF_VERSION = "crovia.tacet.silence.v1", QUERY_VERSION = "crovia.tacet.query.v1";
   const SHEET_VERSION = "crovia.tacet.epoch.v1", SNAP_VERSION = "crovia.tacet.snapshot.v1";
@@ -111,10 +111,14 @@
       if (c.epoch_start < p.epoch_end) throw new Error("epoch " + c.epoch + " starts before epoch " + p.epoch + " ends");
     }
   }
+  /* Chain id and schedule only (drand.py beacon_check): the round is scheduled inside the hour it opens.
+     Says nothing about the round's bytes; those are compared with api.drand.sh below when network checks are on.
+     Neither verifier checks the round's BLS signature. */
+  function openingDelay(opened, epochStart) { return DRAND.genesis + (opened.round - 1) * DRAND.period - ts(epochStart); }
   function beaconStructural(opened, epochStart) {
     if (opened.chain_hash !== DRAND.chain) return false;
-    const t = DRAND.genesis + (opened.round - 1) * DRAND.period, start = ts(epochStart);
-    return start - DRAND.period <= t && t <= start + DRAND.tolerance;
+    const d = openingDelay(opened, epochStart);
+    return -DRAND.period <= d && d < DRAND.tolerance;
   }
 
   /* ---- snapshots (snapshot.py) and RFC 6962 inclusion (merkle.py) ---- */
@@ -194,7 +198,9 @@
     err(opKeys.length === 1, "one operator key across the range", opKeys[0] ? opKeys[0].slice(0, 16) + "…" : "");
     const chains = Array.from(new Set(sheets.map(s => s.opened.chain_hash)));
     if (chains.length === 1 && chains[0] === DRAND.chain) {
-      err(sheets.every(s => beaconStructural(s.opened, s.epoch_start)), "drand rounds sit at each epoch start on the pinned chain", "chain " + DRAND.chain.slice(0, 8) + "…, 30 s rounds, tolerance " + DRAND.tolerance + " s");
+      const late = sheets.filter(s => openingDelay(s.opened, s.epoch_start) > DRAND.lateAfter).map(s => s.epoch);
+      err(sheets.every(s => beaconStructural(s.opened, s.epoch_start)), "drand round numbers lie inside their hour on the pinned chain (schedule only; bytes compared with the relay below when network checks are on, BLS signature not verified)",
+          "chain " + DRAND.chain.slice(0, 8) + "…, 30 s rounds, opening within " + DRAND.tolerance + " s of the hour" + (late.length ? "; late opening (> " + DRAND.lateAfter + " s) in epoch(s) " + late.join(", ") : ""));
     } else {
       note("epochs opened by a beacon chain this page does not pin (" + chains.map(c => String(c).slice(0, 8) + "…").join(", ") + ")", "round times not checked; the Python verifier warns the same way without a beacon_check");
     }
@@ -282,8 +288,8 @@
           checked++; if (b.randomness !== s.opened.randomness || b.signature !== s.opened.signature) mismatch++;
         } catch (_) {}
       }
-      if (checked) err(mismatch === 0, "drand round bytes match api.drand.sh for " + checked + " sheet(s)" + (sheets.length > 24 ? " (first 24)" : ""), mismatch ? mismatch + " mismatch(es)" : "randomness and BLS signature bytes identical");
-      else note("drand API not reachable from this browser", "round times were checked against the chain's genesis and period");
+      if (checked) err(mismatch === 0, "drand round bytes match api.drand.sh for " + checked + " sheet(s)" + (sheets.length > 24 ? " (first 24)" : ""), mismatch ? mismatch + " mismatch(es)" : "randomness and signature bytes identical to the relay's (the BLS signature itself is not verified here)");
+      else note("drand API not reachable from this browser: round bytes not checked", "only chain id and schedule were verified, from the sheets alone");
 
       /* SPEC §8.6 — Bitcoin anchors, without a node: parse each .ots, compare its merkle root with the block header. */
       if (window.tacetOts) {

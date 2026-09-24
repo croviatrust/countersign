@@ -75,10 +75,13 @@ print(verify_wrapped(bundle)["ok"])         # True — verified by the Crovia Se
   non-inclusion at every earlier epoch because slots only move forward.
 - **Delta-encoded non-inclusion chains**: one full path, then per-epoch
   sibling changes. In the fixture, 11 deltas carry 3 hashes in total.
-- **Temporal sandwich**: each epoch sheet embeds the drand round taken at
-  epoch open (lower bound) and is OpenTimestamps-anchored after close (upper
-  bound). Verification hooks `beacon_check` / `ots_check` are pluggable; the
-  result carries an explicit warning when they are absent.
+- **Temporal sandwich**: each epoch sheet embeds the first drand round of its
+  hour (lower bound) and is OpenTimestamps-anchored after close (upper bound).
+  Verification hooks `beacon_check` / `ots_check` are pluggable and tri-state
+  (verified / wrong / unchecked); the result names the epochs whose bound
+  could not be checked and warns when a hook is absent. The reference checks
+  a round's chain and schedule from the sheet; its bytes are compared with a
+  drand relay by the operator package (no BLS12-381 in either verifier).
 - **Commit-then-reveal**: a vendor may pre-register `H(summary || salt)` and
   reveal at release. A committed slot cannot be proven silent.
 - **Fail-closed**: unknown fields, missing sheets, overstated silence,

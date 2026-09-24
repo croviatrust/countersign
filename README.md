@@ -85,11 +85,15 @@ tacet-operator verify Qwen__Qwen3-32B.seal.json
 967736 and 967740. `silence_days` is truncated, never rounded: 10 800 s is `0.12`.)
 
 The verifier recomputes every map root from the empty tree, checks the chain of
-sheets, checks that each drand round matches its epoch start, parses each
-OpenTimestamps proof and matches its merkle root to the Bitcoin block header,
-verifies the observer signature on every negative snapshot and its Merkle inclusion
-in the hour, and recomputes the silence figure. Run a node? Pass your own header
-source to `tacet.ots.verify_sheet_anchor`; the explorer is only the default.
+sheets, verifies the observer signature on every negative snapshot and its Merkle
+inclusion in the hour, and recomputes the silence figure — all from the file. The
+two time bounds are external facts: for each drand round it checks chain and
+schedule from the sheet and, over the network, that the round's bytes are what the
+drand relays serve (it does not verify the BLS signature itself); for each anchor
+it parses the OpenTimestamps proof and matches its merkle root to the Bitcoin
+block header. With `--offline`, or when a relay or explorer is unreachable, those
+items come back as named warnings, never as passes. Run a node? Pass your own
+header source to `tacet.ots.verify_sheet_anchor`; the explorer is only the default.
 
 ## How an hour becomes evidence
 

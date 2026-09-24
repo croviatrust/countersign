@@ -3,9 +3,10 @@
 The operator is the only writer of the map. All changes of an epoch are applied
 in this single batch and the sheet is emitted when the batch is complete, so
 the root in the sheet is the map root at `epoch_end` even though the sheet is
-signed while the hour is still running. Missed hours are back-filled with
-empty sheets (historical drand round, no snapshots, no changes): they keep the
-chain contiguous and contribute no silence.
+signed while the hour is still running. Every epoch, observed or back-filled,
+is opened with the first drand round of its hour (fetched from the relays, which
+serve any past round). Missed hours are back-filled with empty sheets (no
+snapshots, no changes): they keep the chain contiguous and contribute no silence.
 """
 from __future__ import annotations
 
@@ -83,7 +84,7 @@ class EpochRunner:
         self.keys = keys
         self.state = State(settings.paths)
         self.fetcher = fetcher
-        self.drand_latest = drand_latest
+        self.drand_latest = drand_latest  # accepted for compatibility; epochs open with drand_round(first round of the hour)
         self.drand_round = drand_round or drand_mod.fetch_round
         self.ots_stamp = ots_stamp
         self.sleep = sleep
@@ -137,16 +138,30 @@ class EpochRunner:
         log.info("epoch %s: size=%s snapshots=%s changes=%s root=%s", epoch, len(m), len(snaps), len(changes), sheet["root"][:23])
         return sheet
 
-    def _emit_empty(self, epoch: int) -> Dict[str, Any]:
+    def _open(self, epoch: int) -> Dict[str, Any]:
+        """The epoch's opening round: the first drand round of its hour, fetched from the relays.
+
+        Deterministic in the epoch, so the sheet does not depend on when the hourly run
+        actually started (a late cron start once put four rounds past the published
+        tolerance). The round is a lower bound on everything in the epoch either way;
+        the observation times are in each snapshot's `fetched_at`. The operator refuses
+        to sign a sheet its own verifier would reject.
+        """
         start, _ = epoch_bounds(epoch)
         ts = int(datetime.strptime(start, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp())
         opened = self.drand_round(drand_mod.round_at(ts))
+        if not drand_mod.beacon_check(opened, start):
+            raise RuntimeError(f"epoch {epoch}: relay returned round {opened.get('round')}, not inside the hour starting {start}")
+        return opened
+
+    def _emit_empty(self, epoch: int) -> Dict[str, Any]:
+        opened = self._open(epoch)
         m = self.state.load_map()
         log.info("epoch %s: back-filled (operator was down)", epoch)
         return self._finish(epoch, opened, [], [], m)
 
     def _emit_observed(self, epoch: int) -> Dict[str, Any]:
-        opened = self.drand_latest()
+        opened = self._open(epoch)
         m = self.state.load_map()
         all_targets = load_list(self.s.targets_file) if self.s.targets_file and self.s.targets_file.exists() else []
         featured = self.s.featured or FEATURED_DEFAULT

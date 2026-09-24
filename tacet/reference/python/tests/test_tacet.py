@@ -204,6 +204,23 @@ def test_external_checks_are_consulted(proof3):
     assert not r.ok and r.anchored_epochs == 0
 
 
+def test_epoch_ranges():
+    from tacet.silence import epoch_ranges
+    assert epoch_ranges([3, 1, 2, 7, 9, 10]) == "1-3, 7, 9-10"
+    assert epoch_ranges([]) == ""
+
+
+def test_beacon_hook_tristate(proof3):
+    # False is an error, None is an explicit warning naming the epochs, absence is a warning too.
+    r = verify_silence_proof(proof3, beacon_check=lambda o, s: False, ots_check=lambda c, h: True)
+    assert not r.ok and all("beacon check failed" in e for e in r.errors)
+    r = verify_silence_proof(proof3, beacon_check=lambda o, s: None, ots_check=lambda c, h: True)
+    assert r.ok
+    assert len(r.warnings) == 1 and "round bytes unchecked for epoch(s) 0-" in r.warnings[0] and "chain and schedule verified" in r.warnings[0]
+    r = verify_silence_proof(proof3, ots_check=lambda c, h: True)
+    assert r.ok and r.warnings == ["drand rounds taken as claimed: chain, schedule and round bytes not verified (no beacon_check provided)"]
+
+
 # --- Seal wrapper -------------------------------------------------------------
 
 def test_wrapped_proof_is_a_valid_seal(proof3, sc):

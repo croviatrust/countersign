@@ -10,7 +10,7 @@
 <link rel="manifest" href="/site.webmanifest">
 <link rel="alternate" type="application/rss+xml" title="Crovia Silence Report" href="https://croviatrust.com/feed.xml">
 <meta property="og:title" content="Crovia — Silence you can verify">
-<meta property="og:description" content="TACET: hourly, drand-opened, Bitcoin-anchored observations of what AI providers disclose about training data. Proof of absence you can verify offline.">
+<meta property="og:description" content="TACET: hourly, drand-opened, Bitcoin-anchored observations of what AI providers disclose about training data. Proof of absence you can verify yourself, with no Crovia server in the loop.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://croviatrust.com/">
 <meta property="og:image" content="https://croviatrust.com/og-card.png?v=20260919">
@@ -183,7 +183,7 @@
     <div class="hx-verify">
       <ol>
         <li><strong>Read the log.</strong> Every epoch sheet, snapshot and map change is public JSON under <code>/registry/data/tacet/</code>. Start with <a href="/registry/data/tacet/latest.json">latest.json</a>.</li>
-        <li><strong>Verify a silence proof offline.</strong> <code>pip install</code> the reference implementation, download a <code>.seal.json</code> from <a href="/registry/tacet/#proofs">proofs/</a>, run <code>tacet-operator verify</code>. It recomputes every root, checks the drand round, the Bitcoin anchors and the signatures — with no Crovia server in the loop. <a href="/registry/tacet/#verify">Step by step →</a></li>
+        <li><strong>Verify a silence proof yourself.</strong> <code>pip install</code> the reference implementation, download a <code>.seal.json</code> from <a href="/registry/tacet/#proofs">proofs/</a>, run <code>tacet-operator verify</code>. It recomputes every root and checks every signature from the file, compares each drand round with the public relays and each anchor with the Bitcoin block header over the network — with no Crovia server in the loop — and names anything it could not check. <a href="/registry/tacet/#verify">Step by step →</a></li>
         <li><strong>Re-run the predicate.</strong> The predicate is versioned and hashed into every snapshot. Fetch the same card and run it yourself; if you disagree with the verdict, the disagreement is about public code, not about Crovia.</li>
         <li><strong>Check the 2026 archive.</strong> The earlier AXIOM ledger (January–June 2026) is still public at <code>/registry/data/substrate/</code>, with its Bitcoin anchor manifest and an <a href="/proof.html">in-browser signature check</a>.</li>
       </ol>

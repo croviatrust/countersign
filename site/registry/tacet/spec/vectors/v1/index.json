@@ -6,15 +6,15 @@
     "pnx_001_fingerprints.json": "19092bcbdfa6e1a0a0ba2a0ea77ab554cac13b042659a289671d19c0b8690672",
     "pnx_002_proofs.json": "cf828477037c284952b7b3ea8290a256e7b3163073fc1d3b692ddc0542df885b",
     "pnx_003_invalid.json": "9fe265facd8df34ec11537baba8450fd5d5b3665ec223ea70d72da964abd5e82",
-    "pnx_004_sealed.json": "da8e1d35f45ff06e9331d7e762163f226ef1ec271160ec692c0b2e0221b89e65",
+    "pnx_004_sealed.json": "3e25915b201562fc9c7961cc6af2e515394331f76e6220391de41a35885ab35f",
     "sheets_001_chain.json": "be048cfd695201dc25c6038d216b71eec5ce27939e74fc741979a1b3d6eb7663",
     "silence_001_level1.json": "abce91189a6fb231b174f406d5e9a5dfb3605a3d5eba69b8b7e44e7f04298d26",
     "silence_002_level2.json": "904866e55c190be138543ebc363ae6373b2e9cc142ebee3462281db84d7cfcac",
     "silence_003_level3.json": "dc12f566e75d98f3051152f58080d306715b0e92f684ba7b0b7210121e8dcead",
     "silence_004_before_disclosure.json": "ea6a2d93335784bea434aaa1aec73365e8dc25f1f5c20c28dedb63aeb1fb97a9",
     "snapshots_001_negative.json": "140c2d10f3fb144cec30f918c0f3d2ef2c20ebf5e8eab28db330ffa69e7b865b",
-    "wrapped_001_level3.json": "e6687a9f8f1c6267d97a75ec2b0246e876189edca5260f764c240ce4c89ae6b1",
-    "wrapped_002_invalid.json": "661b19a4bf71777be88925511a3b9071d2b210758655d44d7a5572580e8c7f7b"
+    "wrapped_001_level3.json": "3216422274016d3b9bc9d68730afb5ee8f74bf40829f4445409affea4365d706",
+    "wrapped_002_invalid.json": "a4b6f4bedc1e8cad69af56a7116af632be2fb44efdf627e6ef506359520299a1"
   },
   "vectors_version": "crovia.tacet.vectors.v1"
 }

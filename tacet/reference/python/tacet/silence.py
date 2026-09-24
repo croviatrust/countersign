@@ -18,9 +18,24 @@ STRENGTH_MAP = 1
 STRENGTH_SURFACE = 2
 STRENGTH_WITNESSED = 3
 
-BeaconCheck = Callable[[Dict[str, Any], str], bool]
+# beacon_check(opened, epoch_start): True (round fully verified: chain, schedule and the round's
+# bytes, either by a BLS check against the chain key or by comparison with a drand relay),
+# False (wrong chain, round off the epoch start, or bytes that are not the chain's), or None
+# (chain and schedule verified, bytes not checked: no BLS implementation and no relay reachable).
+BeaconCheck = Callable[[Dict[str, Any], str], Optional[bool]]
 # Returns True (anchor verified), False (anchor wrong) or None (could not be checked: no header source).
 OtsCheck = Callable[[Dict[str, Any], bytes], Optional[bool]]
+
+
+def epoch_ranges(epochs: Sequence[int]) -> str:
+    """'0-5, 9, 12-13' for a list of epoch numbers (warnings stay readable over long ranges)."""
+    out: List[str] = []
+    for e in sorted(set(epochs)):
+        if out and e == out[-1][1] + 1:
+            out[-1][1] = e
+        else:
+            out.append([e, e])
+    return ", ".join(f"{a}-{b}" if a != b else str(a) for a, b in out)
 
 
 class SilenceProofError(ValueError):
@@ -201,12 +216,19 @@ def verify_silence_proof(
     ots_check: Optional[OtsCheck] = None,
     expected_operator_pubkey_hex: Optional[str] = None,
 ) -> SilenceVerifyResult:
-    """Verify a silence proof offline.
+    """Verify a silence proof.
 
-    `beacon_check(opened, epoch_start)` and `ots_check(closed, sheet_hash)` are
-    optional hooks for external temporal verification (drand chain and
-    OpenTimestamps). When absent, the structural checks still run and the
-    result carries a warning that temporal bounds were not externally verified.
+    Everything about the proof's own bytes is checked here, offline: operator
+    signatures, sheet chaining, non-inclusion under every root, observer
+    signatures and inclusion of every negative snapshot, the silence figure,
+    witness quorum. The two temporal bounds are external facts and go through
+    hooks: `beacon_check(opened, epoch_start)` for the drand round and
+    `ots_check(closed, sheet_hash)` for the Bitcoin anchor. Each hook returns
+    True, False or None (could not be checked). A False is an error; a None is
+    reported in `warnings` naming the epochs; an absent hook is reported in
+    `warnings` too. Without hooks this function does not verify that the round
+    bytes are the chain's or that the anchor sits in a Bitcoin block: it takes
+    both as claimed and says so.
     """
     errors: List[str] = []
     warnings: List[str] = []
@@ -239,9 +261,14 @@ def verify_silence_proof(
     # Temporal bounds.
     anchored: set = set()
     unchecked: List[int] = []
+    beacon_unchecked: List[int] = []
     for s in sheets:
-        if beacon_check is not None and not beacon_check(s["opened"], s["epoch_start"]):
-            errors.append(f"epoch {s['epoch']}: beacon check failed")
+        if beacon_check is not None:
+            verdict = beacon_check(s["opened"], s["epoch_start"])
+            if verdict is False:
+                errors.append(f"epoch {s['epoch']}: beacon check failed")
+            elif verdict is None:
+                beacon_unchecked.append(s["epoch"])
         if s["closed"]["status"] == "bitcoin":
             verdict = ots_check(s["closed"], sheet_hash(s)) if ots_check is not None else None
             if verdict is False:
@@ -251,11 +278,14 @@ def verify_silence_proof(
                     unchecked.append(s["epoch"])
                 anchored.add(s["epoch"])
     if beacon_check is None:
-        warnings.append("beacon rounds not externally verified (no beacon_check provided)")
+        warnings.append("drand rounds taken as claimed: chain, schedule and round bytes not verified (no beacon_check provided)")
+    elif beacon_unchecked:
+        warnings.append(f"drand round bytes unchecked for epoch(s) {epoch_ranges(beacon_unchecked)}: chain and schedule "
+                        "verified from the sheets, no BLS check and no drand relay consulted")
     if ots_check is None:
         warnings.append("Bitcoin anchors not externally verified (no ots_check provided)")
     elif unchecked:
-        warnings.append(f"Bitcoin anchors unchecked for epoch(s) {unchecked}: no block-header source reachable")
+        warnings.append(f"Bitcoin anchors unchecked for epoch(s) {epoch_ranges(unchecked)}: .ots proof or block header not obtained")
     result.anchored_epochs = len(anchored)
 
     # Non-inclusion in every epoch.

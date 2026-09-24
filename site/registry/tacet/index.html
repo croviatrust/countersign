@@ -99,7 +99,7 @@
     <p class="tc-lead">Every hour, Crovia opens an epoch with a public randomness beacon, fetches the model cards of the AI systems under watch, runs a <b>published predicate</b> over the bytes, signs what it saw, and closes the hour with a Bitcoin anchor. A model that never discloses its training data accumulates <b>anchored negative observations</b> — and nothing else. No observation, no silence.</p>
     <div class="tc-actions">
       <a class="tc-btn is-primary" href="#proofs">Download a proof</a>
-      <a class="tc-btn" href="#verify">Verify it offline</a>
+      <a class="tc-btn" href="#verify">Verify it yourself</a>
       <a class="tc-btn" href="/registry/tacet/spec/">Read the specification</a>
     </div>
 
@@ -118,7 +118,7 @@
       <div class="meta" id="hour-meta">loading…</div>
     </div>
     <div class="tc-steps">
-      <div class="tc-step"><div class="k">1 · open</div><h3>drand beacon</h3><p>A League-of-Entropy round that did not exist before the hour began. Nothing in the epoch can predate it.</p><div class="v">round <b id="v-round">—</b><br>chain <span id="v-chain">8990e7…</span></div></div>
+      <div class="tc-step"><div class="k">1 · open</div><h3>drand beacon</h3><p>The first League-of-Entropy round of the hour; its randomness did not exist before the hour began. Nothing in the epoch can predate it.</p><div class="v">round <b id="v-round">—</b><br>chain <span id="v-chain">8990e7…</span></div></div>
       <div class="tc-step"><div class="k">2 · observe</div><h3>Surface snapshots</h3><p>Raw model card bytes fetched over TLS: status, SHA-256, length, certificate hash, peer IP. Signed by the observer key.</p><div class="v"><b id="v-snaps">—</b> snapshots · <b id="v-neg">—</b> negative<br>root <span id="v-snaproot">—</span></div></div>
       <div class="tc-step"><div class="k">3 · decide</div><h3>Public predicate</h3><p>A pure function <span class="mono">bytes → bool</span>, versioned and hashed. Anyone can re-run it on an archived copy of the card.</p><div class="v"><b>crovia.pred.hf-card-training-data</b> 1.0.0<br>code <span id="v-pred">—</span></div></div>
       <div class="tc-step"><div class="k">4 · commit</div><h3>Sparse Merkle map</h3><p>Disclosed models get a slot; silent ones do not. Slots only move forward, so emptiness at epoch <i>e</i> implies emptiness before.</p><div class="v">size <b id="v-size">—</b><br>root <span id="v-root">—</span></div></div>
@@ -145,7 +145,7 @@
   </section>
 
   <section class="tc-section" id="verify">
-    <div class="tc-head"><div><h2>Don't trust the page. Verify the file.</h2><p class="sub">Two independent verifiers, same checks. <a href="/registry/seal/verify/">In your browser</a>: operator signatures and chaining, the empty slot under every depth-256 root, observer signatures and inclusion of each negative snapshot, the silence block — and, with network checks on, every <span class="mono">.ots</span> proof parsed in the page and its merkle root matched to the Bitcoin block header. Or offline, with the reference implementation below. Neither needs a Bitcoin node, an OpenTimestamps client, or a Crovia server.</p></div></div>
+    <div class="tc-head"><div><h2>Don't trust the page. Verify the file.</h2><p class="sub">Two independent verifiers, same checks. <a href="/registry/seal/verify/">In your browser</a> or with the reference below: operator signatures and chaining, the empty slot under every depth-256 root, observer signatures and inclusion of each negative snapshot, the silence block, and each drand round's chain and schedule — all from the file. The two time bounds need the network: the round's bytes are compared with a drand relay (neither verifier checks the BLS signature itself), and every <span class="mono">.ots</span> proof is parsed and its merkle root matched to the Bitcoin block header. Offline, both verifiers name what they could not check instead of passing it. Neither needs a Bitcoin node, an OpenTimestamps client, or a Crovia server.</p></div></div>
     <div class="tc-grid2">
       <div class="tc-code"><span class="c"># operator + Seal reference, both from PyPI (Python ≥ 3.10)</span>
 pip install crovia-tacet-operator crovia-seal
@@ -167,6 +167,10 @@ tacet-operator verify <span class="a" id="v-slug2">mistralai__Mistral-7B-v0.1</s
         </tbody></table>
         <p class="tc-small" style="margin-top:12px">Pin these keys. Everything under <a href="/registry/data/tacet/" class="mono">/registry/data/tacet/</a> is CC-BY-4.0 and fetchable directly; <a href="/registry/data/tacet/trust_root.json" class="mono">trust_root.json</a> is the only file you need to trust once.</p>
       </div>
+    </div>
+    <div class="tc-card" id="corrections" style="margin-top:18px">
+      <h3 style="font:600 15px var(--sans);margin-bottom:8px">Corrections</h3>
+      <p class="tc-small"><b>2026-09-24 · opening tolerance.</b> Epochs 76, 87, 92 and 99 were opened 31–42 minutes into their hour: the hourly run started late and took the drand round current at that moment. Their sheets are signed and anchored in Bitcoin and cannot change; under the published tolerance of 1800 s both verifiers rejected them, and with them every proof spanning those hours. The rounds lie inside their hour and remain correct lower bounds for everything in it, so the tolerance is now the hour (3600 s, <a href="/registry/tacet/spec/#tacet-851-what-verify-opened-means">SPEC §8.5.1</a>); the verifiers report any opening later than 15 minutes as <i>late</i> in their transcript, and the operator now opens every epoch with the first round of its hour, refusing to sign a sheet its own verifier would reject. Also stated precisely from this date: offline, the verifiers check a round's chain and schedule, not its bytes; the bytes are compared with a drand relay when the network is available, and no Crovia verifier checks the BLS signature itself.</p>
     </div>
   </section>
 

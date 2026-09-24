@@ -33,7 +33,9 @@ def trust_root(settings: Settings, keys: Dict[str, SigningKey], drand_info: Dict
         "operator": {"id": keys["operator"].id, "pubkey": keys["operator"].pubkey_json()},
         "observers": [{"id": keys["observer"].id, "pubkey": keys["observer"].pubkey_json()}],
         "proof_issuer": {"id": keys["issuer"].id, "pubkey": keys["issuer"].pubkey_json()},
-        "beacon": {"kind": "drand", "chain_hash": DRAND_CHAIN_HASH, "tolerance_seconds": 1800,
+        "beacon": {"kind": "drand", "chain_hash": DRAND_CHAIN_HASH, "tolerance_seconds": drand_mod.TOLERANCE_S,
+                   "rule": "the opening round is scheduled no earlier than one period before epoch_start and before epoch_end; "
+                           "verifiers check chain and schedule from the sheet, the round bytes against a relay or the chain key",
                    **({k: drand_info[k] for k in ("public_key", "period", "genesis_time", "scheme") if k in drand_info} if drand_info else {})},
         "anchor": {"kind": "ots", "proof_url_template": f"{PUBLIC_BASE_URL}/ots/{{epoch}}.ots"},
         "predicates": preds,

@@ -22,9 +22,14 @@ What a TACET proof protects against:
   changes a root that is already anchored.
 - **Predicate drift** — the predicate id, version and code hash are in the
   sheet; a verifier re-runs the same code on the same bytes.
-- **Operator disappearance** — proofs verify offline against the pinned keys
-  in `trust_root.json`, the drand chain hash and a Bitcoin block header. No
-  Crovia server is needed once a proof is in hand.
+- **Operator disappearance** — proofs verify against the pinned keys in
+  `trust_root.json`, the drand chain and a Bitcoin block header. No Crovia
+  server is needed once a proof is in hand. Offline, the verifier checks
+  everything the file contains (signatures, chaining, non-inclusion, snapshots,
+  silence) plus each round's chain and schedule; the round bytes need a drand
+  relay (or a BLS12-381 check, which no Crovia verifier implements) and the
+  anchors need the `.ots` files and a block header. What was not checked is
+  named in the result's warnings — see SPEC §8.5.1.
 
 What a TACET proof does **not** claim (explicit non-goals, stated in
 `tacet/SPEC.md §13`):

@@ -81,8 +81,9 @@ def merkle_root(height: int) -> Optional[str]:
 class OtsChecker:
     """SPEC §8.6 anchor check: fetch the .ots, replay it in pure Python, compare the merkle root."""
 
-    def __init__(self, header_source: Optional[Any] = merkle_root) -> None:
+    def __init__(self, header_source: Optional[Any] = merkle_root, fetch: bool = True) -> None:
         self.header_source = header_source
+        self.fetch = fetch
         self.details: List[str] = []
 
     def __call__(self, closed: Dict[str, Any], sheet_hash_bytes: bytes) -> Optional[bool]:
@@ -98,6 +99,9 @@ class OtsChecker:
         if not ref:
             self.details.append("closed.proof_ref missing")
             return False
+        if not self.fetch:
+            self.details.append(f"{ref}: not fetched (offline); block {closed.get('block_height')} taken as claimed")
+            return None
         try:
             req = urllib.request.Request(ref, headers={"User-Agent": USER_AGENT})
             with urllib.request.urlopen(req, timeout=30) as r:
@@ -115,17 +119,30 @@ def ots_check(closed: Dict[str, Any], sheet_hash_bytes: bytes) -> Optional[bool]
 
 
 def verify_file(path: Path, *, expected_operator_pubkey_hex: Optional[str] = None,
-                check_beacon: bool = True, check_ots: bool = True) -> Dict[str, Any]:
+                check_beacon: bool = True, check_ots: bool = True, offline: bool = False) -> Dict[str, Any]:
+    """Verify a wrapped silence proof.
+
+    Signatures, chaining, non-inclusion, snapshots, silence and witnesses are
+    checked from the file alone. The drand rounds are checked for chain and
+    schedule from the file, and their bytes against the public relays unless
+    `offline`; the Bitcoin anchors need the .ots files and a block-header
+    source. `offline=True` skips every network call: those items come back as
+    warnings (unchecked), never as passes. The result lists what happened per
+    sheet under `beacon` and `anchors`.
+    """
     bundle = json.loads(Path(path).read_text(encoding="utf-8"))
     kwargs: Dict[str, Any] = {}
-    if check_beacon:
-        kwargs["beacon_check"] = drand_mod.beacon_check
-    checker = OtsChecker() if check_ots else None
+    beacon = drand_mod.BeaconChecker(online=not offline) if check_beacon else None
+    if beacon is not None:
+        kwargs["beacon_check"] = beacon
+    checker = OtsChecker(header_source=None if offline else merkle_root, fetch=not offline) if check_ots else None
     if checker is not None:
         kwargs["ots_check"] = checker
     if expected_operator_pubkey_hex:
         kwargs["expected_operator_pubkey_hex"] = expected_operator_pubkey_hex
     res = verify_wrapped(bundle, **kwargs)
+    if beacon is not None:
+        res["beacon"] = beacon.details
     if checker is not None:
         res["anchors"] = checker.details
     return res

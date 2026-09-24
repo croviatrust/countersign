@@ -26,7 +26,10 @@ Crovia Seal receipt format, offline verification). Cite them distinctly.
   (urn:crovia:tacet:map:disclosure), signs the epoch sheet and anchors it in
   Bitcoin via OpenTimestamps. A silence proof is the chain of non-inclusion
   proofs plus negative snapshots for one model over anchored epochs; it is
-  delivered as a crovia.seal.v1 and verifies offline (tacet-operator verify).
+  delivered as a crovia.seal.v1; tacet-operator verify checks signatures,
+  chaining, non-inclusion, snapshots and silence from the file, the drand
+  round bytes against a relay and the anchors against Bitcoin block headers
+  over the network, and names what it could not check (SPEC 8.5.1).
   Spec: https://croviatrust.com/registry/tacet/spec/ (source: https://github.com/croviatrust/countersign/blob/main/tacet/SPEC.md)
 - PNX (Proof of Non-Exfiltration, TACET profile crovia.pnx.v1): a proof that
   none of a set of protected assets (fingerprinted, never disclosed) appeared

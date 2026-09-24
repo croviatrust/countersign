@@ -26,6 +26,29 @@ Causari (2026-09-21, all live at causari.dev, CI green):
 - Launch texts for the owner in `causari/drafts/launch/` (Show HN, X,
   LinkedIn, r/programming, maintainer note). Nobody posts but him.
 
+Crovia, correction pass (2026-09-24), `crovia-tacet` / operator 0.4.2:
+
+- **Opening tolerance.** Verifying a live proof against the relays showed
+  119/119 rounds with genuine bytes, but 4 epochs (76, 87, 92, 99) opened
+  31–42 min into their hour and 31 more than 15 min late: the hourly run
+  starts late and took the round current at that moment. Under the published
+  1800 s both verifiers rejected every proof spanning those hours. Fixed at
+  three levels: the bound is now the hour (SPEC §8.5.1 with the correction
+  stated, trust root `tolerance_seconds` 3600, Corrections card on the TACET
+  page); the operator opens every epoch with the first round of its hour and
+  refuses to sign a sheet its verifier rejects; the transcript marks openings
+  later than 900 s as *late*. The lateness of the run itself is the next item
+  (`latest.json` observation age).
+- **drand, stated exactly.** Offline the verifiers check a round's chain and
+  schedule, not its bytes; bytes are compared with a relay when the network
+  is available (`beacon_check_online`, `--offline`, tri-state hook in the
+  reference, warnings that name the epochs); no Crovia verifier checks the
+  BLS signature. Written in SPEC §8.5.1, README, SECURITY.md, the TACET page,
+  the browser verifier's step labels and the MCP `verify` tool.
+- Owner: deploy 0.4.2 on the server (`pip install -U crovia-tacet
+  crovia-tacet-operator` after the tag publishes, then `tacet-operator publish`
+  so `trust_root.json` carries the new tolerance and rule).
+
 Crovia (verified 2026-09-20). Shipped since the previous update:
 
 - `draft-crovia-tacet-00` (TACET core + PNX profile) written in xml2rfc v3,

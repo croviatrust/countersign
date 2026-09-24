@@ -11,8 +11,11 @@ daily        tacet-operator publish --proofs rebuild featured silence proofs (cr
 
 ## What one epoch does
 
-1. Fetches the current **drand** round (chain `8990e7…`, pinned in `trust_root.json`).
-   Nothing in the epoch could have existed before that round: lower time bound.
+1. Fetches the first **drand** round of the hour (chain `8990e7…`, pinned in
+   `trust_root.json`) — the round scheduled at `epoch_start`, so the sheet does not
+   depend on when the run started. Nothing in the epoch could have existed before
+   that round: lower time bound. The operator refuses to sign a sheet whose round
+   its own verifier would reject.
 2. Fetches the surfaces of the featured targets and of a rotating slice of the
    target list (default 120 per hour, 0.6 s apart, `crovia-tacet-observer` user
    agent). Surface = the raw model card `…/raw/main/README.md`; for gated
@@ -41,7 +44,16 @@ contiguous and those hours contribute no silence.
 ```
 tacet-operator prove mistralai/Mistral-7B-v0.1 --strength 2 -o proof.seal.json
 tacet-operator verify proof.seal.json --operator-pubkey <key_hex from trust_root.json>
+tacet-operator verify proof.seal.json --offline     # no network: what could not be checked is named in warnings
 ```
+
+`verify` checks signatures, chaining, non-inclusion, snapshots, silence and
+witnesses from the file. For the two time bounds it does what it can: each drand
+round's chain and schedule from the sheet, its `randomness`/`signature` bytes
+against the public relays (it does not verify the BLS signature itself), and each
+Bitcoin anchor by parsing the `.ots` and comparing with the block header from an
+explorer. The output lists the per-sheet transcript under `beacon` and `anchors`;
+`--offline` skips every network call and reports those items as unchecked.
 
 A proof carries every sheet in the range, the delta-encoded non-inclusion
 path, the negative snapshots with their Merkle inclusion in each epoch's

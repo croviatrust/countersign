@@ -16,7 +16,7 @@ from .silence import (build_silence_proof, verify_silence_proof, build_query, co
                       STRENGTH_MAP, STRENGTH_SURFACE, STRENGTH_WITNESSED)
 from .wrap import wrap_in_seal, verify_wrapped
 
-__version__ = "0.4.1"
+__version__ = "0.4.2"
 __all__ = [
     "canonicalize", "CanonicalizationError",
     "EMPTY", "object_hash", "target_key", "namespace_key", "prefixed", "unprefixed",

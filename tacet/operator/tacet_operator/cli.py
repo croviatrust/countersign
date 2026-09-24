@@ -49,11 +49,14 @@ def main(argv=None) -> int:
     pr.add_argument("--strength", type=int, default=2, choices=(1, 2))
     pr.add_argument("-o", "--out")
 
-    vf = sub.add_parser("verify", help="verify a wrapped silence proof offline")
+    vf = sub.add_parser("verify", help="verify a wrapped silence proof (signatures, chaining, non-inclusion, "
+                                       "snapshots, silence: from the file; drand bytes and Bitcoin anchors: via network unless --offline)")
     vf.add_argument("file")
     vf.add_argument("--operator-pubkey", help="expected operator key_hex (from trust_root.json)")
-    vf.add_argument("--no-beacon", action="store_true")
-    vf.add_argument("--no-ots", action="store_true")
+    vf.add_argument("--offline", action="store_true",
+                    help="no network: drand rounds checked for chain and schedule only, anchors taken as claimed (both reported as warnings)")
+    vf.add_argument("--no-beacon", action="store_true", help="skip the drand checks entirely (reported as a warning)")
+    vf.add_argument("--no-ots", action="store_true", help="skip the anchor checks entirely (reported as a warning)")
 
     bt = sub.add_parser("build-targets", help="derive the target list from public registry files")
     bt.add_argument("--candidates", required=True)
@@ -70,7 +73,7 @@ def main(argv=None) -> int:
         # Third parties run this on any machine: it must not touch operator state or keys.
         from .prove import verify_file
         res = verify_file(Path(args.file), expected_operator_pubkey_hex=args.operator_pubkey,
-                          check_beacon=not args.no_beacon, check_ots=not args.no_ots)
+                          check_beacon=not args.no_beacon, check_ots=not args.no_ots, offline=args.offline)
         print(json.dumps(res, indent=1))
         return 0 if res["ok"] else 1
 

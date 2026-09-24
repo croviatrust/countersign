@@ -134,9 +134,13 @@ def test_three_epochs_then_proof(env):
 
     out = s.paths.public / "proofs" / "t.seal.json"
     out.write_text(json.dumps(bundle))
-    res = verify_file(out, expected_operator_pubkey_hex=keys["operator"].public_hex, check_beacon=True, check_ots=False)
+    res = verify_file(out, expected_operator_pubkey_hex=keys["operator"].public_hex, check_beacon=True, check_ots=False, offline=True)
     assert res["ok"], res["errors"]
     assert res["strength_verified"] == 2
+    # offline, the verifier says what it did not check: round bytes (no relay, no BLS) and anchors (no hook)
+    assert len(res["beacon"]) == 3 and all("bytes not checked (offline)" in d for d in res["beacon"])
+    assert any("round bytes unchecked" in w for w in res["warnings"])
+    assert any("Bitcoin anchors not externally verified" in w for w in res["warnings"])
 
     # a disclosed target cannot get a silence proof: its slot is not empty
     with pytest.raises(SilenceProofError):
@@ -180,3 +184,63 @@ def test_backfill_after_downtime(env):
     # silence only from the two observed epochs (0 and 3), not the empty hours in between
     assert bundle["proof"]["silence"]["observed_epochs"] == 2
     assert bundle["proof"]["silence"]["silence_seconds"] == 2 * EPOCH_SECONDS
+
+
+def test_beacon_check_is_schedule_only_and_online_adds_the_bytes(monkeypatch):
+    from datetime import datetime, timezone
+    start = "2026-09-19T09:00:00Z"
+    r = drand_mod.round_at(int(datetime(2026, 9, 19, 9, tzinfo=timezone.utc).timestamp()))  # first round of the hour
+    good = {"kind": "drand", "chain_hash": drand_mod.DRAND_CHAIN_HASH, "round": r, "randomness": "aa" * 32, "signature": "bb" * 48}
+    # offline: the schedule check accepts any bytes for a well-placed round — it cannot tell, and says so
+    assert drand_mod.beacon_check(good, start)
+    assert drand_mod.beacon_check({**good, "randomness": "ff" * 32}, start)
+    assert not drand_mod.beacon_check({**good, "chain_hash": "00" * 32}, start)
+    assert drand_mod.beacon_check({**good, "round": r + 80}, start)            # 40 minutes in: late, still this hour
+    assert not drand_mod.beacon_check({**good, "round": r + 120}, start)       # the next hour's first round
+    assert not drand_mod.beacon_check({**good, "round": r - 2}, start)         # a round from before the hour
+    assert not drand_mod.beacon_check({**good, "round": "x"}, start)
+    assert drand_mod.opening_delay_s({**good, "round": r + 80}, start) == 2400
+
+    served = dict(good)
+    monkeypatch.setattr(drand_mod, "fetch_round", lambda n, timeout=10.0: dict(served))
+    assert drand_mod.beacon_check_online(good, start) is True
+    assert drand_mod.beacon_check_online({**good, "randomness": "ff" * 32}, start) is False
+    assert drand_mod.beacon_check_online({**good, "round": r + 120}, start) is False
+    chk = drand_mod.BeaconChecker(online=True)
+    assert chk({**good, "round": r + 80}, start) is True and "2400 s after the hour began (late opening)" in chk.details[-1]
+
+    def down(n, timeout=10.0):
+        raise drand_mod.DrandError("all drand relays failed")
+    monkeypatch.setattr(drand_mod, "fetch_round", down)
+    assert drand_mod.beacon_check_online(good, start) is None
+
+    chk = drand_mod.BeaconChecker(online=True)
+    assert chk(good, start) is None and "no relay reachable" in chk.details[-1]
+    chk = drand_mod.BeaconChecker(online=False)
+    assert chk(good, start) is None and "offline" in chk.details[-1]
+    assert chk({**good, "round": r + 120}, start) is False and "not inside the hour" in chk.details[-1]
+
+
+def test_late_run_still_opens_with_the_first_round_of_the_hour(env):
+    s, keys = env
+    fd, fo = FakeDrand(), FakeOTS()
+    runner, _ = run_epochs(s, keys, 1, fd, fo)
+    # the hourly run for epoch 1 starts 41 minutes late (what happened to epochs 76, 87, 92, 99 of the live map)
+    fd.now = GENESIS + timedelta(seconds=EPOCH_SECONDS + 41 * 60)
+    sheet = runner.run(now=fd.now)
+    first_round_of_hour = drand_mod.round_at(int((GENESIS + timedelta(seconds=EPOCH_SECONDS)).timestamp()))
+    assert sheet["opened"]["round"] == first_round_of_hour
+    assert drand_mod.opening_delay_s(sheet["opened"], sheet["epoch_start"]) == 0
+    assert drand_mod.beacon_check(sheet["opened"], sheet["epoch_start"])
+    # every snapshot of the epoch is bound to that round
+    for snap in State(s.paths).load_snapshots(1):
+        assert snap["beacon_round"] == first_round_of_hour
+
+    # a relay answering with a round outside the hour is refused: the operator never signs what its verifier rejects
+    def wrong_round(n):
+        return {"kind": "drand", "chain_hash": drand_mod.DRAND_CHAIN_HASH, "round": n + 500,
+                "randomness": "00" * 32, "signature": "00" * 48}
+    bad = EpochRunner(s, keys, fetcher=fake_fetcher, drand_round=wrong_round, ots_stamp=fo.stamp, sleep=lambda _: None)
+    with pytest.raises(RuntimeError, match="not inside the hour"):
+        bad.run(now=GENESIS + timedelta(seconds=EPOCH_SECONDS * 2 + 300))
+    assert State(s.paths).latest_epoch() == 1

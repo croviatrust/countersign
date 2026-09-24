@@ -150,9 +150,11 @@ epoch `< e` for the same map, and silence is a monotone predicate on epochs.
 
 ## 6. Epoch sheets and the temporal sandwich
 
-At the start of each epoch the operator fetches the current **drand** round
-(chain hash pinned in the trust root). At the end it computes the map root and
-signs an epoch sheet:
+For each epoch the operator fetches the **drand** round scheduled at the epoch
+start — the first round of the hour, from the pinned chain (chain hash in the
+trust root); relays serve any past round, so this does not depend on when the
+hourly run actually starts. At the end it computes the map root and signs an
+epoch sheet:
 
 ```json
 {
@@ -338,11 +340,47 @@ every displayed silence figure.
 
 1. Verify each sheet's operator signature; verify `prev_sheet_hash` chaining
    over the range; verify `map_id` and monotonically increasing `epoch`.
-2. For each sheet, verify `opened` is a valid drand round for the pinned chain
-   whose time is ≤ `epoch_start` + tolerance, and (if `closed.status ==
-   bitcoin`) verify the OTS proof of `sheet_hash` and record the block time.
+2. For each sheet, verify `opened` (§8.5.1) and, if `closed.status ==
+   bitcoin`, verify the OTS proof of `sheet_hash` (§8.6) and record the block
+   time.
 3. Reconstruct the path per epoch from `paths`; for each epoch recompute the
    root from `EMPTY[0]`; require equality with `sheets[i].root`.
+
+#### 8.5.1 What "verify `opened`" means
+
+`opened` is a claim with two parts, checked differently:
+
+- **Chain and schedule** — from the sheet alone, offline: `opened.chain_hash`
+  equals the pinned chain, and the round's scheduled time
+  `genesis_time + (round − 1) · period` lies inside the hour the sheet opens:
+  `epoch_start − period ≤ t < epoch_start + tolerance_seconds`, with
+  `tolerance_seconds` from the trust root (3600, the epoch length). This says
+  the round *number* fits the epoch. It says nothing about the bytes.
+- **Round bytes** — that `randomness` and `signature` are the chain's output
+  for that round. The complete check is the round's BLS12-381 signature under
+  the chain public key in the trust root (drand `pedersen-bls-chained`:
+  message `SHA-256(previous_signature ‖ round)`, round as a big-endian 64-bit
+  integer). Equivalent in practice, and
+  what both Crovia verifiers do: fetch the same round from a drand relay and
+  require byte equality. Without one of the two, the lower time bound rests
+  on the operator's word, because an operator can write a well-placed round
+  number with invented bytes.
+
+A verifier that checks only chain and schedule MUST say so (the reference
+returns a warning naming the epochs; the browser page prints a note). It MUST
+NOT report the bound as verified. A round whose bytes cannot be obtained is
+*unchecked*, never failed. Neither Crovia verifier implements BLS12-381; the
+relay comparison is what they run when the network is available.
+
+**Correction, 2026-09-24.** `tolerance_seconds` was 1800 until this date.
+Epochs 76, 87, 92 and 99 of `urn:crovia:tacet:map:disclosure` were opened
+31–42 minutes into their hour because the operator's hourly run started late,
+and their signed, anchored sheets cannot change. Their rounds lie inside their
+hour and remain correct lower bounds for everything in it, so the bound is
+now the hour; the reference verifier reports any opening later than 900 s as
+*late* in its per-sheet transcript. The operator now opens every epoch with
+the first round of its hour (§6) and refuses to sign a sheet that fails this
+check, so lateness of the run no longer reaches the sheet.
 
 ### 8.6 Checking the Bitcoin anchor without a Bitcoin node
 

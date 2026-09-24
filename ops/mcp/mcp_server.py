@@ -238,19 +238,29 @@ def tool_verify_seal(a: dict) -> dict:
         try:
             from tacet.wrap import verify_wrapped  # type: ignore
             kwargs: dict[str, Any] = {}
-            if check_network:
-                try:
-                    from tacet_operator import drand as drand_mod  # type: ignore
-                    from tacet_operator.prove import OtsChecker  # type: ignore
-                    kwargs["beacon_check"] = drand_mod.beacon_check
-                    kwargs["ots_check"] = OtsChecker()
-                except ImportError:
-                    pass
+            beacon = anchors = None
+            try:
+                from tacet_operator import drand as drand_mod  # type: ignore
+                from tacet_operator.prove import OtsChecker  # type: ignore
+                # Chain and schedule of each drand round are checked from the file alone; the round
+                # bytes (against a relay) and the Bitcoin anchors only when check_anchors is set.
+                beacon = drand_mod.BeaconChecker(online=check_network)
+                anchors = OtsChecker(fetch=check_network)
+                kwargs["beacon_check"] = beacon
+                kwargs["ots_check"] = anchors
+            except ImportError:
+                pass
             res = verify_wrapped(obj, **kwargs)
             res["kind"] = "tacet_silence_proof"
             res["network_checks"] = check_network and "ots_check" in kwargs
+            if beacon is not None:
+                res["beacon"] = beacon.details
+            if anchors is not None:
+                res["anchors"] = anchors.details
             res["meaning"] = ("Valid: the operator signature, the binding of query and proof, and every per-epoch non-inclusion path check out. "
-                              "Silence is bounded by the observed epochs listed in the proof." if res.get("ok") else "Invalid: see errors.")
+                              "Silence is bounded by the observed epochs listed in the proof. "
+                              "Read 'warnings': what could not be checked from the file (drand round bytes, Bitcoin anchors) is listed there."
+                              if res.get("ok") else "Invalid: see errors.")
             return res
         except Exception as e:  # noqa: BLE001
             return {"ok": False, "kind": "tacet_silence_proof", "error": f"{type(e).__name__}: {e}"}
