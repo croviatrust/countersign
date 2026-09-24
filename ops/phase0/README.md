@@ -166,3 +166,17 @@ only". Retired and replaced:
 
 Kept: `global_ranking.json` and `/registry/compliance/` (model-card checklist coverage: counts of
 present/absent items, no grades), `crovia_broadcast_changes.py` (high-signal change posts).
+
+**Silence Report, closed weeks are frozen (2026-09-24, `silence_report.py`; deploy: copy the file
+to `/opt/crovia/scripts/`).** Until now the daily run recomputed the previous week from the current
+files, so a closed week's page moved every day: anchors confirmed, proofs grew, and
+`targets_observed_week` *shrank* because `targets.json` only knows a target's latest observation.
+Now: the week before the current one is finalized exactly once, at the first run after it closes
+(`final`, `finalized_at` in `facts.json`; the page says so), and never rewritten. Models observed in
+a week are counted from the week's `snapshots/<epoch>.jsonl` files (distinct targets, last verdict
+of the week), not from `last_seen`; `epochs_week` is every epoch emitted in the week, with
+`epochs_anchored_week` / `epochs_pending_week` stated separately (a closed week may still have
+anchors pending when finalized — the page says how many). Correcting a finalized week is explicit:
+`silence_report.py --refinalize 2026-W38 --note "why"` keeps the superseded figures as
+`facts.rN.json` and lists the correction on the page. The live `2026-W38/facts.json` carries no
+`final` flag, so the first run after deployment finalizes it from the files as they are then.
