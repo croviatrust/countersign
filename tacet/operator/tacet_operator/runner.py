@@ -149,7 +149,18 @@ class EpochRunner:
         """
         start, _ = epoch_bounds(epoch)
         ts = int(datetime.strptime(start, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp())
-        opened = self.drand_round(drand_mod.round_at(ts))
+        opened = None
+        for attempt, pause in enumerate((15, 30, 60, 0)):
+            try:
+                opened = self.drand_round(drand_mod.round_at(ts))
+                break
+            except drand_mod.DrandError as e:
+                # a transient relay failure must not cost the hour: an unemitted epoch becomes an empty back-fill
+                if not pause:
+                    raise
+                log.warning("epoch %s: drand attempt %s failed (%s); retrying in %ss", epoch, attempt + 1, e, pause)
+                self.sleep(pause)
+        assert opened is not None
         if not drand_mod.beacon_check(opened, start):
             raise RuntimeError(f"epoch {epoch}: relay returned round {opened.get('round')}, not inside the hour starting {start}")
         return opened

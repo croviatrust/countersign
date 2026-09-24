@@ -18,7 +18,7 @@ from tacet_operator.config import GENESIS, EPOCH_SECONDS, Paths, Settings
 from tacet_operator.fetch import Fetched
 from tacet_operator.keys import load_all
 from tacet_operator.prove import build as build_proof, verify_file
-from tacet_operator.publish import badges, featured_proofs, index, observed_targets, trust_root
+from tacet_operator.publish import badges, featured_proofs, health, index, observed_targets, trust_root
 from tacet_operator.runner import EpochRunner, refresh_anchors
 from tacet_operator.state import State
 
@@ -149,8 +149,15 @@ def test_three_epochs_then_proof(env):
     # publishing
     tr = trust_root(s, keys)
     assert tr["operator"]["pubkey"]["key_hex"] == keys["operator"].public_hex
-    latest = index(s)
+    now = GENESIS + timedelta(minutes=22)  # the fake fetcher stamps every fetch 18:07:00Z; 15 min later
+    latest = index(s, now=now)
     assert latest["latest_epoch"] == 2 and latest["anchored_epochs"] == 2 and latest["map_size"] == 2
+    st_ = latest["status"]
+    assert st_["state"] == "ok" and st_["reasons"] == [], st_
+    assert st_["observation"]["last_observed_epoch"] == 2 and st_["observation"]["late_runs_24h"] == []
+    assert st_["anchoring"]["pending_epochs"] == 1 and st_["anchoring"]["oldest_pending_epoch"] == 2
+    # the same rows read two hours later are stale, whatever the file says: readers must compare as_of too
+    assert index(s, now=now + timedelta(hours=2))["status"]["state"] == "stale"
     rows = featured_proofs(s, keys)
     assert [r["target_id"] for r in rows] == [SILENT]
     tg = observed_targets(s)
@@ -244,3 +251,57 @@ def test_late_run_still_opens_with_the_first_round_of_the_hour(env):
     with pytest.raises(RuntimeError, match="not inside the hour"):
         bad.run(now=GENESIS + timedelta(seconds=EPOCH_SECONDS * 2 + 300))
     assert State(s.paths).latest_epoch() == 1
+
+
+def test_health_is_fail_closed():
+    def row(e, snaps=3, closed="bitcoin", first_delay=300):
+        start = GENESIS + timedelta(seconds=EPOCH_SECONDS * e)
+        fmt = lambda d: d.strftime("%Y-%m-%dT%H:%M:%SZ")  # noqa: E731
+        return {"epoch": e, "epoch_start": fmt(start), "epoch_end": fmt(start + timedelta(seconds=EPOCH_SECONDS)),
+                "snapshots": snaps, "closed": closed,
+                "first_fetched_at": fmt(start + timedelta(seconds=first_delay)) if snaps else None,
+                "last_fetched_at": fmt(start + timedelta(seconds=first_delay + 90)) if snaps else None}
+    rows = [row(e, closed="bitcoin" if e < 29 else "pending") for e in range(30)]
+    now = GENESIS + timedelta(seconds=EPOCH_SECONDS * 29 + 1200)
+    assert health(rows, now)["state"] == "ok"
+    assert health([], now)["state"] == "stale"
+    # two epochs behind
+    h = health(rows, now + timedelta(hours=2))
+    assert h["state"] == "stale" and any("current hour is epoch 31" in r for r in h["reasons"])
+    # a gap in the last 24 hours
+    h = health(rows[:20] + [row(20, snaps=0)] + rows[21:], now)
+    assert h["state"] == "degraded" and h["observation"]["empty_epochs_24h"] == [20]
+    # three late runs
+    late = [row(e, first_delay=2400 if e in (10, 15, 20) else 300, closed="bitcoin" if e < 29 else "pending") for e in range(30)]
+    h = health(late, now)
+    assert h["state"] == "degraded" and h["observation"]["late_runs_24h"] == [10, 15, 20]
+    assert health([row(e, first_delay=2400 if e in (10, 15) else 300, closed="bitcoin" if e < 29 else "pending") for e in range(30)], now)["state"] == "ok"
+    # an anchor pending for more than a day
+    h = health([row(e, closed="pending" if e == 2 else "bitcoin") for e in range(30)], now)
+    assert h["state"] == "degraded" and h["anchoring"]["oldest_pending_epoch"] == 2 and any("without a Bitcoin anchor" in r for r in h["reasons"])
+    # the latest epoch is a back-fill
+    h = health(rows[:29] + [row(29, snaps=0, closed="pending")], now)
+    assert h["state"] == "degraded" and any("back-fill" in r for r in h["reasons"])
+
+
+def test_transient_relay_failure_does_not_cost_the_hour(env):
+    s, keys = env
+    fd, fo = FakeDrand(), FakeOTS()
+    calls = {"n": 0}
+    slept = []
+
+    def flaky(n):
+        calls["n"] += 1
+        if calls["n"] < 3:
+            raise drand_mod.DrandError("all drand relays failed: timeout")
+        return fd.round(n)
+    runner = EpochRunner(s, keys, fetcher=fake_fetcher, drand_round=flaky, ots_stamp=fo.stamp, sleep=slept.append)
+    sheet = runner.run(now=GENESIS + timedelta(seconds=300))
+    assert sheet["epoch"] == 0 and calls["n"] == 3 and [t for t in slept if t] == [15, 30]
+
+    def dead(n):
+        raise drand_mod.DrandError("all drand relays failed")
+    runner = EpochRunner(s, keys, fetcher=fake_fetcher, drand_round=dead, ots_stamp=fo.stamp, sleep=slept.append)
+    with pytest.raises(drand_mod.DrandError):
+        runner.run(now=GENESIS + timedelta(seconds=EPOCH_SECONDS + 300))
+    assert State(s.paths).latest_epoch() == 0

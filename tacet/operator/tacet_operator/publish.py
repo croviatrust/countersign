@@ -3,12 +3,12 @@ from __future__ import annotations
 
 import hashlib
 from datetime import datetime, timezone
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from tacet.keys import SigningKey
 
 from . import drand as drand_mod
-from .config import DRAND_CHAIN_HASH, EPOCH_SECONDS, GENESIS, MAP_ID, PUBLIC_BASE_URL, Settings
+from .config import DRAND_CHAIN_HASH, EPOCH_SECONDS, GENESIS, MAP_ID, PUBLIC_BASE_URL, Settings, epoch_of
 from .predicates import REGISTRY, load as load_predicate
 from .prove import build as build_proof, negative_epochs, slug
 from .state import State, _write_json
@@ -54,7 +54,88 @@ def trust_root(settings: Settings, keys: Dict[str, SigningKey], drand_info: Dict
     return tr
 
 
-def index(settings: Settings) -> Dict[str, Any]:
+def _ts(iso: str) -> int:
+    return int(datetime.strptime(iso[:19], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).timestamp())
+
+
+LATE_RUN_S = 900          # an hourly run that first fetches later than this is late
+STALE_AFTER_S = 2 * EPOCH_SECONDS
+ANCHOR_OVERDUE_S = 24 * 3600
+
+
+def health(rows: List[Dict[str, Any]], now: Optional[datetime] = None) -> Dict[str, Any]:
+    """Operational status from the index rows (each with `first_fetched_at` / `last_fetched_at`).
+
+    Fail-closed: the state is `ok` only when the latest epoch is the current or previous
+    hour, holds observations, the last 24 epochs have no gap and at most two late runs,
+    and no anchor is older than a day. Everything else is `degraded` or `stale`, with
+    the reasons spelled out. A page reading this MUST also compare `as_of` with its own
+    clock: a file that stopped updating is stale whatever it says.
+    """
+    now = now or datetime.now(timezone.utc)
+    now_s = int(now.timestamp())
+    reasons: List[str] = []
+    observed = [r for r in rows if r.get("snapshots")]
+    last_obs = observed[-1] if observed else None
+    recent = rows[-24:]
+    late = [r["epoch"] for r in recent if r.get("first_fetched_at") and _ts(r["first_fetched_at"]) - _ts(r["epoch_start"]) > LATE_RUN_S]
+    empty = [r["epoch"] for r in recent if not r.get("snapshots")]
+    pending = [r for r in rows if r.get("closed") != "bitcoin"]
+    oldest_pending = pending[0] if pending else None
+    oldest_pending_age = now_s - _ts(oldest_pending["epoch_end"]) if oldest_pending else None
+
+    # rows without fetch times (older index files) count from the start of their hour: the conservative reading
+    age = now_s - _ts(last_obs.get("last_fetched_at") or last_obs["epoch_start"]) if last_obs else None
+    current = epoch_of(now)
+    latest_epoch = rows[-1]["epoch"] if rows else None
+    state = "ok"
+    if not rows or latest_epoch is None or latest_epoch < current - 1:
+        state = "stale"
+        reasons.append(f"latest epoch is {latest_epoch}, current hour is epoch {current}" if rows else "no epoch published")
+    if age is None or age > STALE_AFTER_S:
+        state = "stale"
+        reasons.append("no observation yet" if age is None else f"last observation {age // 60} min ago")
+    if state != "stale":
+        if rows and not rows[-1].get("snapshots"):
+            state = "degraded"
+            reasons.append(f"latest epoch {latest_epoch} is a back-fill without observations")
+        if empty:
+            state = "degraded"
+            reasons.append(f"{len(empty)} epoch(s) without observations in the last 24: {', '.join(map(str, empty))}")
+        if len(late) >= 3:
+            state = "degraded"
+            reasons.append(f"{len(late)} late runs in the last 24 epochs (first fetch more than {LATE_RUN_S // 60} min after the hour)")
+        if oldest_pending_age is not None and oldest_pending_age > ANCHOR_OVERDUE_S:
+            state = "degraded"
+            reasons.append(f"epoch {oldest_pending['epoch']} still without a Bitcoin anchor after {oldest_pending_age // 3600} h")
+    run_delay = None
+    if last_obs and last_obs.get("first_fetched_at"):
+        run_delay = _ts(last_obs["first_fetched_at"]) - _ts(last_obs["epoch_start"])
+    return {
+        "state": state,
+        "reasons": reasons,
+        "as_of": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "rule": f"ok = latest epoch is this hour or the previous one, with observations, no gap and fewer than 3 late runs "
+                f"(> {LATE_RUN_S} s) in the last 24 epochs, no anchor pending for more than {ANCHOR_OVERDUE_S // 3600} h; "
+                f"stale = no observation for {STALE_AFTER_S // 3600} h or the log is two epochs behind; anything else is degraded. "
+                f"Readers must also treat this file as stale when as_of is older than {STALE_AFTER_S // 3600} h.",
+        "observation": {
+            "last_observed_epoch": last_obs["epoch"] if last_obs else None,
+            "last_observed_at": last_obs.get("last_fetched_at") if last_obs else None,
+            "age_seconds": age,
+            "run_delay_seconds": run_delay,
+            "late_runs_24h": late,
+            "empty_epochs_24h": empty,
+        },
+        "anchoring": {
+            "pending_epochs": len(pending),
+            "oldest_pending_epoch": oldest_pending["epoch"] if oldest_pending else None,
+            "oldest_pending_age_seconds": oldest_pending_age,
+        },
+    }
+
+
+def index(settings: Settings, now: Optional[datetime] = None) -> Dict[str, Any]:
     st = State(settings.paths)
     last = st.latest_epoch()
     rows: List[Dict[str, Any]] = []
@@ -71,10 +152,12 @@ def index(settings: Settings) -> Dict[str, Any]:
             total_neg += neg
             if s["closed"]["status"] == "bitcoin":
                 anchored += 1
+            fetched = sorted(x["fetched_at"] for x in snaps)
             rows.append({"epoch": e, "epoch_start": s["epoch_start"], "epoch_end": s["epoch_end"], "size": s["size"],
                          "snapshots": len(snaps), "negative": neg, "root": s["root"],
                          "sheet_hash": s["closed"]["anchored_digest"], "closed": s["closed"]["status"],
-                         "block_height": s["closed"].get("block_height"), "beacon_round": s["opened"]["round"]})
+                         "block_height": s["closed"].get("block_height"), "beacon_round": s["opened"]["round"],
+                         "first_fetched_at": fetched[0] if fetched else None, "last_fetched_at": fetched[-1] if fetched else None})
     out = {"index_version": "crovia.tacet.index.v1", "map_id": MAP_ID, "epochs": rows, "generated_at": _now()}
     _write_json(settings.paths.public / "index.json", out)
     latest = {
@@ -83,6 +166,7 @@ def index(settings: Settings) -> Dict[str, Any]:
         "map_size": rows[-1]["size"] if rows else 0,
         "snapshots_total": total_snaps, "negative_snapshots_total": total_neg,
         "latest_sheet": rows[-1] if rows else None,
+        "status": health(rows, now),
         "generated_at": _now(),
     }
     _write_json(settings.paths.public / "latest.json", latest)

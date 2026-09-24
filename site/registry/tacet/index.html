@@ -228,6 +228,23 @@ tacet-operator verify <span class="a" id="v-slug2">mistralai__Mistral-7B-v0.1</s
     $('s-neg').textContent=n(L.negative_snapshots_total);
     $('s-map').textContent=n(L.map_size);
     $('hour-meta').textContent='epoch #'+L.latest_epoch+' · '+(s.epoch_start||'')+' → '+(s.epoch_end||'')+' · generated '+ago(L.generated_at);
+    /* Operational status, fail-closed: the file's own verdict, overridden to STALE when the file itself
+       stopped updating (older than two epochs) or when it predates the status block. */
+    (function(){
+      var st=L.status, ageMin=Math.round((Date.now()-new Date(L.generated_at).getTime())/60000), state, why=[];
+      if(!st){ state='unknown'; why.push('this latest.json carries no status block (operator older than 0.4.2)'); }
+      else { state=st.state; why=(st.reasons||[]).slice(); }
+      if(ageMin>120){ state='stale'; why.unshift('latest.json last written '+ago(L.generated_at)); }
+      var o=(st&&st.observation)||{}, a=(st&&st.anchoring)||{}, bits=[];
+      if(o.run_delay_seconds!=null) bits.push('last run began '+Math.round(o.run_delay_seconds/60)+' min after the hour');
+      if(o.late_runs_24h) bits.push(o.late_runs_24h.length+' late run'+(o.late_runs_24h.length===1?'':'s')+' in 24 h');
+      if(o.empty_epochs_24h&&o.empty_epochs_24h.length) bits.push(o.empty_epochs_24h.length+' hour'+(o.empty_epochs_24h.length===1?'':'s')+' without observation in 24 h');
+      if(a.pending_epochs!=null) bits.push(a.pending_epochs+' anchor'+(a.pending_epochs===1?'':'s')+' pending');
+      var cls=state==='ok'?'ok':(state==='degraded'?'pending':'neg');
+      var el=document.createElement('div'); el.className='tc-small'; el.id='ops-status'; el.style.cssText='margin:-6px 0 16px';
+      el.innerHTML='<span class="tc-pill '+cls+'">'+esc(state.toUpperCase())+'</span> '+esc(bits.join(' · '))+(why.length?' — '+esc(why.join('; ')):'')+' · <a href="'+B+'latest.json">status in latest.json</a>';
+      var head=$('hour-meta').closest('.tc-head'); head.parentNode.insertBefore(el,head.nextSibling);
+    })();
     $('v-round').textContent=n(s.beacon_round); $('v-snaps').textContent=n(s.snapshots); $('v-neg').textContent=n(s.negative);
     $('v-size').textContent=n(s.size); $('v-root').textContent=short(s.root,12); $('v-sheet').textContent=short(s.sheet_hash,12);
     $('v-closed').innerHTML=s.closed==='bitcoin'?'<span class="tc-pill ok">bitcoin · block '+n(s.block_height)+'</span>':'<span class="tc-pill pending">pending calendar</span>';
