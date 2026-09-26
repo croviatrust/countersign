@@ -180,3 +180,33 @@ anchors pending when finalized — the page says how many). Correcting a finaliz
 `silence_report.py --refinalize 2026-W38 --note "why"` keeps the superseded figures as
 `facts.rN.json` and lists the correction on the page. The live `2026-W38/facts.json` carries no
 `final` flag, so the first run after deployment finalizes it from the files as they are then.
+
+## Server changes of 2026-09-26 (TACET 0.4.3, locks, rate limit, Hugging Face)
+
+TACET 0.4.3 installed (featured proofs in seconds; `refresh-anchors` had been running for
+hours on the old code). `home_pulse.py` under `flock -n` + `timeout 10m`. Nginx zone
+`machine_public` (10 r/s, burst 100) on `/registry/data/`, so a verifier can fetch every
+sheet; a stray backup left `sites-enabled`. `smoke_public_v2.sh` now lives here and on the
+server. Cloudflare's Browser Integrity Check is ignored on `/registry/data/*`.
+
+**Hugging Face dataset (`hf_publish_tacet.py`).** Publishes the public TACET directory as
+the dataset `CroviaResearch/tacet-disclosure-ledger`: every file byte for byte, plus three
+flat tables for the Hub viewer (`snapshots/*.jsonl` as *observations*, `epochs.jsonl`,
+`targets.jsonl`) and a card with the live counts. Unchanged files are not re-uploaded.
+
+```bash
+/opt/crovia/tacet/.venv/bin/pip install -U huggingface_hub
+set -a; . /etc/crovia/hf.env; set +a          # exports HF_TOKEN; never echo it
+python3 /opt/crovia/scripts/hf_publish_tacet.py --dry-run     # builds /opt/crovia/tacet/hf-dataset
+python3 /opt/crovia/scripts/hf_publish_tacet.py               # creates the repo if needed, uploads
+```
+
+Cron, after the hourly epoch has been published (the operator writes `latest.json` at ~:26):
+
+```cron
+35 * * * *  flock -n /run/lock/hf-publish.lock timeout 20m bash -c 'set -a; . /etc/crovia/hf.env; set +a; /opt/crovia/tacet/.venv/bin/python3 /opt/crovia/scripts/hf_publish_tacet.py' >> /var/log/crovia/hf_publish.log 2>&1
+```
+
+The script reads the token only from `HF_TOKEN` and never prints it. Verified before
+deployment on a mirror of the live log (epochs 0–164, 15,525 observations): the card's
+`tacet-operator verify` line passes online with 161 beacon rounds and 160 anchors checked.
