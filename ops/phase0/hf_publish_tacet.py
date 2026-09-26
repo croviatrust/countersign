@@ -4,8 +4,8 @@
 The public directory (/var/www/registry/data/tacet) already holds every
 signed observation, every epoch sheet, the map changes, the Bitcoin anchors
 and the featured proofs. This script copies those files into a dataset
-layout, adds three flat tables the Hub's viewer can show (observations,
-epochs, targets) and a dataset card with the live counts, then uploads the
+layout, adds three flat tables the Hub's viewer can show (observations
+sharded by day, epochs, targets) and a dataset card with the live counts, then uploads the
 folder to the Hub. Unchanged files are not re-uploaded (the Hub compares
 hashes), so it is safe to run every hour.
 
@@ -103,6 +103,37 @@ def epoch_rows(public: Path, latest: int) -> List[Dict[str, Any]]:
     return rows
 
 
+def observation_shards(public: Path, epochs: List[Dict[str, Any]], out: Path) -> int:
+    """Write observations/<YYYY-MM-DD>.jsonl, one shard per UTC day of epoch start.
+
+    The Hub's viewer (the `datasets` JSON builder) fails on a split that
+    contains an empty shard, and an hour with no observations is an empty
+    snapshots/<epoch>.jsonl. The per-epoch files stay as the raw record; the
+    day shards hold the same lines, unmodified, and only non-empty days are
+    written. A day that has ended never changes again.
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    by_day: Dict[str, List[str]] = {}
+    for e in epochs:
+        f = public / "snapshots" / f"{e['epoch']}.jsonl"
+        if not f.exists() or not e.get("epoch_start"):
+            continue
+        lines = [ln for ln in f.read_text(encoding="utf-8").splitlines() if ln.strip()]
+        if lines:
+            by_day.setdefault(str(e["epoch_start"])[:10], []).extend(lines)
+    for day, lines in by_day.items():
+        p = out / f"{day}.jsonl"
+        body = "\n".join(lines) + "\n"
+        if not p.exists() or p.read_text(encoding="utf-8") != body:
+            tmp = p.with_suffix(".jsonl.tmp")
+            tmp.write_text(body, encoding="utf-8")
+            tmp.replace(p)
+    for f in out.iterdir():
+        if f.is_file() and f.stem not in by_day:
+            f.unlink()
+    return sum(len(v) for v in by_day.values())
+
+
 def target_rows(public: Path) -> List[Dict[str, Any]]:
     t = _read_json(public / "targets.json", {"targets": []})
     rows = t.get("targets") if isinstance(t, dict) else t
@@ -148,7 +179,7 @@ size_categories:
   - 10K<n<100K
 configs:
   - config_name: observations
-    data_files: snapshots/*.jsonl
+    data_files: observations/*.jsonl
     default: true
   - config_name: epochs
     data_files: epochs.jsonl
@@ -187,10 +218,14 @@ and the [LACUNA page](https://croviatrust.com/registry/lacuna/).
 
 ## Tables
 
-- **observations** (`snapshots/<epoch>.jsonl`): one signed row per fetch —
-  `target_id`, `surface_url`, `fetched_at`, `http_status`, `body_sha256`,
-  `body_len`, `predicate` (id, version, code hash), `result`,
-  `beacon_round`, `observer` (id, Ed25519 key), `signature`.
+- **observations** (`observations/<YYYY-MM-DD>.jsonl`): one signed row per
+  fetch — `target_id`, `surface_url`, `fetched_at`, `http_status`,
+  `body_sha256`, `body_len`, `predicate` (id, version, code hash), `result`,
+  `beacon_round`, `observer` (id, Ed25519 key), `signature`. Sharded by the
+  UTC day the epoch opened; the same lines, unmodified, live in
+  `snapshots/<epoch>.jsonl`, the per-hour file whose rows are the leaves of
+  the sheet's `snapshots_root` (RFC 6962 Merkle root). Hours with no
+  observations have an empty snapshots file and no line here.
 - **epochs** (`epochs.jsonl`): one row per hour — map root and size,
   snapshots root and chain, drand round, snapshots counted, anchor status and
   Bitcoin block.
@@ -241,6 +276,7 @@ def build(public: Path, out: Path) -> Dict[str, Any]:
     latest = int(_read_json(public / "latest.json")["latest_epoch"])
     epochs = epoch_rows(public, latest)
     targets = target_rows(public)
+    observation_shards(public, epochs, out / "observations")
     _write_jsonl(out / "epochs.jsonl", epochs)
     _write_jsonl(out / "targets.jsonl", targets)
     c = counts(public, epochs, targets)
@@ -258,7 +294,7 @@ def upload(out: Path, repo_id: str, message: str) -> str:
     api = HfApi(token=token)
     api.create_repo(repo_id, repo_type="dataset", exist_ok=True)
     info = api.upload_folder(repo_id=repo_id, repo_type="dataset", folder_path=str(out),
-                             commit_message=message, delete_patterns=["snapshots/*", "sheets/*", "changes/*", "ots/*", "proofs/*"])
+                             commit_message=message, delete_patterns=["observations/*", "snapshots/*", "sheets/*", "changes/*", "ots/*", "proofs/*"])
     return getattr(info, "commit_url", str(info))
 
 

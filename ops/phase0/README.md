@@ -191,8 +191,10 @@ server. Cloudflare's Browser Integrity Check is ignored on `/registry/data/*`.
 
 **Hugging Face dataset (`hf_publish_tacet.py`).** Publishes the public TACET directory as
 the dataset `CroviaTrust/tacet-disclosure-ledger` (the organisation; the token is CroviaResearch, admin of it): every file byte for byte, plus three
-flat tables for the Hub viewer (`snapshots/*.jsonl` as *observations*, `epochs.jsonl`,
-`targets.jsonl`) and a card with the live counts. Unchanged files are not re-uploaded.
+flat tables for the Hub viewer (`observations/<day>.jsonl` — the snapshot lines sharded by
+UTC day, because the viewer's JSON builder fails on an empty per-hour shard —
+`epochs.jsonl`, `targets.jsonl`) and a card with the live counts. `ots/*.ots.bak` backups
+are skipped. Unchanged files are not re-uploaded.
 
 ```bash
 /opt/crovia/tacet/.venv/bin/pip install -U huggingface_hub
