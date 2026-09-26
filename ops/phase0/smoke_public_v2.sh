@@ -91,12 +91,19 @@ check seal_public_log "$BASE/registry/data/seal/public_log.jsonl"               
 # User-Agent; Cloudflare's Browser Integrity Check answers that client with
 # 403 (error 1010) unless the path is exempted. A 200 above and a 403 here
 # means "verifiable by anyone" is false for scripts. Fix: Cloudflare →
-# Rules → Configuration Rules → URI path starts with /registry/data/ →
-# Browser Integrity Check: off (same rule on causari.dev for /reports/, /r/).
+# Rules → Configuration Rules → URI path starts with /registry/data/,
+# /registry/tacet/spec/, /registry/seal/spec/ → Browser Integrity Check: off
+# (same rule on causari.dev for /reports/, /r/). Email Address Obfuscation
+# must stay off too: it rewrites HTML in transit, so the mirrors would no
+# longer be byte-for-byte (2026-09-26).
 CHECK_UA="Python-urllib/3.12" check script_latest_seal "$BASE/registry/data/substrate/latest_seal.json" 200 "merkle_root"
 CHECK_UA="Python-urllib/3.12" check script_public_log  "$BASE/registry/data/seal/public_log.jsonl"      200 "crovia.seal.v1"
 CHECK_UA="Python-urllib/3.12" check script_trust_root  "$BASE/registry/data/substrate/trust_root.json"  200 "public_key_hex"
 CHECK_UA="Python-urllib/3.12" check script_silence     "$BASE/registry/data/silence_index.json"         200 "generated_at"
+CHECK_UA="Python-urllib/3.12" check script_tacet_draft "$BASE/registry/tacet/spec/draft-crovia-tacet-01.txt" 200 "draft-crovia-tacet-01"
+CHECK_UA="Python-urllib/3.12" check script_tacet_vecs  "$BASE/registry/tacet/spec/vectors/v1/manifest.json" 200 "crovia.tacet.vectors.v1"
+CHECK_UA="Python-urllib/3.12" check script_seal_draft  "$BASE/registry/seal/spec/draft-crovia-seal-01.txt"  200 "draft-crovia-seal-01"
+check no_cf_rewrite   "$BASE/registry/tacet/spec/index.html" 200 "info@croviatrust.com"
 
 # Seal issuer
 check seal_trust_root "$SEAL/trust-root.json"                 200 "pubkey"
