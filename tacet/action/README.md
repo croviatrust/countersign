@@ -116,7 +116,7 @@ Traffic that bypasses the capture point is outside the proof. This is stated in 
 
 ## Related
 
-- Specification: <https://croviatrust.com/registry/tacet/spec/> (TACET core + PNX profile, Internet-Draft `draft-crovia-tacet-00`, 47 conformance tests)
+- Specification: <https://croviatrust.com/registry/tacet/spec/> (TACET core + PNX profile, Internet-Draft `draft-crovia-tacet-01`, 47 conformance tests)
 - CLI and reference implementation: [`crovia-tacet` on PyPI](https://pypi.org/project/crovia-tacet/) · [source](https://github.com/croviatrust/countersign/tree/main/tacet)
 - Crovia Seal: <https://croviatrust.com/registry/seal/>
 - Crovia Trust: <https://croviatrust.com> · info@croviatrust.com

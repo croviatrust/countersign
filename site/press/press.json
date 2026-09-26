@@ -59,7 +59,7 @@
   "specifications": {
    "tacet": "https://croviatrust.com/registry/tacet/spec/",
    "seal": "https://croviatrust.com/registry/seal/spec/",
-   "internet_drafts": ["draft-crovia-seal-01", "draft-crovia-tacet-00"],
+   "internet_drafts": ["draft-crovia-seal-01", "draft-crovia-tacet-01"],
    "conformance_tests": {"tacet": 47, "seal": 41}
   },
   "code": {
