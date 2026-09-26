@@ -100,12 +100,12 @@ Table of Contents
      11.1.  Problem  . . . . . . . . . . . . . . . . . . . . . . . .  15
      11.2.  Roles  . . . . . . . . . . . . . . . . . . . . . . . . .  15
      11.3.  Fingerprinting . . . . . . . . . . . . . . . . . . . . .  16
-     11.4.  Run Sheet  . . . . . . . . . . . . . . . . . . . . . . .  17
+     11.4.  Run Sheet  . . . . . . . . . . . . . . . . . . . . . . .  16
      11.5.  Proof and Verdicts . . . . . . . . . . . . . . . . . . .  17
      11.6.  Verification . . . . . . . . . . . . . . . . . . . . . .  17
      11.7.  What a PNX Proof Does Not Claim  . . . . . . . . . . . .  18
    12. Public Data Layout  . . . . . . . . . . . . . . . . . . . . .  18
-   13. Security Considerations . . . . . . . . . . . . . . . . . . .  19
+   13. Security Considerations . . . . . . . . . . . . . . . . . . .  18
 
 
 
@@ -875,19 +875,19 @@ Internet-Draft                    TACET                   September 2026
    Assets shorter than 32 bytes are "undetectable" and MUST NOT be
    counted as clean.
 
-   Normalisation layers.  The raw bytes of every body are always
-   fingerprinted.  A witness MAY additionally fingerprint derived bodies
-   produced by a declared normalisation layer and MUST list the layers
-   it applied in the run sheet ("normalization", sorted; empty when
-   none). crovia.pnx.v1 defines one layer, "json-strings-v1": if the
-   body parses as UTF-8 JSON, every string value in the document,
-   decoded, of at least k_gram bytes is a derived body.  Model request
-   bodies are JSON, so a file quoted inside one arrives with its
-   newlines and quotes escaped and its raw bytes never form a 47-byte
-   run; the decoded strings restore the guarantee for content quoted
-   inside JSON.  Derived bodies add fingerprints only; "egress.bodies"
-   and "egress.bytes" count raw bodies.  A verifier MUST reject a sheet
-   that names a layer it does not implement.
+11.4.  Run Sheet
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -898,8 +898,6 @@ En Nakhai                 Expires 24 March 2027                [Page 16]
 Internet-Draft                    TACET                   September 2026
 
 
-11.4.  Run Sheet
-
    {
      "profile": "crovia.pnx.v1",
      "run_id": "ci-4711/agent-review",
@@ -908,7 +906,6 @@ Internet-Draft                    TACET                   September 2026
                 "hash": "sha256"},
      "egress": {"bodies": 212, "bytes": 1834112,
                 "first_at": "...", "last_at": "..."},
-     "normalization": ["json-strings-v1"],
      "fingerprints": 118201,
      "root": "sha256:...",
      "closed_at": "2026-09-19T22:00:00Z",
@@ -949,6 +946,9 @@ Internet-Draft                    TACET                   September 2026
 
 
 
+
+
+
 En Nakhai                 Expires 24 March 2027                [Page 17]
 
 Internet-Draft                    TACET                   September 2026
@@ -978,8 +978,7 @@ Internet-Draft                    TACET                   September 2026
 
    *  Nothing about paraphrase, translation, summarisation or encodings
       the witness did not normalise; crovia.pnx.v1 fingerprints raw
-      bytes plus the declared layers (today json-strings-v1).  Base64,
-      URL-encoding and UTF-16 are not normalised.
+      bytes.
 
    *  Nothing about assets shorter than 32 bytes.
 
@@ -1001,6 +1000,7 @@ Internet-Draft                    TACET                   September 2026
    Consumers fetch HEAD.json and only the sheets they need; no consumer
    needs a whole-history file.
 
+13.  Security Considerations
 
 
 
@@ -1009,8 +1009,6 @@ En Nakhai                 Expires 24 March 2027                [Page 18]
 
 Internet-Draft                    TACET                   September 2026
 
-
-13.  Security Considerations
 
    *  Back-dating an epoch is prevented by "opened": beacon randomness
       is unpredictable.  Forward-dating is prevented by "closed": the
@@ -1054,9 +1052,11 @@ Internet-Draft                    TACET                   September 2026
    of publication, in the spirit of [RFC7942]; it is to be removed
    before publication as an RFC.
 
-
-
-
+   *  crovia-tacet (Python, Apache-2.0): reference implementation of the
+      map, sheets, silence proofs, the anchor check of Section 7.6 and
+      the PNX profile; crovia-tacet-operator: the operator that runs the
+      public map.  Published on PyPI; source at
+      https://github.com/croviatrust/countersign.
 
 
 
@@ -1065,12 +1065,6 @@ En Nakhai                 Expires 24 March 2027                [Page 19]
 
 Internet-Draft                    TACET                   September 2026
 
-
-   *  crovia-tacet (Python, Apache-2.0): reference implementation of the
-      map, sheets, silence proofs, the anchor check of Section 7.6 and
-      the PNX profile; crovia-tacet-operator: the operator that runs the
-      public map.  Published on PyPI; source at
-      https://github.com/croviatrust/countersign.
 
    *  A browser verifier (JavaScript, no dependencies) that verifies
       wrapped silence proofs including the drand round and the Bitcoin
@@ -1112,16 +1106,6 @@ Internet-Draft                    TACET                   September 2026
               DOI 10.17487/RFC8032, January 2017,
               <https://www.rfc-editor.org/info/rfc8032>.
 
-
-
-
-
-
-En Nakhai                 Expires 24 March 2027                [Page 20]
-
-Internet-Draft                    TACET                   September 2026
-
-
    [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
               2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
               May 2017, <https://www.rfc-editor.org/info/rfc8174>.
@@ -1130,6 +1114,13 @@ Internet-Draft                    TACET                   September 2026
               Canonicalization Scheme (JCS)", RFC 8785,
               DOI 10.17487/RFC8785, June 2020,
               <https://www.rfc-editor.org/info/rfc8785>.
+
+
+
+En Nakhai                 Expires 24 March 2027                [Page 20]
+
+Internet-Draft                    TACET                   September 2026
+
 
 16.2.  Informative References
 
@@ -1170,14 +1161,6 @@ Author's Address
    Tarik En Nakhai
    Crovia Trust
    Italy
-
-
-
-En Nakhai                 Expires 24 March 2027                [Page 21]
-
-Internet-Draft                    TACET                   September 2026
-
-
    Email: info@croviatrust.com
    URI:   https://croviatrust.com
 
@@ -1190,43 +1173,4 @@ Internet-Draft                    TACET                   September 2026
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-En Nakhai                 Expires 24 March 2027                [Page 22]
+En Nakhai                 Expires 24 March 2027                [Page 21]

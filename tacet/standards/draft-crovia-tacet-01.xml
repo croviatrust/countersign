@@ -7,7 +7,7 @@
 ]>
 <rfc xmlns:xi="http://www.w3.org/2001/XInclude"
      ipr="trust200902"
-     docName="draft-crovia-tacet-00"
+     docName="draft-crovia-tacet-01"
      category="info"
      submissionType="independent"
      tocInclude="true"
@@ -18,7 +18,7 @@
 
   <front>
     <title abbrev="TACET">TACET: Verifiable Silence Proofs over a Sparse Merkle Transparency Map, with the PNX Profile for Proof of Non-Exfiltration</title>
-    <seriesInfo name="Internet-Draft" value="draft-crovia-tacet-00"/>
+    <seriesInfo name="Internet-Draft" value="draft-crovia-tacet-01"/>
     <author fullname="Tarik En Nakhai" surname="En Nakhai" initials="T.">
       <organization>Crovia Trust</organization>
       <address>
@@ -30,7 +30,7 @@
         <uri>https://croviatrust.com</uri>
       </address>
     </author>
-    <date year="2026" month="September" day="20"/>
+    <date year="2026" month="September" day="26"/>
     <area>Security</area>
     <workgroup>Independent Submission</workgroup>
     <keyword>transparency log</keyword>
@@ -269,7 +269,7 @@ node(l, r)    = H("TACET-NODE-v1\n" || l || r)
       <ul>
         <li>sheet_hash = H(CSC-1(sheet without the members "signature" and "closed")). The signature is Ed25519 over "TACET-EPOCH-v1" || 0x0A || CSC-1(sheet without "signature" and "closed").</li>
         <li>prev_sheet_hash chains sheets; the genesis sheet carries null.</li>
-        <li>"opened" binds the epoch to a randomness value that did not exist before epoch_start: nothing in the epoch could have been produced earlier. This is the lower time bound.</li>
+        <li>"opened" binds the epoch to a randomness value that did not exist before epoch_start: nothing in the epoch could have been produced earlier. This is the lower time bound. The trust root pins the beacon: chain_hash, public_key, scheme, genesis_time, period and tolerance_seconds; the operator MUST open an epoch with a round scheduled no earlier than one period before epoch_start and before epoch_start + tolerance_seconds, and SHOULD use the first round of the epoch (<xref target="opened"/>).</li>
         <li>"closed" is an OpenTimestamps attestation <xref target="OTS"/> of sheet_hash confirmed in a Bitcoin block: the sheet existed before that block. This is the upper time bound. The member is filled in after confirmation and is outside the signed region; verifiers check it independently (<xref target="anchor"/>). anchored_digest MUST equal sheet_hash; proof_ref locates the attestation file; block_height is the Bitcoin block carrying it.</li>
         <li>snapshots_root is the Merkle tree hash, computed as in <xref target="RFC6962"/>, of all snapshot hashes taken during the epoch, so that every observation is bound to the epoch's temporal bounds.</li>
       </ul>
@@ -438,12 +438,45 @@ silence_days    = floor(silence_seconds * 100 / 86400) / 100,
         <name>Verification Algorithm</name>
         <ol>
           <li>Verify each sheet's operator signature; verify prev_sheet_hash chaining over the range; verify map_id and monotonically increasing epoch numbers.</li>
-          <li>For each sheet, verify that "opened" is a valid round of the pinned drand chain whose time is at most epoch_start plus a tolerance, and, if closed.status is "bitcoin", verify the OpenTimestamps attestation of sheet_hash (<xref target="anchor"/>) and record the block height.</li>
+          <li>For each sheet, verify "opened" as described in <xref target="opened"/>, and, if closed.status is "bitcoin", verify the OpenTimestamps attestation of sheet_hash (<xref target="anchor"/>) and record the block height.</li>
           <li>Reconstruct the path per epoch from "paths"; for each epoch recompute the root from EMPTY[0]; require equality with sheets[i].root.</li>
           <li>Level 2 and above: verify each snapshot's observer signature, beacon_round, result false, target_id, and its inclusion in the epoch's snapshots_root. Recompute "silence" per <xref target="monotonicity"/> and require equality with the proof's "silence" member.</li>
           <li>Level 3: verify witness signatures over each sheet_hash; require at least k.</li>
           <li>Verify the outer Seal (<xref target="wrapping"/>).</li>
         </ol>
+      </section>
+      <section anchor="opened">
+        <name>What Verifying "opened" Means</name>
+        <t>
+          "opened" is a claim with two parts, checked differently.
+        </t>
+        <dl>
+          <dt>Chain and schedule</dt>
+          <dd>
+            From the sheet alone, offline: opened.chain_hash equals the chain pinned in the trust
+            root, and the round's scheduled time t = genesis_time + (round - 1) * period lies
+            inside the hour the sheet opens: epoch_start - period &lt;= t &lt; epoch_start +
+            tolerance_seconds, with tolerance_seconds taken from the trust root (the epoch
+            length, 3600, for the public map). This says the round number fits the epoch. It says
+            nothing about the bytes.
+          </dd>
+          <dt>Round bytes</dt>
+          <dd>
+            That "randomness" and "signature" are the chain's output for that round. The complete
+            check is the round's BLS12-381 signature under the chain public key in the trust
+            root (drand chained mode: message SHA-256(previous_signature || round), round as a
+            big-endian 64-bit integer). Equivalent in practice: fetch the same round from a drand
+            relay and require byte equality. Without one of the two, the lower time bound rests
+            on the operator's word, because an operator can write a well-placed round number with
+            invented bytes.
+          </dd>
+        </dl>
+        <t>
+          A verifier that checks only chain and schedule MUST say so and MUST NOT report the
+          lower bound as verified. A round whose bytes cannot be obtained is unchecked, never
+          failed. A verifier SHOULD report an opening later than 900 s into its hour as late; a
+          late round is still a correct lower bound for everything in that hour.
+        </t>
       </section>
       <section anchor="anchor">
         <name>Checking the Bitcoin Anchor without a Bitcoin Node</name>
@@ -577,6 +610,18 @@ silence_days    = floor(silence_seconds * 100 / 86400) / 100,
           "partial": detection is possible, not guaranteed). Assets shorter than 32 bytes are
           "undetectable" and MUST NOT be counted as clean.
         </t>
+        <t>
+          Normalisation layers. The raw bytes of every body are always fingerprinted. A witness
+          MAY additionally fingerprint derived bodies produced by a declared normalisation layer
+          and MUST list the layers it applied in the run sheet ("normalization", sorted; empty
+          when none). crovia.pnx.v1 defines one layer, "json-strings-v1": if the body parses as
+          UTF-8 JSON, every string value in the document, decoded, of at least k_gram bytes is a
+          derived body. Model request bodies are JSON, so a file quoted inside one arrives with
+          its newlines and quotes escaped and its raw bytes never form a 47-byte run; the decoded
+          strings restore the guarantee for content quoted inside JSON. Derived bodies add
+          fingerprints only; "egress.bodies" and "egress.bytes" count raw bodies. A verifier MUST
+          reject a sheet that names a layer it does not implement.
+        </t>
       </section>
       <section anchor="pnx-sheet">
         <name>Run Sheet</name>
@@ -589,6 +634,7 @@ silence_days    = floor(silence_seconds * 100 / 86400) / 100,
              "hash": "sha256"},
   "egress": {"bodies": 212, "bytes": 1834112,
              "first_at": "...", "last_at": "..."},
+  "normalization": ["json-strings-v1"],
   "fingerprints": 118201,
   "root": "sha256:...",
   "closed_at": "2026-09-19T22:00:00Z",
@@ -635,7 +681,7 @@ silence_days    = floor(silence_seconds * 100 / 86400) / 100,
         <name>What a PNX Proof Does Not Claim</name>
         <ul>
           <li>Nothing about bytes the witness did not see: traffic that bypassed the proxy, TLS the proxy could not terminate, side channels.</li>
-          <li>Nothing about paraphrase, translation, summarisation or encodings the witness did not normalise; crovia.pnx.v1 fingerprints raw bytes.</li>
+          <li>Nothing about paraphrase, translation, summarisation or encodings the witness did not normalise; crovia.pnx.v1 fingerprints raw bytes plus the declared layers (today json-strings-v1). Base64, URL-encoding and UTF-16 are not normalised.</li>
           <li>Nothing about assets shorter than 32 bytes.</li>
           <li>The witness must be honest about what it ingested. Countersigning of the same egress by several witnesses removes the single point of trust; a single-witness sheet is a statement by that witness.</li>
         </ul>
@@ -682,8 +728,17 @@ silence_days    = floor(silence_seconds * 100 / 86400) / 100,
       <ul>
         <li>crovia-tacet (Python, Apache-2.0): reference implementation of the map, sheets, silence proofs, the anchor check of <xref target="anchor"/> and the PNX profile; crovia-tacet-operator: the operator that runs the public map. Published on PyPI; source at https://github.com/croviatrust/countersign.</li>
         <li>A browser verifier (JavaScript, no dependencies) that verifies wrapped silence proofs including the drand round and the Bitcoin anchor, at https://croviatrust.com/registry/seal/verify/.</li>
-        <li>A public map, urn:crovia:tacet:map:disclosure, operated by Crovia Trust since 2026-09-19 with hourly epochs, published at https://croviatrust.com/registry/data/tacet/.</li>
+        <li>A public map, urn:crovia:tacet:map:disclosure, operated by Crovia Trust since 2026-09-19 with hourly epochs, published at https://croviatrust.com/registry/data/tacet/ and mirrored hourly as the Hugging Face dataset CroviaTrust/tacet-disclosure-ledger.</li>
         <li>Conformance vectors for both TACET and the Seal wrapper in the repository above; both implementations pass them.</li>
+      </ul>
+    </section>
+
+    <section anchor="changes">
+      <name>Changes since draft-crovia-tacet-00</name>
+      <ul>
+        <li>Verification: "opened" is now specified in two parts (<xref target="opened"/>): chain and schedule, checkable offline against the trust root's chain_hash, genesis_time, period and tolerance_seconds; and round bytes, checkable by the BLS12-381 chain signature or by byte equality with a relay. A verifier that checks only the schedule MUST say so. Openings later than 900 s into the hour SHOULD be reported as late.</li>
+        <li>PNX profile: normalisation layers. A witness MAY fingerprint derived bodies produced by a declared layer and MUST list the layers in the run sheet ("normalization"); crovia.pnx.v1 defines json-strings-v1. A verifier MUST reject a sheet naming a layer it does not implement.</li>
+        <li>Implementation status: the public map is also mirrored as a Hugging Face dataset.</li>
       </ul>
     </section>
 

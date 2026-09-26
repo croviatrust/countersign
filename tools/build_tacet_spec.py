@@ -135,12 +135,21 @@ def build(root: Path, out_dir: Path) -> None:
                           for p in sorted(vdst.rglob("*")) if p.is_file()]}
     (vdst / "manifest.json").write_text(json.dumps(manifest, indent=1) + "\n")
 
+    # The page mirrors the revision that is on the Datatracker (tacet/standards/SUBMITTED);
+    # a newer revision in the directory is prepared but not yet submitted, and is labelled so.
     drafts = sorted((tacet / "standards").glob(f"{DRAFT}-*.txt"))
-    latest = drafts[-1].stem if drafts else f"{DRAFT}-00"
-    for ext in (".txt", ".xml", ".html"):
-        f = tacet / "standards" / f"{latest}{ext}"
-        if f.exists():
-            shutil.copyfile(f, out_dir / f.name)
+    newest = drafts[-1].stem if drafts else f"{DRAFT}-00"
+    submitted_file = tacet / "standards" / "SUBMITTED"
+    latest = submitted_file.read_text().strip() if submitted_file.exists() else newest
+    prepared = newest if newest != latest else ""
+    for name in {latest, prepared} - {""}:
+        for ext in (".txt", ".xml", ".html"):
+            f = tacet / "standards" / f"{name}{ext}"
+            if f.exists():
+                shutil.copyfile(f, out_dir / f.name)
+    prepared_html = (f' Revision <code>{html.escape(prepared)}</code> is prepared and not yet submitted: '
+                     f'<a href="{BASE}{prepared}.txt">.txt</a> · <a href="{BASE}{prepared}.xml">.xml</a> · '
+                     f'<a href="{BASE}{prepared}.html">.html</a>.') if prepared else ""
 
     ref_version = re.search(r'^version\s*=\s*"([^"]+)"', (tacet / "reference" / "python" / "pyproject.toml").read_text(), re.MULTILINE).group(1)
     rows, nvec = vector_rows(vsrc)
@@ -325,7 +334,7 @@ node tacet/conformance/run_conformance_js.cjs</pre></div>
 
   <div class="sp-head"><h2 id="related">Draft, code, related</h2><div class="meta">everything the draft refers to, in one place</div></div>
   <div class="sp-grid">
-    <div class="sp-card"><div class="k">Internet-Draft</div><h3>{html.escape(latest)}</h3><p>Independent Submission, Informational. <a href="{DATATRACKER}" rel="noopener">Datatracker ↗</a> · mirrored here: <a href="{BASE}{latest}.txt">.txt</a> · <a href="{BASE}{latest}.xml">.xml</a> · <a href="{BASE}{latest}.html">.html</a>. Sections 1–9 are the core protocol, section 10 is the PNX profile. The draft is not modified; this page is its companion.</p></div>
+    <div class="sp-card"><div class="k">Internet-Draft</div><h3>{html.escape(latest)}</h3><p>Independent Submission, Informational. <a href="{DATATRACKER}" rel="noopener">Datatracker ↗</a> · mirrored here: <a href="{BASE}{latest}.txt">.txt</a> · <a href="{BASE}{latest}.xml">.xml</a> · <a href="{BASE}{latest}.html">.html</a>. Sections 1–9 are the core protocol, section 10 is the PNX profile. The draft is not modified; this page is its companion.{prepared_html}</p></div>
     <div class="sp-card"><div class="k">Reference implementation</div><h3>crovia-tacet {html.escape(ref_version)}</h3><p>Python, Apache-2.0: sparse Merkle map, epoch sheets, silence proofs at three strength levels, PNX egress fingerprinting and run sheets, OpenTimestamps verification without a node. <a href="{REPO}/tree/main/tacet" rel="noopener">countersign/tacet ↗</a> · <a href="https://pypi.org/project/crovia-tacet/" rel="noopener">PyPI</a></p><pre>pip install crovia-tacet            # verifier + primitives, Python ≥ 3.10
 pip install crovia-tacet-operator   # run an observatory of your own</pre></div>
     <div class="sp-card"><div class="k">Built on</div><h3>Crovia Seal</h3><p>Every TACET proof travels as an unmodified <code>crovia.seal.v1</code>. The Seal text, its Internet-Draft and its vectors: <a href="/registry/seal/spec/">/registry/seal/spec/</a>. Anchors: <a href="https://opentimestamps.org" rel="noopener">OpenTimestamps</a> above, <a href="https://drand.love" rel="noopener">drand</a> below.</p></div>
