@@ -105,17 +105,22 @@ class State:
 
     def paths_for_key(self, key: bytes, from_epoch: int, to_epoch: int) -> Dict[int, CompactPath]:
         """Replay the map from genesis and return the non-inclusion path of `key` at each epoch in range."""
+        return self.paths_for_keys([key], from_epoch, to_epoch)[key]
+
+    def paths_for_keys(self, keys: List[bytes], from_epoch: int, to_epoch: int) -> Dict[bytes, Dict[int, CompactPath]]:
+        """One replay of the map for several keys: the path of each key at each epoch in range."""
         m = SparseMerkleMap()
-        out: Dict[int, CompactPath] = {}
-        last: Optional[CompactPath] = None
+        out: Dict[bytes, Dict[int, CompactPath]] = {k: {} for k in keys}
+        last: Dict[bytes, CompactPath] = {}
         for e in range(0, to_epoch + 1):
             changes = self.load_changes(e)
             for k, v in changes:
                 m.set(k, v)
-            if changes or last is None:
-                last = m.prove(key)  # the path only moves when the map moves
-            if e >= from_epoch:
-                out[e] = last
+            for key in keys:
+                if changes or key not in last:
+                    last[key] = m.prove(key)  # the path only moves when the map moves
+                if e >= from_epoch:
+                    out[key][e] = last[key]
         return out
 
     # -- cursor -----------------------------------------------------------------

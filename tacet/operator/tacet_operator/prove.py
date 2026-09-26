@@ -29,25 +29,45 @@ def negative_epochs(state: State, target_id: str, from_epoch: int, to_epoch: int
     return out
 
 
+class ProofInputs:
+    """Everything a range of proofs reads from state, loaded and hashed once.
+
+    Each proof needs every snapshot hash of the range and the map path of its
+    target at every epoch. Rebuilt per target, that is one full read, hash and
+    replay of the log per featured model; shared, it is one for all of them.
+    """
+
+    def __init__(self, state: State, target_ids: List[str], from_epoch: int, to_epoch: int) -> None:
+        self.from_epoch, self.to_epoch = from_epoch, to_epoch
+        self.sheets = list(state.iter_sheets(from_epoch, to_epoch))
+        self.snapshots = {e: state.load_snapshots(e) for e in range(from_epoch, to_epoch + 1)}
+        self.epoch_hashes = {e: [snapshot_hash(s) for s in snaps] for e, snaps in self.snapshots.items()}
+        keys = {t: target_key(t) for t in target_ids}
+        by_key = state.paths_for_keys(list(set(keys.values())), from_epoch, to_epoch)
+        self.paths = {t: by_key[k] for t, k in keys.items()}
+
+    def negatives(self, target_id: str) -> List[Dict[str, Any]]:
+        return [s for snaps in self.snapshots.values() for s in snaps
+                if s["target_id"] == target_id and s["result"] is False]
+
+
 def build(settings: Settings, issuer: SigningKey, target_id: str, *, from_epoch: int = 0,
-          to_epoch: Optional[int] = None, strength: int = STRENGTH_SURFACE) -> Dict[str, Any]:
-    st = State(settings.paths)
-    last = st.latest_epoch()
-    if last is None:
-        raise RuntimeError("no epochs yet")
-    to_epoch = last if to_epoch is None else min(to_epoch, last)
-    sheets = list(st.iter_sheets(from_epoch, to_epoch))
-    key = target_key(target_id)
-    paths = st.paths_for_key(key, from_epoch, to_epoch)
-    epoch_hashes: Dict[int, List[bytes]] = {}
-    negatives: List[Dict[str, Any]] = []
-    for e in range(from_epoch, to_epoch + 1):
-        snaps = st.load_snapshots(e)
-        epoch_hashes[e] = [snapshot_hash(s) for s in snaps]
-        negatives.extend(s for s in snaps if s["target_id"] == target_id and s["result"] is False)
+          to_epoch: Optional[int] = None, strength: int = STRENGTH_SURFACE,
+          inputs: Optional[ProofInputs] = None) -> Dict[str, Any]:
+    if inputs is None:
+        st = State(settings.paths)
+        last = st.latest_epoch()
+        if last is None:
+            raise RuntimeError("no epochs yet")
+        to_epoch = last if to_epoch is None else min(to_epoch, last)
+        inputs = ProofInputs(st, [target_id], from_epoch, to_epoch)
+    elif target_id not in inputs.paths:
+        raise ValueError(f"{target_id} is not among the prepared targets")
+    from_epoch, to_epoch = inputs.from_epoch, inputs.to_epoch
     proof = build_silence_proof(
-        map_id=MAP_ID, target_id=target_id, sheets=sheets, paths=paths,
-        epoch_snapshot_hashes=epoch_hashes, negative_snapshots=negatives, strength=strength,
+        map_id=MAP_ID, target_id=target_id, sheets=inputs.sheets, paths=inputs.paths[target_id],
+        epoch_snapshot_hashes=inputs.epoch_hashes, negative_snapshots=inputs.negatives(target_id),
+        strength=strength,
     )
     query = build_query(map_id=MAP_ID, target_id=target_id, from_epoch=from_epoch, to_epoch=to_epoch, min_strength=strength)
     return wrap_in_seal(issuer=issuer, query=query, proof=proof)

@@ -82,6 +82,21 @@ def test_root_is_order_independent():
     assert a.root() == b.root()
 
 
+def test_incremental_cache_matches_a_fresh_map():
+    # set() drops only the cached subtrees on the key's path; every root and
+    # path must equal those of a map built from the same entries in one go.
+    m = SparseMerkleMap()
+    keys = [target_key(f"o{i}/m{i}") for i in range(40)]
+    keys.append(keys[0][:31] + bytes([keys[0][31] ^ 1]))   # differs only in the last bit
+    probes = keys[:3] + [target_key("absent/model"), keys[-1]]
+    for step, k in enumerate(keys + keys[::3]):             # new keys, then overwrites
+        m.set(k, object_hash({"step": step}))
+        fresh = SparseMerkleMap(dict(m._entries))
+        assert m.root() == fresh.root()
+        for p in probes:
+            assert m.prove(p) == fresh.prove(p)
+
+
 # --- RFC 6962 tree ------------------------------------------------------------
 
 @pytest.mark.parametrize("n", [1, 2, 3, 5, 8, 13])

@@ -10,7 +10,7 @@ from tacet.keys import SigningKey
 from . import drand as drand_mod
 from .config import DRAND_CHAIN_HASH, EPOCH_SECONDS, GENESIS, MAP_ID, PUBLIC_BASE_URL, Settings, epoch_of
 from .predicates import REGISTRY, load as load_predicate
-from .prove import build as build_proof, negative_epochs, slug
+from .prove import ProofInputs, build as build_proof, slug
 from .state import State, _write_json
 from .targets import FEATURED_DEFAULT
 
@@ -180,11 +180,12 @@ def featured_proofs(settings: Settings, keys: Dict[str, SigningKey], targets: Li
     if last is None:
         return []
     out: List[Dict[str, Any]] = []
-    for t in targets or settings.featured or FEATURED_DEFAULT:
-        negs = negative_epochs(st, t, 0, last)
-        if not negs:
+    wanted = list(targets or settings.featured or FEATURED_DEFAULT)
+    inputs = ProofInputs(st, wanted, 0, last)
+    for t in wanted:
+        if not inputs.negatives(t):
             continue
-        bundle = build_proof(settings, keys["issuer"], t, from_epoch=0, to_epoch=last)
+        bundle = build_proof(settings, keys["issuer"], t, inputs=inputs)
         path = settings.paths.proofs / f"{slug(t)}.seal.json"
         _write_json(path, bundle)
         sil = bundle["proof"]["silence"]

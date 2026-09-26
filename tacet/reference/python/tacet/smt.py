@@ -80,7 +80,12 @@ class SparseMerkleMap:
         if len(key) != 32 or len(value_hash) != 32:
             raise ValueError("key and value_hash must be 32 bytes")
         self._entries[key] = value_hash
-        self._cache.clear()
+        # Only the subtrees on this key's path change. Clearing the whole cache
+        # made every prove after a set rehash the entire map, so an operator
+        # replaying history paid (epochs x map size x 256) hashes per proof.
+        bits = _bit_string(key)
+        for depth in range(DEPTH):
+            self._cache.pop((depth, bits[:depth]), None)
 
     def copy(self) -> "SparseMerkleMap":
         return SparseMerkleMap(self._entries)
@@ -100,6 +105,15 @@ class SparseMerkleMap:
         cached = self._cache.get(cache_key)
         if cached is not None:
             return cached
+        if len(keys) == 1:
+            # A lone key: every sibling below is empty, so fold its leaf up
+            # directly instead of recursing (same hashes, no per-level entries).
+            (k,) = keys
+            node = leaf_hash(k, self._entries[k])
+            for h in range(height):
+                node = node_hash(EMPTY[h], node) if key_bit(k, DEPTH - 1 - h) else node_hash(node, EMPTY[h])
+            self._cache[cache_key] = node
+            return node
         left = [k for k in keys if key_bit(k, depth) == 0]
         right = [k for k in keys if key_bit(k, depth) == 1]
         digest = node_hash(self._subtree(depth + 1, prefix + b"0", left),
@@ -124,6 +138,11 @@ class SparseMerkleMap:
             prefix = prefix + (b"1" if bit else b"0")
             keys = same
         return CompactPath.from_full(full)
+
+
+def _bit_string(key: bytes) -> bytes:
+    """The key as the '0'/'1' prefix alphabet used by `_subtree` cache entries."""
+    return format(int.from_bytes(key, "big"), "0256b").encode()
 
 
 def verify_inclusion(root: bytes, key: bytes, value_hash: bytes, path: CompactPath) -> bool:
