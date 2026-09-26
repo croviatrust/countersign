@@ -190,7 +190,7 @@ sheet; a stray backup left `sites-enabled`. `smoke_public_v2.sh` now lives here 
 server. Cloudflare's Browser Integrity Check is ignored on `/registry/data/*`.
 
 **Hugging Face dataset (`hf_publish_tacet.py`).** Publishes the public TACET directory as
-the dataset `CroviaResearch/tacet-disclosure-ledger`: every file byte for byte, plus three
+the dataset `CroviaTrust/tacet-disclosure-ledger` (the organisation; the token is CroviaResearch, admin of it): every file byte for byte, plus three
 flat tables for the Hub viewer (`snapshots/*.jsonl` as *observations*, `epochs.jsonl`,
 `targets.jsonl`) and a card with the live counts. Unchanged files are not re-uploaded.
 

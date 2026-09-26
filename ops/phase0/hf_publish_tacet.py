@@ -31,7 +31,7 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Iterable, List
 
-REPO_ID = "CroviaResearch/tacet-disclosure-ledger"
+REPO_ID = "CroviaTrust/tacet-disclosure-ledger"
 PUBLIC_BASE_URL = "https://croviatrust.com/registry/data/tacet"
 COPIED_DIRS = ("sheets", "changes", "snapshots", "ots", "proofs")
 COPIED_FILES = ("trust_root.json", "latest.json", "index.json", "targets.json")
