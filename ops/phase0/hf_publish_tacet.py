@@ -32,6 +32,8 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List
 
 REPO_ID = "CroviaTrust/tacet-disclosure-ledger"
+ORG_CARD_REPO = "CroviaTrust/README"
+SURVIVAL_LATEST_URL = "https://causari.dev/reports/survival/latest.json"
 PUBLIC_BASE_URL = "https://croviatrust.com/registry/data/tacet"
 COPIED_DIRS = ("sheets", "changes", "snapshots", "ots", "proofs")
 COPIED_FILES = ("trust_root.json", "latest.json", "index.json", "targets.json")
@@ -265,6 +267,201 @@ sheet, once anchored, is a fact about the past.
 """
 
 
+def survival_latest() -> Dict[str, Any]:
+    """Headline facts of the latest Survival Report (counts only; rates need the report's own context)."""
+    import urllib.request
+
+    try:
+        req = urllib.request.Request(SURVIVAL_LATEST_URL, headers={"User-Agent": "crovia-hf-publisher/1 (+https://croviatrust.com)"})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            d = json.loads(r.read().decode("utf-8"))
+    except Exception:  # noqa: BLE001 — the card must build without it
+        return {}
+    agg = d.get("aggregate") or {}
+    return {
+        "title": d.get("title"),
+        "date": d.get("date"),
+        "url": d.get("url") or "https://causari.dev/reports/survival/",
+        "repositories": agg.get("repositories"),
+        "ai_tagged_commits": agg.get("ai_tagged_commits"),
+        "method": (d.get("method") or {}).get("version"),
+        "doi": d.get("doi"),
+    }
+
+
+def _esc(s: Any) -> str:
+    return str(s).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+
+
+def org_card(c: Dict[str, Any], epochs: List[Dict[str, Any]], public: Path, survival: Dict[str, Any]) -> str:
+    """The organisation card: the live state of the ledger, rendered from the same files as the dataset.
+
+    Hugging Face renders README.md of the Space named README on the organisation
+    page, with HTML and Tailwind classes allowed (see the spaCy and Amazon cards).
+    Every number on it is a value in a public file; nothing is typed by hand.
+    """
+    n = lambda k: f"{c[k]:,}" if isinstance(c.get(k), int) else "—"  # noqa: E731
+    anchored = [e for e in epochs if e["anchor_status"] == "bitcoin" and e.get("block_height")]
+    last_block = max((e["block_height"] for e in anchored), default=None)
+    idx = _read_json(public / "proofs" / "index.json", {"proofs": []})
+    proofs = sorted(idx.get("proofs", []), key=lambda p: (-float(p.get("silence_days") or 0), (p.get("target_id") or "").lower()))
+    featured, more = proofs[:8], max(0, len(proofs) - 8)
+    dataset = f"https://huggingface.co/datasets/{REPO_ID}"
+    more_html = (f'<p class="text-xs text-gray-500 mt-2">and {more} more in <a class="underline" '
+                 f'href="{dataset}/blob/main/proofs/index.json">proofs/index.json</a></p>') if more else ""
+    updated = (c.get("generated_at") or "")[:16].replace("T", " ") + " UTC" if c.get("generated_at") else "—"
+
+    rows = "".join(
+        f'<tr><td class="py-1.5 pr-4 cv-mono">{_esc(p["target_id"])}</td>'
+        f'<td class="py-1.5 pr-4 text-right cv-mono">{int(p.get("observed_epochs") or 0):,}</td>'
+        f'<td class="py-1.5 pr-4 text-right cv-mono">{_esc(p.get("silence_days") or "—")}</td>'
+        f'<td class="py-1.5 text-right"><a class="underline" href="{dataset}/blob/main/proofs/{_esc(p["slug"])}.seal.json">proof</a></td></tr>'
+        for p in featured
+    )
+    surv = ""
+    if survival.get("title"):
+        bits = [_esc(survival["title"])]
+        if survival.get("date"):
+            bits.append(_esc(survival["date"]))
+        if isinstance(survival.get("repositories"), int):
+            bits.append(f'{survival["repositories"]:,} repositories')
+        if isinstance(survival.get("ai_tagged_commits"), int):
+            bits.append(f'{survival["ai_tagged_commits"]:,} AI-tagged commits')
+        if survival.get("method"):
+            bits.append(f'method {_esc(survival["method"])}')
+        surv = (f'<p class="text-sm mt-3"><span class="cv-label">Latest</span><br>'
+                f'<a class="underline" href="{_esc(survival["url"])}">{" · ".join(bits)}</a></p>')
+
+    head, body = _card_template(c, n, dataset, updated, last_block, rows, surv, proofs, more_html)
+    return head + "\n".join(line for line in body.splitlines() if line.strip()) + "\n"
+
+
+def _card_template(c, n, dataset, updated, last_block, rows, surv, proofs, more_html):  # noqa: ANN001
+    head = """---
+title: README
+emoji: 🔐
+colorFrom: gray
+colorTo: gray
+sdk: static
+pinned: false
+---
+
+"""
+    body = f"""<style>
+  .cv-dark {{ background: #0b0b0d; color: #f4f4f2; border-radius: 14px; }}
+  .cv-dark a {{ color: #f4f4f2; }}
+  .cv-mono {{ font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }}
+  .cv-num {{ font-size: 1.7rem; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em; }}
+  .cv-tile {{ border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; }}
+  .cv-label {{ font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.12em; color: #6b7280; }}
+  .cv-dot {{ display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #22c55e; margin-right: 6px; vertical-align: middle; }}
+  .cv-btn {{ display: inline-block; border: 1px solid #f4f4f2; border-radius: 6px; padding: 7px 13px; font-size: 0.85rem; text-decoration: none; }}
+  .cv-btn-solid {{ background: #f4f4f2; color: #0b0b0d !important; }}
+  .cv-h {{ font-size: 2rem; line-height: 1.1; font-weight: 700; letter-spacing: -0.03em; }}
+  .cv-card table {{ width: 100%; font-size: 0.85rem; border-collapse: collapse; }}
+  .cv-card th {{ text-align: left; font-weight: 500; }}
+  .cv-card tr {{ border-top: 1px solid #f0f0f0; }}
+  .cv-pre {{ background: #0b0b0d; color: #f4f4f2; border-radius: 8px; padding: 12px 14px; font-size: 0.78rem; white-space: pre-wrap; word-break: break-word; }}
+</style>
+
+<div class="cv-card">
+
+<div class="cv-dark p-6 md:p-8 mb-5">
+  <div class="cv-mono text-sm opacity-70 mb-3">∴ Crovia Trust</div>
+  <div class="cv-h mb-3">Crovia proves what did not happen.</div>
+  <p class="text-base opacity-90 max-w-3xl">Every hour, Crovia fetches the public model cards of AI models on this Hub, asks one published
+  question — <em>does this card disclose its training data?</em> — and signs what it saw. The hour is opened by a public randomness beacon
+  (drand) and closed by a Bitcoin anchor. Anyone can verify the record without an account and without a Crovia server.</p>
+  <div class="mt-5 flex flex-wrap gap-2">
+    <a class="cv-btn cv-btn-solid" href="{dataset}">Open the ledger</a>
+    <a class="cv-btn" href="https://croviatrust.com/registry/tacet/spec/">Read the specification</a>
+    <a class="cv-btn" href="https://croviatrust.com">croviatrust.com</a>
+  </div>
+</div>
+
+<p class="cv-label mb-2"><span class="cv-dot"></span>Live from the log · updated {_esc(updated)} · <a class="underline" href="{PUBLIC_BASE_URL}/latest.json">latest.json</a></p>
+
+<div class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+  <div class="cv-tile"><div class="cv-num cv-mono">{n('latest_epoch')}</div><div class="cv-label mt-1">current epoch · since {_esc((c.get('genesis') or '')[:10] or '—')}</div></div>
+  <div class="cv-tile"><div class="cv-num cv-mono">{n('observations')}</div><div class="cv-label mt-1">signed observations</div></div>
+  <div class="cv-tile"><div class="cv-num cv-mono">{n('anchored')}</div><div class="cv-label mt-1">hours anchored in Bitcoin{f' · last block {last_block:,}' if last_block else ''}</div></div>
+  <div class="cv-tile"><div class="cv-num cv-mono">{n('targets')}</div><div class="cv-label mt-1">models in the target list</div></div>
+  <div class="cv-tile"><div class="cv-num cv-mono">{n('negative')}</div><div class="cv-label mt-1">observations that found no disclosure</div></div>
+  <div class="cv-tile"><div class="cv-num cv-mono">{n('proofs')}</div><div class="cv-label mt-1">featured silence proofs</div></div>
+</div>
+
+<div class="grid md:grid-cols-2 gap-6 mb-6">
+  <div>
+    <div class="cv-label mb-1">Dataset · updated hourly</div>
+    <h3 class="text-lg font-semibold mb-2"><a class="underline" href="{dataset}">TACET disclosure ledger</a></h3>
+    <p class="text-sm">Every observation since {_esc((c.get('genesis') or '')[:10] or '—')}, byte for byte as served at croviatrust.com: the
+    signed rows, the hourly epoch sheets, the map changes, the OpenTimestamps anchors and the featured proofs. Three tables in the viewer
+    (<em>observations</em>, <em>epochs</em>, <em>targets</em>), CC-BY-4.0.</p>
+    <p class="text-sm mt-3"><span class="cv-label">Verify a proof yourself</span></p>
+<pre class="cv-pre cv-mono">pip install crovia-tacet-operator
+tacet-operator verify proofs/&lt;slug&gt;.seal.json \\
+  --operator-pubkey &lt;operator key from trust_root.json&gt;</pre>
+    <p class="text-xs text-gray-500 mt-1">Checks signatures, chaining, non-inclusion paths, snapshot hashes; drand rounds and Bitcoin blocks against public relays.</p>
+  </div>
+  <div>
+    <div class="cv-label mb-1">Weekly report · open method</div>
+    <h3 class="text-lg font-semibold mb-2"><a class="underline" href="https://causari.dev">Survival Report (causari)</a></h3>
+    <p class="text-sm">How much AI-tagged code is still at HEAD, repository by repository, against the same repository's untagged code of the
+    same age. Built with <code>causari</code>, one open-source Rust binary, no cloud: counts, not grades, and every number in the report
+    can be recomputed with the command the report prints and verified offline.</p>
+    {surv}
+<pre class="cv-pre cv-mono mt-3">npx causari audit &lt;owner/repo&gt;
+pipx run causari audit &lt;owner/repo&gt;</pre>
+  </div>
+</div>
+
+<div class="mb-6">
+  <div class="cv-label mb-1">Featured proofs · {len(proofs)} model cards, silence documented hour by hour</div>
+  <p class="text-sm mb-2">A <em>silence</em> is a run of anchored hours in which every observation of a model card found no training-data
+  disclosure on that surface. It is a statement about a web page over time — not about fraud, bad faith, or what the provider disclosed elsewhere.</p>
+  <table>
+    <thead><tr><th class="pb-1">Model card</th><th class="pb-1 text-right">Hours observed</th><th class="pb-1 text-right">Silence (days)</th><th class="pb-1 text-right">Proof</th></tr></thead>
+    <tbody>{rows}</tbody>
+  </table>
+  {more_html}
+</div>
+
+<div class="text-xs text-gray-500 border-t pt-3">
+  <a class="underline" href="https://croviatrust.com/registry/tacet/spec/">TACET specification</a> (Internet-Draft <span class="cv-mono">draft-crovia-tacet</span>) ·
+  <a class="underline" href="https://croviatrust.com/registry/lacuna/">LACUNA</a> ·
+  <a class="underline" href="https://croviatrust.com/registry/seal/">Crovia Seal</a> ·
+  <a class="underline" href="https://github.com/croviatrust">github.com/croviatrust</a> ·
+  <a class="underline" href="https://causari.dev">causari.dev</a> ·
+  <a class="underline" href="mailto:info@croviatrust.com">info@croviatrust.com</a><br>
+  Data CC-BY-4.0, code Apache-2.0. Hours not observed count toward nothing. Corrections are made by revision, never by rewriting an anchored epoch.
+  This card is regenerated hourly by the same script that publishes the dataset.
+</div>
+</div>
+"""
+    return head, body
+
+
+def upload_org_card(readme: Path, repo_id: str, message: str) -> str:
+    """Write README.md of the organisation card Space; remove the static-Space template files if present."""
+    token = os.environ.get("HF_TOKEN")
+    if not token:
+        raise SystemExit("HF_TOKEN is not set (source /etc/crovia/hf.env)")
+    from huggingface_hub import CommitOperationAdd, CommitOperationDelete, HfApi
+
+    api = HfApi(token=token)
+    api.create_repo(repo_id, repo_type="space", space_sdk="static", exist_ok=True)
+    present = set(api.list_repo_files(repo_id, repo_type="space"))
+    if "README.md" in present:
+        current = Path(api.hf_hub_download(repo_id, "README.md", repo_type="space")).read_bytes()
+        if current == readme.read_bytes() and not ({"index.html", "style.css"} & present):
+            return "unchanged"
+    ops: List[Any] = [CommitOperationAdd(path_in_repo="README.md", path_or_fileobj=str(readme))]
+    # The Hub shows index.html instead of the card while the template files exist.
+    ops += [CommitOperationDelete(path_in_repo=f) for f in ("index.html", "style.css") if f in present]
+    info = api.create_commit(repo_id=repo_id, repo_type="space", operations=ops, commit_message=message)
+    return getattr(info, "commit_url", str(info))
+
+
 def build(public: Path, out: Path) -> Dict[str, Any]:
     out.mkdir(parents=True, exist_ok=True)
     for d in COPIED_DIRS:
@@ -282,7 +479,20 @@ def build(public: Path, out: Path) -> Dict[str, Any]:
     c = counts(public, epochs, targets)
     (out / "README.md").write_text(card(c), encoding="utf-8")
     (out / ".gitattributes").write_text("*.ots filter=lfs diff=lfs merge=lfs -text\n", encoding="utf-8")
+    c["_epochs"] = epochs
     return c
+
+
+def card_path(out: Path) -> Path:
+    # Outside the dataset folder, so upload_folder never ships it.
+    return out.with_name(out.name + "-org-card") / "README.md"
+
+
+def build_org_card(public: Path, out: Path, c: Dict[str, Any]) -> Path:
+    p = card_path(out)
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(org_card(c, c["_epochs"], public, survival_latest()), encoding="utf-8")
+    return p
 
 
 def upload(out: Path, repo_id: str, message: str) -> str:
@@ -303,15 +513,24 @@ def main(argv: List[str] | None = None) -> int:
     ap.add_argument("--public", type=Path, default=Path(os.environ.get("TACET_PUBLIC", "/var/www/registry/data/tacet")))
     ap.add_argument("--out", type=Path, default=Path("/opt/crovia/tacet/hf-dataset"))
     ap.add_argument("--repo", default=REPO_ID)
-    ap.add_argument("--dry-run", action="store_true", help="build the folder, do not upload")
+    ap.add_argument("--card-repo", default=ORG_CARD_REPO, help="Space that holds the organisation card")
+    ap.add_argument("--no-card", action="store_true", help="do not render or upload the organisation card")
+    ap.add_argument("--dry-run", action="store_true", help="build the folder and the card, do not upload")
     a = ap.parse_args(argv)
     c = build(a.public, a.out)
     print(f"hf_publish_tacet: built {a.out}: epoch {c['latest_epoch']}, {c['epochs']} epochs "
           f"({c['anchored']} anchored), {c['observations']} observations, {c['targets']} targets, {c['proofs']} proofs")
+    card_file = None if a.no_card else build_org_card(a.public, a.out, c)
+    if card_file:
+        print(f"hf_publish_tacet: built organisation card {card_file}")
     if a.dry_run:
         return 0
-    url = upload(a.out, a.repo, f"epoch {c['latest_epoch']}: {c['observations']} observations, {c['anchored']} anchored epochs")
+    msg = f"epoch {c['latest_epoch']}: {c['observations']} observations, {c['anchored']} anchored epochs"
+    url = upload(a.out, a.repo, msg)
     print(f"hf_publish_tacet: uploaded to {a.repo} ({url})")
+    if card_file:
+        r = upload_org_card(card_file, a.card_repo, msg)
+        print(f"hf_publish_tacet: organisation card {a.card_repo} {r}")
     return 0
 
 

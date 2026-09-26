@@ -196,6 +196,15 @@ UTC day, because the viewer's JSON builder fails on an empty per-hour shard —
 `epochs.jsonl`, `targets.jsonl`) and a card with the live counts. `ots/*.ots.bak` backups
 are skipped. Unchanged files are not re-uploaded.
 
+The same run renders the **organisation card** (`README.md` of the Space `CroviaTrust/README`,
+which the Hub shows on the organisation page) from the same files: the live counters, the
+featured proofs, the latest Survival Report headline (fetched from
+`causari.dev/reports/survival/latest.json`, counts only), install and verify lines. It is
+written next to the dataset folder (`<out>-org-card/README.md`) and committed to the Space
+only when it changed; the static-Space template files `index.html` and `style.css`, which
+the Hub renders instead of the card while they exist, are deleted in the same commit.
+`--no-card` skips it. A rendered sample is kept at `ops/hf/org-card/README.md`.
+
 ```bash
 /opt/crovia/tacet/.venv/bin/pip install -U huggingface_hub
 set -a; . /etc/crovia/hf.env; set +a          # exports HF_TOKEN; never echo it
