@@ -62,7 +62,8 @@ def sync_tree(src: Path, dst: Path) -> None:
     dst.mkdir(parents=True, exist_ok=True)
     wanted = set()
     for f in src.iterdir():
-        if not f.is_file():
+        # `ots upgrade` leaves <epoch>.ots.bak next to the proof; not part of the record.
+        if not f.is_file() or f.name.endswith((".bak", ".tmp")):
             continue
         wanted.add(f.name)
         t = dst / f.name
