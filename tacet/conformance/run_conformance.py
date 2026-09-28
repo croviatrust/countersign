@@ -204,6 +204,8 @@ def pnx_cases() -> None:
         case(f"pnx/003 invalid/{name}: hash-only verdict {'accepts' if vec['hash_only_ok'] else 'rejects'}",
              egress.verify_pnx(vec["proof"]).ok is vec["hash_only_ok"])
 
+    reach_cases()
+
     try:
         import crovia_seal  # noqa: F401
         from tacet.pnx import verify_any
@@ -222,6 +224,40 @@ def pnx_cases() -> None:
             case(f"pnx/004 invalid/{name} rejected (seal signature {'valid' if exp['seal_signature_ok'] else 'invalid'})",
                  not r.ok and outer["seal_signature_ok"] is exp["seal_signature_ok"] and any(vec["expect_error_contains"] in e for e in r.errors),
                  "; ".join(r.errors) or "accepted")
+
+
+def reach_cases() -> None:
+    """The reach record (PNX.md §4a, vector pnx_005): valid under every mode and disclosure, faults rejected."""
+    from tacet import egress, reach
+
+    v = load("pnx_005_reach.json")
+    policy = reach.Policy.from_json(v["policy"]["document"])
+    case("pnx/005: policy hash is SHA-256 of the CSC-1 document", policy.hash == v["policy"]["hash"] and len(policy.allow) == v["policy"]["rules"])
+    salt = unhex = bytes.fromhex(v["valid"]["enforce"]["sheet"]["salt_hex"])
+    case("pnx/005: host hashes (CROVIA-PNX-REACH-v1 ‖ salt ‖ host)", all(reach.host_hash(salt, n) == h for n, h in v["host_hashes"].items()))
+    # The record an enforcing witness derives from the log is the one in the vector.
+    lg = reach.ReachLog(capture="proxy-connect", policy=policy, mode="enforce")
+    for a in v["log"]:
+        lg.attempt(a["host"], a["port"], a["at"], bytes_out=a["bytes_out"], bytes_in=a["bytes_in"], ip=a.get("ip"))
+    case("pnx/005: enforcing witness rebuilds the record from the log", lg.record(salt) == v["valid"]["enforce"]["sheet"]["reach"])
+    case("pnx/005: salted record rebuilt from the log", lg.record(salt, "salted") == v["valid"]["salted"]["sheet"]["reach"])
+    for name, vec in v["valid"].items():
+        sheet = vec["sheet"]
+        case(f"pnx/005 {name}: sheet verifies (record is a signed member)", egress.verify_sheet(sheet) == [], "; ".join(egress.verify_sheet(sheet)))
+        case(f"pnx/005 {name}: same run root as pnx_002", sheet["root"] == load("pnx_002_proofs.json")["sheet"]["root"])
+        for label, pol in (("with_policy", policy), ("without_policy", None)):
+            exp = vec[f"expect_{label}"]
+            r = reach.verify_reach(sheet["reach"], salt, pol, vec.get("names", ()))
+            case(f"pnx/005 {name} {label}: verdict {exp['verdict']}",
+                 r.ok and r.verdict == exp["verdict"] and r.outside == exp["outside"] and r.reached == exp["reached"]
+                 and (exp["warning_contains"] is None or any(exp["warning_contains"] in w for w in r.warnings)),
+                 f"{r.verdict} {r.outside} {r.reached} {r.errors} {r.warnings}")
+    for name, vec in v["invalid"].items():
+        s = vec["sheet"]
+        errs = egress.verify_sheet(s)
+        if not errs and vec["with_policy"]:
+            errs = reach.verify_reach(s["reach"], unhex, policy).errors
+        case(f"pnx/005 invalid/{name} rejected", any(vec["expect_error_contains"] in e for e in errs), "; ".join(errs) or "accepted")
 
 
 def fixtures_stream(label: str, n: int) -> bytes:

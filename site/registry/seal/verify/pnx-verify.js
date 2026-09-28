@@ -92,7 +92,113 @@
     try { ok = await ed25519Verify(unhex((sheet.signature || {}).sig_hex || ""), cat(D_SHEET, bytesOf(strip(sheet, ["signature"]))), unhex(sheet.witness.pubkey.key_hex)); }
     catch (_) { ok = false; }
     if (!ok) errors.push("witness signature invalid");
+    if ("reach" in sheet) {
+      if (!sheet.reach || typeof sheet.reach !== "object" || Array.isArray(sheet.reach)) errors.push("reach must be an object");
+      else for (const e of (await verifyReach(sheet.reach, unhex(sheet.salt_hex), null, [])).errors) errors.push("reach: " + e);
+    }
     return errors;
+  }
+
+  /* ---- reach record (reach.py, PNX.md §4a / §6 step 1b) ---- */
+  const REACH_VERSION = "crovia.pnx.reach.v1", POLICY_VERSION = "crovia.pnx.policy.v1", D_REACH = D("CROVIA-PNX-REACH-v1");
+  const CAPTURES = ["proxy-connect", "proxy-http", "socket"], DISCLOSURES = ["clear", "salted"], OUTCOMES = ["allowed", "blocked", "failed"];
+  const POLICY_KINDS = ["allowlist", "none"], POLICY_MODES = ["enforce", "observe"];
+  const WITHIN = "within-policy", OUTSIDE = "outside-policy", UNCHECKED = "unchecked", UNPOLICED = "unpoliced";
+
+  function splitRule(rule) { const i = rule.lastIndexOf(":"); if (i > 0 && /^[0-9]+$/.test(rule.slice(i + 1))) return [rule.slice(0, i).toLowerCase(), parseInt(rule.slice(i + 1), 10)]; return [rule.toLowerCase(), null]; }
+  // `host` or `host:port`; `*.` matches one or more labels, never the apex; case-insensitive; no port = any port.
+  function ruleMatches(rule, host, port) {
+    const [rhost, rport] = splitRule(rule); host = host.toLowerCase();
+    if (rport !== null && rport !== port) return false;
+    if (rhost.startsWith("*.")) { const suffix = rhost.slice(1); return host.endsWith(suffix) && host.length > suffix.length; }
+    return host === rhost;
+  }
+  function policyFrom(doc) {
+    if (!doc || doc.version !== POLICY_VERSION) throw new Error("unknown policy version '" + (doc && doc.version) + "'");
+    if (!Array.isArray(doc.allow) || !doc.allow.every(r => typeof r === "string" && r)) throw new Error("policy.allow must be a list of non-empty strings");
+    return { allow: doc.allow.slice(), allows: (h, p) => doc.allow.some(r => ruleMatches(r, h, p)), hasWildcards: () => doc.allow.some(r => splitRule(r)[0].startsWith("*.")) };
+  }
+  async function policyHash(policy) { return "sha256:" + hex(await sha256(bytesOf({ version: POLICY_VERSION, allow: policy.allow }))); }
+  async function hostHash(salt, host) { return hex(await sha256(cat(D_REACH, salt, enc.encode(host.toLowerCase())))); }
+  const isRfc3339 = s => typeof s === "string" && s.length >= 20 && s.endsWith("Z") && s[10] === "T";
+  function summarize(entries) {
+    const n = o => entries.filter(e => e.outcome === o).length;
+    return { destinations: entries.length, connections: entries.reduce((a, e) => a + (e.connections | 0), 0), allowed: n("allowed"), blocked: n("blocked"), failed: n("failed") };
+  }
+  // Same checks, same order, same wording as reach.verify_reach. policy: policyFrom(doc) or null; names: hosts to look up under salted disclosure.
+  async function verifyReach(reach, salt, policy, names) {
+    const res = { ok: false, verdict: "?", errors: [], warnings: [], outside: [], reached: {} };
+    const err = m => res.errors.push(m);
+    if (!reach || reach.version !== REACH_VERSION) { err("unknown reach version '" + (reach && reach.version) + "'"); return res; }
+    const capture = reach.capture, disclosure = reach.disclosure;
+    if (!CAPTURES.includes(capture)) err("unknown capture '" + capture + "'");
+    if (!DISCLOSURES.includes(disclosure)) { err("unknown disclosure '" + disclosure + "'"); return res; }
+    const pol = reach.policy || {}, kind = pol.kind, mode = pol.mode, phash = pol.hash, rules = pol.rules;
+    if (!POLICY_KINDS.includes(kind)) err("unknown policy kind '" + kind + "'");
+    if (!POLICY_MODES.includes(mode)) err("unknown policy mode '" + mode + "'");
+    if (kind === "none" && (phash !== null || rules !== 0 || mode !== "observe")) err("policy kind none must have hash null, rules 0, mode observe");
+    if (kind === "allowlist" && !(typeof phash === "string" && phash.startsWith("sha256:") && phash.length === 71 && Number.isInteger(rules) && rules >= 0))
+      err("policy kind allowlist must carry a sha256: hash and a rule count");
+    const entries = reach.destinations;
+    if (!Array.isArray(entries)) { err("destinations must be a list"); return res; }
+    const keys = [];
+    entries.forEach((e, i) => {
+      if (!e || typeof e !== "object") { err("destination " + i + ": not an object"); return; }
+      const nameKey = disclosure === "salted" ? "host_hash" : "host", other = disclosure === "salted" ? "host" : "host_hash";
+      const name = e[nameKey];
+      if (other in e) err("destination " + i + ": " + other + " not allowed under " + disclosure + " disclosure");
+      if (typeof name !== "string" || !name) { err("destination " + i + ": missing " + nameKey); return; }
+      if (disclosure === "salted" && !/^[0-9a-f]{64}$/.test(name)) err("destination " + i + ": host_hash is not 64 lowercase hex characters");
+      if (disclosure === "clear" && name !== name.toLowerCase()) err("destination " + i + ": host must be lower-cased");
+      const port = e.port;
+      if (!Number.isInteger(port) || !(port > 0 && port < 65536)) { err("destination " + i + ": port out of range"); return; }
+      if (!OUTCOMES.includes(e.outcome)) err("destination " + i + ": unknown outcome '" + e.outcome + "'");
+      if (kind === "none" && e.outcome === "blocked") err("destination " + i + ": blocked without a policy");
+      if (mode === "observe" && e.outcome === "blocked") err("destination " + i + ": blocked under observe mode");
+      for (const k of ["connections", "bytes_out", "bytes_in"]) if (!Number.isInteger(e[k]) || e[k] < 0) err("destination " + i + ": " + k + " must be a non-negative integer");
+      if (!Number.isInteger(e.connections) || e.connections < 1) err("destination " + i + ": connections must be at least 1");
+      if (e.outcome === "blocked" && (e.bytes_out || e.bytes_in)) err("destination " + i + ": bytes relayed on a blocked destination");
+      const ips = e.ips;
+      if (!Array.isArray(ips) || ips.slice().sort().join("\u0000") !== ips.join("\u0000") || new Set(ips).size !== ips.length) err("destination " + i + ": ips must be a sorted list without duplicates");
+      if (!isRfc3339(e.first_at) || !isRfc3339(e.last_at) || e.first_at > e.last_at) err("destination " + i + ": first_at/last_at must be RFC 3339 UTC and ordered");
+      keys.push([name, port]);
+    });
+    const keyStr = k => k[0] + "\u0000" + String(k[1]).padStart(5, "0");
+    const sorted = keys.slice().sort((a, b) => a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : a[1] - b[1]);
+    if (keys.map(keyStr).join("\u0001") !== sorted.map(keyStr).join("\u0001")) err("destinations are not sorted by host then port");
+    if (new Set(keys.map(keyStr)).size !== keys.length) err("duplicate destination");
+    const objs = entries.filter(e => e && typeof e === "object");
+    if (csc1(reach.summary || null) !== csc1(summarize(objs))) err("summary does not match the destinations");
+    if (res.errors.length) return res;
+
+    if (kind === "none") {
+      res.verdict = UNPOLICED;
+      if (policy) res.warnings.push("policy document supplied but the record was made without a policy");
+    } else if (!policy) {
+      if (mode === "enforce") { res.verdict = WITHIN; res.warnings.push("policy document not supplied: the outcomes rest on the witness; only the policy hash is bound"); }
+      else { res.verdict = UNCHECKED; res.warnings.push("policy document not supplied and the witness observed only: conformance cannot be checked"); }
+    } else {
+      const h = await policyHash(policy);
+      if (h !== phash || policy.allow.length !== rules) { err("policy document does not match the record: hash " + h + " vs " + phash + ", " + policy.allow.length + " rules vs " + rules); return res; }
+      if (disclosure === "clear") {
+        for (const e of entries) {
+          const allowed = policy.allows(e.host, e.port);
+          if ((e.outcome === "allowed" || e.outcome === "failed") && !allowed) res.outside.push(e.host + ":" + e.port);
+          if (e.outcome === "blocked" && allowed) err(e.host + ":" + e.port + ": blocked although the policy allows it (inconsistent witness)");
+        }
+        if (res.errors.length) return res;
+        res.verdict = res.outside.length ? OUTSIDE : WITHIN;
+      } else {
+        res.verdict = mode === "enforce" ? WITHIN : UNCHECKED;
+        res.warnings.push("salted disclosure: the policy hash matches; destinations cannot be matched against the rules" + (policy.hasWildcards() ? " (the policy has wildcard rules)" : ""));
+      }
+    }
+    if (disclosure === "salted") {
+      const hashes = new Set(entries.map(e => e.host_hash));
+      for (const n of names || []) res.reached[n] = hashes.has(await hostHash(salt, n));
+    }
+    res.ok = !res.errors.length;
+    return res;
   }
 
   const pnxQuery = proof => ({ profile: PROFILE, run_id: proof.sheet.run_id,
@@ -144,6 +250,30 @@
     const k = sheet.params.k_gram, w = sheet.params.window;
     err(proof.profile === PROFILE && proof.proof_version === PROOF_VERSION, "proof is " + PROFILE + " / " + PROOF_VERSION);
 
+    // Reach record (PNX §4a / §6 step 1b): structure was checked by sheetErrors; this is the policy conformance.
+    let reach = null;
+    if (sheet.reach && typeof sheet.reach === "object") {
+      const rr = sheet.reach, pol = rr.policy || {};
+      hdr("— reach (destinations contacted during the run)", rr.destinations.length + " destination(s), " + rr.capture + ", " + rr.disclosure + " disclosure");
+      let policy = null;
+      if (opts.policy) { try { policy = policyFrom(opts.policy); } catch (e) { err(false, "policy document: " + e.message); } }
+      reach = await verifyReach(rr, salt, policy, opts.names || []);
+      for (const e of reach.errors) err(false, "reach: " + e);
+      if (reach.errors.length) throw new Error("reach: " + reach.errors[0]);
+      note("policy " + pol.kind + (pol.kind === "allowlist" ? " (" + pol.rules + " rule(s), " + pol.mode + ")" : ""),
+           pol.hash ? "bound by " + pol.hash + (policy ? "; the supplied document matches" : "") : "the witness recorded without a policy");
+      const s = rr.summary;
+      note(s.connections + " connection(s) to " + s.destinations + " destination(s): " + s.allowed + " allowed, " + s.blocked + " blocked, " + s.failed + " failed",
+           rr.destinations.map(d => (d.host || d.host_hash.slice(0, 16) + "…") + ":" + d.port + " " + d.outcome).join(", "));
+      for (const w_ of reach.warnings) warn("reach: " + w_);
+      for (const n of Object.keys(reach.reached)) note("looked up " + n + ": " + (reach.reached[n] ? "reached" : "not among the destinations"), "salted host hash compared");
+      // outside-policy is a finding about the run, not a fault of the proof: the proof still verifies (as in egress.verify_pnx).
+      if (reach.verdict === OUTSIDE) { steps.push({ ok: false, label: "reach: outside-policy — " + reach.outside.join(", "), det: "contacted although the policy does not allow it", finding: true }); warnings.push("reach: outside-policy: " + reach.outside.join(", ")); }
+      else step(true, "reach: " + reach.verdict, reach.verdict === WITHIN ? "every destination the witness saw is allowed by the policy"
+                                                : reach.verdict === UNPOLICED ? "no policy was in force; the destinations are stated, not judged"
+                                                : "the policy could not be checked against the destinations");
+    } else if (opts.policy) warn("policy document supplied but the sheet carries no reach record");
+
     hdr("— assets against the run root", (proof.assets || []).length + " asset(s)");
     const assets = opts.assets || null;
     if (!assets) warn("assets not supplied: fingerprints taken from the proof, not recomputed",
@@ -192,12 +322,14 @@
 
     if (errors.length) throw new Error(errors[0]);
     return { verdict: overall, assets: computed, sealed, hashOnly: !assets, warnings, run: sheet.run_id,
-             witness: sheet.witness.id, bodies: sheet.egress.bodies, bytes: sheet.egress.bytes };
+             witness: sheet.witness.id, bodies: sheet.egress.bodies, bytes: sheet.egress.bytes,
+             reach: reach && { verdict: reach.verdict, outside: reach.outside, reached: reach.reached } };
   }
 
   window.verifyPnx = verifyPnx;
   window.isPnxProof = isPnxProof;
   window.isPnxEnvelope = isPnxEnvelope;
   window.tacetPnx = { PROFILE, PROOF_VERSION, K_GRAM, WINDOW, kgramHashes, winnow, fingerprints, assetFingerprints, jsonStrings,
-                      epochLeafKey, presentLeaf, sheetErrors, pnxQuery };
+                      epochLeafKey, presentLeaf, sheetErrors, pnxQuery,
+                      REACH_VERSION, POLICY_VERSION, ruleMatches, policyFrom, policyHash, hostHash, verifyReach };
 })();

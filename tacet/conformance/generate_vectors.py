@@ -193,7 +193,121 @@ def pnx_vectors() -> dict[str, dict]:
             assert outer["seal_signature_ok"] is vec["expect"]["seal_signature_ok"], name
             assert any(vec["expect_error_contains"] in e for e in r.errors), (name, r.errors)
 
-    return {"pnx_001_fingerprints.json": p001, "pnx_002_proofs.json": p002, "pnx_003_invalid.json": p003, "pnx_004_sealed.json": p004}
+    return {"pnx_001_fingerprints.json": p001, "pnx_002_proofs.json": p002, "pnx_003_invalid.json": p003, "pnx_004_sealed.json": p004,
+            "pnx_005_reach.json": reach_vector(sc)}
+
+
+# The connection log of pnx_005 (PNX.md §4a): seven attempts, three destinations
+# the policy allows (one through a wildcard, one through a port-less rule), one
+# it refuses, one the wildcard must not match (the apex).
+REACH_POLICY = {"version": "crovia.pnx.policy.v1",
+                "allow": ["api.github.com:443", "*.githubusercontent.com:443", "github.com"]}
+REACH_LOG = [
+    {"at": "2026-09-20T11:00:05Z", "host": "api.github.com", "port": 443, "ip": "140.82.112.5", "bytes_out": 4000, "bytes_in": 90000},
+    {"at": "2026-09-20T11:02:00Z", "host": "API.github.com", "port": 443, "ip": "140.82.112.6", "bytes_out": 200, "bytes_in": 100},
+    {"at": "2026-09-20T11:03:00Z", "host": "objects.githubusercontent.com", "port": 443, "ip": "185.199.108.133", "bytes_out": 300, "bytes_in": 700000},
+    {"at": "2026-09-20T11:04:00Z", "host": "github.com", "port": 22, "ip": "140.82.121.4", "bytes_out": 1200, "bytes_in": 8000},
+    {"at": "2026-09-20T11:05:00Z", "host": "pastebin.com", "port": 443, "bytes_out": 500, "bytes_in": 0},
+    {"at": "2026-09-20T11:06:00Z", "host": "githubusercontent.com", "port": 443, "bytes_out": 10, "bytes_in": 0},
+    {"at": "2026-09-20T11:07:00Z", "host": "api.github.com", "port": 443, "ip": "140.82.112.5", "bytes_out": 100, "bytes_in": 100},
+]
+
+
+def reach_vector(sc) -> dict:
+    """pnx_005: the reach record, valid under every mode and disclosure, and the faults a verifier MUST reject."""
+    from tacet import reach as rc  # noqa: E402
+    from tacet.pnx import witness_from_state, witness_to_state  # noqa: E402
+    policy = rc.Policy.from_json(REACH_POLICY)
+    key, salt = sc.witness_key, fx.PNX_SALT
+
+    def log(mode, policy_=policy, explicit=None):
+        lg = rc.ReachLog(capture="proxy-connect", policy=policy_, mode=mode)
+        for a in REACH_LOG:
+            lg.attempt(a["host"], a["port"], a["at"], explicit, bytes_out=a["bytes_out"], bytes_in=a["bytes_in"], ip=a.get("ip"))
+        return lg
+
+    def sheet_with(record):
+        # The same run as pnx_002 (same bodies, same salt, same root), plus the record.
+        w = witness_from_state(witness_to_state(sc.witness))
+        w.reach = record
+        return w.sheet(key, fx.PNX_CLOSED_AT)
+
+    def expect(sheet, with_policy, names=()):
+        r = egress.verify_sheet(sheet)
+        assert r == [], r
+        rr = rc.verify_reach(sheet["reach"], salt, policy if with_policy else None, names)
+        assert rr.ok, rr.errors
+        return {"ok": True, "verdict": rr.verdict, "outside": rr.outside, "reached": rr.reached,
+                "warning_contains": rr.warnings[0].split(":")[0] if rr.warnings else None}
+
+    enforce, observe, salted, none = (sheet_with(log("enforce").record(salt)), sheet_with(log("observe").record(salt)),
+                                      sheet_with(log("enforce").record(salt, "salted")), sheet_with(log("observe", None).record(salt)))
+    names = ["api.github.com", "pastebin.com", "example.org"]
+    valid = {
+        "enforce": {"sheet": enforce, "expect_with_policy": expect(enforce, True), "expect_without_policy": expect(enforce, False)},
+        "observe": {"sheet": observe, "expect_with_policy": expect(observe, True), "expect_without_policy": expect(observe, False)},
+        "salted": {"sheet": salted, "names": names, "expect_with_policy": expect(salted, True, names),
+                   "expect_without_policy": expect(salted, False, names)},
+        "none": {"sheet": none, "expect_with_policy": expect(none, True), "expect_without_policy": expect(none, False)},
+    }
+    assert valid["observe"]["expect_with_policy"]["verdict"] == rc.VERDICT_OUTSIDE
+    assert valid["observe"]["expect_with_policy"]["outside"] == ["githubusercontent.com:443", "pastebin.com:443"]
+    assert valid["salted"]["expect_with_policy"]["reached"] == {"api.github.com": True, "pastebin.com": True, "example.org": False}
+
+    # Faults. Each is re-signed so the signature does not hide it, except the last, where it must.
+    invalid: dict[str, dict] = {}
+
+    def fault(name, sheet, contains, *, with_policy=True, resign=True):
+        s = _resigned(sheet, key) if resign else sheet
+        errs = egress.verify_sheet(s)
+        if not errs and with_policy:
+            errs = rc.verify_reach(s["reach"], salt, policy).errors
+        assert any(contains in e for e in errs), (name, errs)
+        invalid[name] = {"sheet": s, "with_policy": with_policy, "expect_error_contains": contains}
+
+    def mutated(base, fn):
+        s = copy.deepcopy(base)
+        fn(s["reach"])
+        return s
+
+    def fix_summary(r):
+        r["summary"] = rc.summarize(r["destinations"])
+
+    fault("unsorted_destinations", mutated(enforce, lambda r: r["destinations"].reverse()), "not sorted", with_policy=False)
+    fault("duplicate_destination", mutated(enforce, lambda r: (r["destinations"].append(copy.deepcopy(r["destinations"][-1])), fix_summary(r))),
+          "duplicate destination", with_policy=False)
+    fault("wrong_summary", mutated(enforce, lambda r: r["summary"].__setitem__("allowed", 9)), "summary does not match", with_policy=False)
+    fault("unknown_capture", mutated(enforce, lambda r: r.__setitem__("capture", "telepathy")), "unknown capture", with_policy=False)
+    fault("unknown_outcome", mutated(enforce, lambda r: r["destinations"][0].__setitem__("outcome", "maybe")), "unknown outcome", with_policy=False)
+    fault("blocked_without_policy", mutated(none, lambda r: (r["destinations"][4].__setitem__("outcome", "blocked"),
+                                                             r["destinations"][4].__setitem__("bytes_out", 0), fix_summary(r))),
+          "blocked without a policy", with_policy=False)
+    fault("host_under_salted", mutated(salted, lambda r: r["destinations"][0].__setitem__("host", "api.github.com")),
+          "not allowed under salted", with_policy=False)
+    other = copy.deepcopy(enforce)
+    other["reach"]["policy"]["hash"] = "sha256:" + "00" * 32
+    fault("policy_hash_mismatch", other, "does not match the record")
+    fault("blocked_destination_the_policy_allows", mutated(enforce, lambda r: (r["destinations"][0].__setitem__("outcome", "blocked"),
+                                                                                 r["destinations"][0].__setitem__("bytes_out", 0),
+                                                                                 r["destinations"][0].__setitem__("bytes_in", 0), fix_summary(r))),
+          "inconsistent witness")
+    fault("tampered_record_unchanged_signature", mutated(enforce, lambda r: (r["destinations"][4].__setitem__("outcome", "allowed"), fix_summary(r))),
+          "witness signature invalid", with_policy=False, resign=False)
+
+    # A draft 0.3 verifier (signature and params only) accepts every valid sheet: the record is a member like any other.
+    for v in valid.values():
+        s = v["sheet"]
+        assert egress.verify_signature(s["witness"]["pubkey"]["key_hex"], egress.DOMAIN_SHEET + canonicalize(egress._unsigned(s)),
+                                       bytes.fromhex(s["signature"]["sig_hex"]))
+    return {
+        "profile": egress.PROFILE, "reach_version": rc.REACH_VERSION, "policy_version": rc.POLICY_VERSION,
+        "domain_reach": rc.DOMAIN_REACH.decode(),
+        "policy": {"document": REACH_POLICY, "hash": policy.hash, "rules": len(policy.allow)},
+        "log": REACH_LOG,
+        "host_hashes": {n: rc.host_hash(salt, n) for n in names},
+        "valid": valid, "invalid": invalid,
+        "note": "every valid sheet has the root of pnx_002 (same bodies, same salt); a verifier of draft 0.3 accepts them all",
+    }
 
 
 def main() -> None:

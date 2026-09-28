@@ -159,7 +159,11 @@
        sealed bundle above. The page re-does <a href="/registry/tacet/spec/#pnx-6-verification">PNX §6</a> here:
        witness signature, parameter consistency, every path, every verdict. Without the asset bytes it proves
        non-inclusion of the listed keys only and says so; paste a single asset in the box below to have its
-       fingerprints recomputed byte for byte. Same checks as <span class="mono">tacet-pnx verify</span>.</p>
+       fingerprints recomputed byte for byte. Same checks as <span class="mono">tacet-pnx verify</span>.
+       If the run sheet carries a <a href="/registry/tacet/spec/#pnx-4a-the-reach-record">reach record</a> (where the
+       run connected, under which policy), paste the policy document below to have its hash recomputed and every
+       destination matched against the rules; without it the page reports only what the record alone supports.</p>
+    <textarea id="policyInput" class="small" spellcheck="false" placeholder='{"version":"crovia.pnx.policy.v1","allow":["api.github.com:443","*.githubusercontent.com:443"]}   — reach policy document (optional)'></textarea>
     <div class="vf-row" style="margin-top:10px">
       <button class="vf-btn" id="btnPnx">Load a PNX conformance proof</button>
     </div>
@@ -195,7 +199,7 @@
 <script src="/registry/seal/verify/seal-core.js?v=20260920a"></script>
 <script src="/registry/seal/verify/ots-verify.js?v=20260920a"></script>
 <script src="/registry/seal/verify/tacet-verify.js?v=20260920a"></script>
-<script src="/registry/seal/verify/pnx-verify.js?v=20260920a"></script>
+<script src="/registry/seal/verify/pnx-verify.js?v=20260928a"></script>
 <script>
 "use strict";
 
@@ -226,7 +230,10 @@ async function run() {
       const content = $("contentInput").value;
       // One pasted asset can be checked byte for byte when the proof covers exactly one asset.
       const assets = content && proof.assets.length === 1 ? { [proof.assets[0].label]: enc.encode(content) } : null;
-      const r = await verifyPnx(single, steps, assets ? { assets } : {});
+      const policyRaw = $("policyInput").value.trim();
+      let policy = null;
+      if (policyRaw) { try { policy = JSON.parse(policyRaw); } catch (_) { throw new Error("the policy document is not valid JSON"); } }
+      const r = await verifyPnx(single, steps, { ...(assets ? { assets } : {}), ...(policy ? { policy } : {}) });
       const n = Object.keys(r.assets).length, present = Object.values(r.assets).filter(v => v === "present").length;
       const what = r.verdict === "absent" ? n + " asset(s) proven absent from the witnessed egress"
                  : r.verdict === "present" ? present + " of " + n + " asset(s) <b>present</b> in the witnessed egress — signed evidence of exposure"
@@ -234,7 +241,8 @@ async function run() {
       verdict.className = "vf-verdict ok";
       verdict.innerHTML = "&#10003;&nbsp; VALID <span class='sub'>PNX proof (" + (r.sealed ? "sealed, " : "") + "run <b>" + escapeHtml(r.run) + "</b>, witness "
         + escapeHtml(r.witness) + "): verdict <b>" + r.verdict.toUpperCase() + "</b> — " + what + "; " + r.bodies + " bodies, " + r.bytes + " bytes witnessed"
-        + (r.hashOnly ? ". Hash-only: asset bytes not supplied, so this proves non-inclusion of the listed keys, not of any asset." : ".") + "</span>";
+        + (r.hashOnly ? ". Hash-only: asset bytes not supplied, so this proves non-inclusion of the listed keys, not of any asset." : ".")
+        + (r.reach ? " Reach: <b>" + escapeHtml(r.reach.verdict) + "</b>" + (r.reach.outside.length ? " (" + escapeHtml(r.reach.outside.join(", ")) + ")" : "") + "." : "") + "</span>";
       renderSteps(steps, stepsEl);
       return;
     }

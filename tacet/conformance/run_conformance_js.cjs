@@ -98,9 +98,10 @@ async function pnxCases() {
   const assetsOf = vec => Object.fromEntries(Object.entries(vec.assets_hex).map(([k, v]) => [k, unhex(v)]));
   const P = ctx.tacetPnx;
   const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
-  async function run(obj, assets) {
+  const sameObj = (a, b) => same(Object.entries(a).sort(), Object.entries(b).sort());
+  async function run(obj, assets, extra) {
     const steps = [];
-    try { return { ok: true, result: await ctx.verifyPnx(obj, steps, assets ? { assets } : {}), steps }; }
+    try { return { ok: true, result: await ctx.verifyPnx(obj, steps, { ...(assets ? { assets } : {}), ...(extra || {}) }), steps }; }
     catch (e) { return { ok: false, error: e.message, steps }; }
   }
   const sealSigValid = steps => steps.some(s => s.label === "Ed25519 issuer signature" && s.ok);
@@ -143,6 +144,41 @@ async function pnxCases() {
     report(!r.ok && (r.error.includes(vec.expect_error_contains) || failing(r.steps).includes(vec.expect_error_contains)), `browser pnx/003 invalid/${name} rejected`, r.ok ? "accepted" : r.error + " | " + failing(r.steps));
     r = await run(vec.proof);
     report(r.ok === vec.hash_only_ok, `browser pnx/003 invalid/${name}: hash-only verdict ${vec.hash_only_ok ? "accepts" : "rejects"}`, r.error || "accepted");
+  }
+
+  v = load("pnx_005_reach.json");
+  {
+    const policy = P.policyFrom(v.policy.document);
+    report(await P.policyHash(policy) === v.policy.hash && policy.allow.length === v.policy.rules, "browser pnx/005: policy hash is SHA-256 of the CSC-1 document");
+    const rsalt = unhex(v.valid.enforce.sheet.salt_hex);
+    let allHashes = true;
+    for (const [n, h] of Object.entries(v.host_hashes)) if (await P.hostHash(rsalt, n) !== h) allHashes = false;
+    report(allHashes, "browser pnx/005: host hashes (CROVIA-PNX-REACH-v1 ‖ salt ‖ host)");
+    const base = load("pnx_002_proofs.json"), clean = base.proofs.clean || Object.values(base.proofs)[0];
+    for (const [name, vec] of Object.entries(v.valid)) {
+      const sheet = vec.sheet, errs = await P.sheetErrors(sheet);
+      report(errs.length === 0, `browser pnx/005 ${name}: sheet verifies (record is a signed member)`, errs.join("; "));
+      for (const [label, pol] of [["with_policy", policy], ["without_policy", null]]) {
+        const exp = vec["expect_" + label];
+        const r = await P.verifyReach(sheet.reach, rsalt, pol, vec.names || []);
+        report(r.ok && r.verdict === exp.verdict && same(r.outside, exp.outside) && sameObj(r.reached, exp.reached)
+               && (exp.warning_contains === null || r.warnings.some(w => w.includes(exp.warning_contains))),
+               `browser pnx/005 ${name} ${label}: verdict ${exp.verdict}`, `${r.verdict} ${JSON.stringify(r.outside)} ${JSON.stringify(r.reached)} ${r.errors} ${r.warnings}`);
+      }
+      // A pnx_002 proof over the same run root, with this sheet in place: the whole proof verifies end to end.
+      if (sheet.root === base.sheet.root && sheet.salt_hex === base.sheet.salt_hex) {
+        const exp = vec.expect_with_policy;
+        const r = await run({ ...clean.proof, sheet }, assetsOf(clean), { policy: v.policy.document, names: vec.names || [] });
+        report(r.ok && r.result.reach && r.result.reach.verdict === exp.verdict && sameObj(r.result.reach.reached, exp.reached),
+               `browser pnx/005 ${name}: full proof verifies with the reach record, verdict ${exp.verdict}`, r.error || JSON.stringify(r.result && r.result.reach));
+      }
+    }
+    for (const [name, vec] of Object.entries(v.invalid)) {
+      const s = vec.sheet;
+      let errs = await P.sheetErrors(s);
+      if (!errs.length && vec.with_policy) errs = (await P.verifyReach(s.reach, rsalt, policy, [])).errors;
+      report(errs.some(e => e.includes(vec.expect_error_contains)), `browser pnx/005 invalid/${name} rejected`, errs.join("; ") || "accepted");
+    }
   }
 
   v = load("pnx_004_sealed.json");
