@@ -27,6 +27,15 @@ tacet-pnx prove   --state run.state.json --sheet run.sheet.json \
 tacet-pnx verify  pnx.proof.json --asset api_key=secret.txt --assets-dir protected/
 ```
 
-Exit codes: 0 valid and every asset absent · 1 valid but present, undetectable or
-partial · 2 invalid. The GitHub Action `croviatrust/pnx-action` wraps the same
+Where the run connected (the reach record, PNX §4a) is added at witness time
+from a connection log and checked against the policy document:
+
+```bash
+tacet-pnx witness egress/ --reach logs/connect.jsonl --policy egress-policy.json \
+                  --reach-mode enforce [--reach-salted] ...                  # one {"at","host","port",...} per line
+tacet-pnx verify  pnx.proof.json --policy egress-policy.json [--name api.github.com]
+```
+
+Exit codes: 0 valid and every asset absent · 1 valid but present, undetectable,
+partial or outside-policy · 2 invalid. The GitHub Action `croviatrust/pnx-action` wraps the same
 three steps for CI (`../../action/`).

@@ -23,6 +23,7 @@ from typing import Any
 
 from .canonical import canonicalize
 from .egress import PRESENT, PROFILE, EgressWitness, PnxVerifyResult, verify_pnx
+from .reach import Policy, ReachLog
 from .hashing import prefixed, sha256
 from .keys import SigningKey
 from .smt import SparseMerkleMap
@@ -71,6 +72,7 @@ def witness_to_state(w: EgressWitness) -> dict[str, Any]:
         "bodies": w.bodies, "bytes": w.bytes_seen, "first_at": w.first_at, "last_at": w.last_at,
         "normalization": sorted(w.normalization),
         "fingerprints": sorted(fp.hex() for fp in w._map.keys()),  # noqa: SIM118 - SparseMerkleMap is not a dict
+        **({"reach": w.reach} if w.reach is not None else {}),
     }
 
 
@@ -82,7 +84,8 @@ def witness_from_state(state: dict[str, Any]) -> EgressWitness:
                          k=int(state["k_gram"]), w=int(state["window"]), _map=m,
                          bodies=int(state["bodies"]), bytes_seen=int(state["bytes"]),
                          first_at=state.get("first_at"), last_at=state.get("last_at"),
-                         normalization=tuple(state.get("normalization", [])))
+                         normalization=tuple(state.get("normalization", [])),
+                         reach=state.get("reach"))
 
 
 def save_state(w: EgressWitness, path: Path) -> None:
@@ -220,8 +223,11 @@ def seal_pnx(proof: dict[str, Any], issuer: SigningKey, *, tacet_version: str, a
     return {"seal": unsigned, "query": query, "proof": proof}
 
 
-def verify_any(obj: dict[str, Any], assets: dict[str, bytes] | None = None) -> tuple[PnxVerifyResult, dict[str, Any]]:
-    """Verify a bare PNX proof or a sealed bundle. Returns (inner result, outer info)."""
+def verify_any(obj: dict[str, Any], assets: dict[str, bytes] | None = None, *,
+               policy: Policy | None = None, names: Iterable[str] = ()) -> tuple[PnxVerifyResult, dict[str, Any]]:
+    """Verify a bare PNX proof or a sealed bundle. Returns (inner result, outer info).
+
+    ``policy`` and ``names`` reach the reach-record check (PNX.md §6 step 1b)."""
     outer: dict[str, Any] = {"sealed": False}
     proof = obj
     if "seal" in obj and "proof" in obj:
@@ -242,8 +248,47 @@ def verify_any(obj: dict[str, Any], assets: dict[str, bytes] | None = None) -> t
                 errs.append("query does not describe this proof")
             outer.update({"seal_ok": r.ok and not errs, "seal_signature_ok": r.ok, "seal_errors": errs,
                           "issuer_id": r.issuer_id, "seal_id": r.seal_id})
-    res = verify_pnx(proof, assets)
+    res = verify_pnx(proof, assets, policy=policy, names=names)
     if outer.get("seal_ok") is False:
         res.ok = False
         res.errors = outer["seal_errors"] + res.errors
     return res, outer
+
+
+# --------------------------------------------------------------------------- reach (PNX.md §4a)
+
+def load_policy(path: Path) -> Policy:
+    """A ``crovia.pnx.policy.v1`` document from disk."""
+    return Policy.from_json(json.loads(Path(path).read_text()))
+
+
+def iter_reach_log(paths: Iterable[Path]) -> Iterable[dict[str, Any]]:
+    """Yield the connection attempts of ``.jsonl`` reach logs, one object per line.
+
+    A line is ``{"at": RFC 3339, "host": name, "port": int}`` with optional
+    ``outcome`` (``allowed`` / ``blocked`` / ``failed``; when absent the
+    witness decides from its policy), ``ip``, ``bytes_out``, ``bytes_in``.
+    Blank lines and lines starting with ``#`` are skipped.
+    """
+    for path in paths:
+        with Path(path).open(encoding="utf-8") as fh:
+            for n, line in enumerate(fh, 1):
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                try:
+                    obj = json.loads(line)
+                except ValueError as e:
+                    raise ValueError(f"{path}:{n}: not JSON: {e}") from None
+                if not isinstance(obj, dict) or not isinstance(obj.get("host"), str) or not isinstance(obj.get("port"), int):
+                    raise ValueError(f"{path}:{n}: a reach log line needs \"host\" (string) and \"port\" (integer)")
+                obj.setdefault("at", rfc3339(os.stat(path).st_mtime))
+                yield obj
+
+
+def reach_from_logs(paths: Iterable[Path], policy: Policy | None, mode: str, capture: str) -> ReachLog:
+    log = ReachLog(capture=capture, policy=policy, mode=mode)
+    for a in iter_reach_log(paths):
+        log.attempt(a["host"], a["port"], a["at"], a.get("outcome"),
+                    bytes_out=int(a.get("bytes_out") or 0), bytes_in=int(a.get("bytes_in") or 0), ip=a.get("ip"))
+    return log

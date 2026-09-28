@@ -5,9 +5,16 @@
     tacet-pnx prove   --state run.state.json --sheet run.sheet.json --asset api_key=secret.txt --assets-dir protected/ --out pnx.proof.json
     tacet-pnx verify  pnx.proof.json --asset api_key=secret.txt
 
+With a reach record (PNX.md §4a: where the run connected, under which policy):
+
+    tacet-pnx witness --run-id run-42 --key witness.key.json egress/ --reach connections.jsonl --policy policy.json \
+                      --sheet run.sheet.json --state run.state.json
+    tacet-pnx verify  pnx.proof.json --asset api_key=secret.txt --policy policy.json
+
 Exit codes of ``verify`` (and of ``prove --fail-on-present``):
-    0  proof valid, every asset absent
-    1  proof valid, at least one asset present, undetectable or only partially covered
+    0  proof valid, every asset absent, reach within policy (or no reach record)
+    1  proof valid, at least one asset present, undetectable or only partially covered,
+       or a destination reached outside the policy
     2  proof invalid or unverifiable
 """
 from __future__ import annotations
@@ -26,12 +33,15 @@ from .pnx import (
     iter_bodies,
     key_from_env,
     load_key,
+    load_policy,
     load_state,
+    reach_from_logs,
     save_key,
     save_state,
     seal_pnx,
     verify_any,
 )
+from .reach import CAPTURES, POLICY_MODES, VERDICT_OUTSIDE, VERDICT_WITHIN
 
 EXIT_OK, EXIT_PRESENT, EXIT_INVALID = 0, 1, 2
 
@@ -83,12 +93,26 @@ def cmd_witness(a: argparse.Namespace) -> int:
     for body, at, _src in iter_bodies(a.paths, raw=a.raw):
         w.ingest(body, at)
         n += 1
+    if a.reach:
+        policy = load_policy(a.policy) if a.policy else None
+        mode = a.reach_mode or "enforce"
+        if policy is None and a.reach_mode == "enforce":
+            raise SystemExit("--reach-mode enforce needs --policy")
+        log = reach_from_logs(a.reach, policy, mode, a.reach_capture)
+        w.reach = log.record(w.salt, "salted" if a.reach_salted else "clear")
+    elif a.policy or a.reach_mode or a.reach_salted:
+        raise SystemExit("--policy, --reach-mode and --reach-salted need --reach LOG")
     sheet = w.sheet(key, a.closed_at or _now())
     save_state(w, a.state)
     _emit(sheet, a.sheet)
     print(f"run {a.run_id}: {n} bodies this pass, {w.bodies} total, {w.bytes_seen:,} bytes, "
           f"{len(w._map)} fingerprints\n  root   {sheet['root']}\n  sheet  {a.sheet}\n  state  {a.state} (private)",
           file=sys.stderr)
+    if w.reach is not None:
+        sm, pol = w.reach["summary"], w.reach["policy"]
+        print(f"  reach  {sm['destinations']} destinations, {sm['connections']} connections: {sm['allowed']} allowed, "
+              f"{sm['blocked']} blocked, {sm['failed']} failed · policy {pol['kind']} {pol['mode']}"
+              + (f" {pol['hash']}" if pol['hash'] else "") + f" · {w.reach['disclosure']} · {w.reach['capture']}", file=sys.stderr)
     return EXIT_OK
 
 
@@ -121,8 +145,11 @@ def cmd_verify(a: argparse.Namespace) -> int:
     supplied: dict[str, bytes] | None = None
     if a.asset or a.assets_dir or a.asset_env:
         supplied = dict(collect_assets(a.asset or [], a.assets_dir or [], a.asset_env or []))
-    res, outer = verify_any(obj, supplied)
+    policy = load_policy(a.policy) if a.policy else None
+    res, outer = verify_any(obj, supplied, policy=policy, names=a.name or [])
     report = {"ok": res.ok, "verdict": res.verdict, "assets": res.assets, "errors": res.errors, "warnings": res.warnings, **outer}
+    if res.reach is not None:
+        report["reach"] = {"verdict": res.reach.verdict, "outside": res.reach.outside, "reached": res.reach.reached}
     if a.json:
         print(json.dumps(report, indent=1))
     else:
@@ -136,6 +163,15 @@ def cmd_verify(a: argparse.Namespace) -> int:
               f"guarantee for shared substrings ≥ {sheet.get('params', {}).get('threshold', THRESHOLD)} bytes")
         for label, v in res.assets.items():
             print(f"  {v:<14} {label}")
+        if res.reach is not None and isinstance(sheet.get("reach"), dict):
+            r, sm, pol = sheet["reach"], sheet["reach"].get("summary", {}), sheet["reach"].get("policy", {})
+            print(f"  reach  {res.reach.verdict} · {sm.get('destinations')} destinations, {sm.get('connections')} connections "
+                  f"({sm.get('allowed')} allowed, {sm.get('blocked')} blocked, {sm.get('failed')} failed) · "
+                  f"policy {pol.get('kind')} {pol.get('mode')} · {r.get('disclosure')} · {r.get('capture')}")
+            for d in res.reach.outside:
+                print(f"  outside  {d}")
+            for name, hit in res.reach.reached.items():
+                print(f"  {'reached ' if hit else 'absent  '} {name}")
         for e in res.errors:
             print(f"  error    {e}")
         for wmsg in res.warnings:
@@ -143,6 +179,10 @@ def cmd_verify(a: argparse.Namespace) -> int:
     if not res.ok:
         return EXIT_INVALID
     if res.verdict != VERDICT_ABSENT:
+        return EXIT_PRESENT
+    if res.reach is not None and res.reach.verdict == VERDICT_OUTSIDE:
+        return EXIT_PRESENT
+    if a.strict and res.reach is not None and res.reach.verdict != VERDICT_WITHIN and res.reach.verdict != "unpoliced":
         return EXIT_PRESENT
     if a.strict and res.warnings:
         return EXIT_PRESENT
@@ -174,6 +214,11 @@ def build_parser() -> argparse.ArgumentParser:
     w.add_argument("--raw-bytes-only", action="store_true",
                    help="disable json-strings-v1: do not also fingerprint the decoded string values of JSON bodies")
     w.add_argument("--closed-at", help="RFC 3339 close time (default: now)")
+    w.add_argument("--reach", action="append", type=Path, metavar="LOG", help="reach log (.jsonl: one connection attempt per line: at, host, port[, outcome, ip, bytes_out, bytes_in]); adds the reach record")
+    w.add_argument("--policy", type=Path, help="crovia.pnx.policy.v1 document the witness applied; bound by hash in the record")
+    w.add_argument("--reach-mode", choices=POLICY_MODES, help="enforce (default with --policy: refused destinations are blocked) or observe (everything relayed and recorded)")
+    w.add_argument("--reach-capture", choices=CAPTURES, default="proxy-connect", help="how the destinations were seen (default proxy-connect)")
+    w.add_argument("--reach-salted", action="store_true", help="disclose host hashes (salted with the run salt) instead of names")
     w.set_defaults(fn=cmd_witness)
 
     def asset_args(p: argparse.ArgumentParser) -> None:
@@ -195,7 +240,9 @@ def build_parser() -> argparse.ArgumentParser:
     v = sub.add_parser("verify", help="verify a proof (bare or sealed) offline")
     v.add_argument("proof", type=Path)
     asset_args(v)
-    v.add_argument("--strict", action="store_true", help="exit 1 on warnings too (partial coverage, assets not supplied)")
+    v.add_argument("--policy", type=Path, help="the policy document: check its hash and match every destination of the reach record against it")
+    v.add_argument("--name", action="append", metavar="HOST", help="under salted disclosure, report whether HOST was reached")
+    v.add_argument("--strict", action="store_true", help="exit 1 on warnings too (partial coverage, assets not supplied, reach unchecked)")
     v.add_argument("--json", action="store_true", help="machine-readable report")
     v.set_defaults(fn=cmd_verify)
     return ap

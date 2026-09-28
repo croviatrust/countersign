@@ -48,6 +48,7 @@ from typing import Any
 from .canonical import canonicalize
 from .hashing import prefixed, sha256, unprefixed
 from .keys import SigningKey, verify_signature
+from .reach import Policy, ReachVerifyResult, verify_reach
 from .smt import CompactPath, SparseMerkleMap, verify_inclusion, verify_non_inclusion
 
 PROFILE = "crovia.pnx.v1"
@@ -170,6 +171,7 @@ class EgressWitness:
     first_at: str | None = None
     last_at: str | None = None
     normalization: tuple[str, ...] = (NORMALIZE_JSON_STRINGS,)
+    reach: dict[str, Any] | None = None  # the reach record (reach.ReachLog.record), optional
 
     def _add(self, data: bytes) -> int:
         added = 0
@@ -214,6 +216,8 @@ class EgressWitness:
             "closed_at": closed_at,
             "witness": {"id": witness.id, "pubkey": witness.pubkey_json()},
         }
+        if self.reach is not None:
+            s["reach"] = self.reach
         sig = witness.sign(DOMAIN_SHEET + canonicalize(s))
         s["signature"] = {"alg": "ed25519", "domain": DOMAIN_SHEET.strip().decode(), "sig_hex": sig.hex()}
         return s
@@ -261,6 +265,7 @@ class PnxVerifyResult:
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
     assets: dict[str, str] = field(default_factory=dict)
+    reach: ReachVerifyResult | None = None  # set when the sheet carries a reach record
 
 
 def _unsigned(sheet: dict[str, Any]) -> dict[str, Any]:
@@ -291,10 +296,20 @@ def verify_sheet(sheet: dict[str, Any]) -> list[str]:
         ok = False
     if not ok:
         errors.append("witness signature invalid")
+    if "reach" in sheet:
+        if not isinstance(sheet["reach"], dict):
+            errors.append("reach must be an object")
+        else:
+            try:
+                salt = bytes.fromhex(sheet["salt_hex"])
+            except ValueError:
+                salt = b""
+            errors += [f"reach: {e}" for e in verify_reach(sheet["reach"], salt).errors]
     return errors
 
 
-def verify_pnx(proof: dict[str, Any], assets: dict[str, bytes] | None = None) -> PnxVerifyResult:
+def verify_pnx(proof: dict[str, Any], assets: dict[str, bytes] | None = None, *,
+               policy: Policy | None = None, names: Iterable[str] = ()) -> PnxVerifyResult:
     """Verify a PNX proof offline.
 
     With ``assets`` (label -> bytes) the verifier recomputes every fingerprint
@@ -313,6 +328,16 @@ def verify_pnx(proof: dict[str, Any], assets: dict[str, bytes] | None = None) ->
     k, w = sheet["params"]["k_gram"], sheet["params"]["window"]
     if assets is None:
         res.warnings.append("assets not supplied: fingerprints taken from the proof, not recomputed")
+    if isinstance(sheet.get("reach"), dict):
+        # Structure was checked by verify_sheet; this is the policy conformance (PNX.md §6 step 1b).
+        res.reach = verify_reach(sheet["reach"], salt, policy, names)
+        res.errors += [f"reach: {e}" for e in res.reach.errors]
+        res.warnings += [f"reach: {w_}" for w_ in res.reach.warnings]
+        if res.errors:
+            res.ok = False
+            return res
+    elif policy is not None:
+        res.warnings.append("policy document supplied but the sheet carries no reach record")
 
     computed_verdicts: dict[str, str] = {}
     for a in proof.get("assets", []):

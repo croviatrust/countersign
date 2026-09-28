@@ -1,9 +1,11 @@
 # PNX — Proof of Non-Exfiltration
 
-**TACET profile `crovia.pnx.v1` · status: draft 0.3 · 2026-09-20**
+**TACET profile `crovia.pnx.v1` · status: draft 0.4 · 2026-09-28**
 
-Reference implementation: `reference/python/tacet/egress.py` (tests in `reference/python/tests/test_egress.py`);
-second implementation: `site/registry/seal/verify/pnx-verify.js` (browser). Conformance vectors: §9.
+Reference implementation: `reference/python/tacet/egress.py` and `reach.py` (tests in `reference/python/tests/`);
+second implementation: `site/registry/seal/verify/pnx-verify.js` (browser); third: Causari (`re proxy --pnx`, Rust). Conformance vectors: §9.
+
+Changes in draft 0.4: §4a, the optional **reach record** (where a run connected, under which policy), its policy document, its verification (§6 step 1b) and its vector (`pnx_005_reach.json`). A draft 0.3 sheet is a valid draft 0.4 sheet; a draft 0.3 verifier accepts a draft 0.4 sheet and ignores the record.
 
 ## 1. The problem
 
@@ -95,6 +97,84 @@ then on the run root is provably older than a Bitcoin block and younger than
 a drand round; the epoch's OpenTimestamps receipt verifies without a node
 (SPEC §8.6).
 
+## 4a. The reach record
+
+The fingerprints say what did not leave. They say nothing about *where* the
+run connected. An agent that opens a connection to a host nobody intended it
+to reach is the incident every operator now fears, and the evidence for it,
+when it exists at all, is a network log written after the fact. The reach
+record is the witness's signed statement of every destination the run
+tried to reach, with the outcome, and of the policy the witness applied,
+bound by hash before the run. It is an OPTIONAL member `reach` of the run
+sheet; when present it is covered by the sheet signature like every other
+member.
+
+```json
+"reach": {
+  "version": "crovia.pnx.reach.v1",
+  "capture": "proxy-connect",
+  "disclosure": "clear",
+  "policy": {"kind": "allowlist", "mode": "enforce", "hash": "sha256:…", "rules": 3},
+  "destinations": [
+    {"host": "api.github.com", "port": 443, "outcome": "allowed", "connections": 12,
+     "bytes_out": 48211, "bytes_in": 1903344, "ips": ["140.82.112.5"],
+     "first_at": "2026-09-28T05:17:09Z", "last_at": "2026-09-28T05:19:40Z"},
+    {"host": "pastebin.com", "port": 443, "outcome": "blocked", "connections": 1,
+     "bytes_out": 0, "bytes_in": 0, "ips": [],
+     "first_at": "2026-09-28T05:18:02Z", "last_at": "2026-09-28T05:18:02Z"}
+  ],
+  "summary": {"destinations": 2, "connections": 13, "allowed": 1, "blocked": 1, "failed": 0}
+}
+```
+
+**Capture.** How the witness saw the destinations: `proxy-connect` (the
+witness is the HTTP proxy the run was pointed at and read `host:port` from
+each `CONNECT` request or absolute-form request line; TLS was not opened, so
+bodies of tunnelled connections are not fingerprinted), `proxy-http` (plain
+HTTP requests through the same proxy, bodies fingerprinted as in §3), or
+`socket` (connection-level observation outside the process, such as a
+firewall log fed to the witness; no bodies). A verifier MUST reject an
+unknown capture.
+
+**Destinations.** One entry per distinct `(host, port)`, host lower-cased,
+sorted by host then port, with no duplicates. `connections` counts attempts;
+`bytes_out` and `bytes_in` count the bytes relayed towards and from the
+destination (zero when nothing was relayed); `ips` lists the addresses the
+name resolved to, sorted, possibly empty; `first_at` and `last_at` are RFC
+3339 UTC. `outcome` is one of `allowed` (the witness relayed the connection),
+`blocked` (the witness refused it under the policy), `failed` (the witness
+would have relayed it and could not: resolution or connection error).
+
+**Disclosure.** `clear` lists host names. `salted` replaces each `host` by
+`host_hash`, the lowercase hex of `SHA-256("CROVIA-PNX-REACH-v1\n" ‖ salt ‖
+host)` with the run salt of the sheet, so the record proves nothing about
+names to a reader who does not already hold them, and a verifier who holds
+a name can check whether it was reached. A `salted` entry MUST NOT carry
+`host`; a `clear` entry MUST NOT carry `host_hash`.
+
+**Policy.** `kind` is `allowlist` or `none`. With `none`, `hash` is `null`,
+`rules` is 0, `mode` is `observe` and no outcome is `blocked`. With
+`allowlist`, `hash` is `sha256:` followed by the SHA-256 of the CSC-1
+encoding of the policy document, `rules` is the number of its rules and
+`mode` is `enforce` (the witness refused what the document did not allow)
+or `observe` (the witness relayed everything and recorded it; outcomes are
+`allowed` or `failed`). The policy document is:
+
+```json
+{"version": "crovia.pnx.policy.v1",
+ "allow": ["api.github.com:443", "*.githubusercontent.com:443", "github.com"]}
+```
+
+A rule is `host` or `host:port`. A host rule beginning with `*.` matches any
+name that ends with the rule after the star (one or more labels), never the
+apex itself. Matching is case-insensitive; a rule without a port matches any
+port. The document is committed by hash *before* the run and MAY be
+published; the hash binds the record to it either way.
+
+**Summary.** `destinations` is the number of entries, `connections` the sum
+of their `connections`, and `allowed`, `blocked`, `failed` the number of
+entries with that outcome. A verifier recomputes all five.
+
 ## 5. The proof
 
 For each labelled asset the prover recomputes `FP(A)` with the run salt and
@@ -111,6 +191,20 @@ protected string left the perimeter during a bounded window.
 ## 6. Verification
 
 1. Check the sheet: profile, parameter consistency, Ed25519 signature.
+   1b. If the sheet carries a `reach` record (§4a): check version, capture,
+   disclosure and policy kind and mode; the entries' order, uniqueness and
+   fields for the stated disclosure; every outcome; the summary. If the
+   policy document is supplied, recompute its hash and refuse on mismatch,
+   then, for `clear` disclosure, match every destination against it: an
+   `allowed` or `failed` destination that matches no rule makes the reach
+   verdict `outside-policy`; a `blocked` destination that matches a rule is
+   an inconsistent witness and invalidates the sheet. Otherwise the reach
+   verdict is `within-policy`. If the document is not supplied, the verdict
+   is `within-policy` when the mode is `enforce` (with a warning that the
+   outcomes rest on the witness) and `unchecked` when it is `observe`. With
+   `none` the verdict is `unpoliced`. Under `salted` disclosure the verifier
+   checks the hash and, for each name it holds, whether that name was
+   reached; it cannot apply wildcard rules and says so.
 2. If the asset bytes are supplied, recompute `asset_sha256`, the detection
    class and the fingerprint set; refuse the proof if any differ. If they are
    not supplied, check that the stated detection class is the one `asset_len`
@@ -133,6 +227,13 @@ block-header fetch, exactly as the existing TACET verifiers do.
   sheet declares (today `json-strings-v1`); base64, URL-encoding and UTF-16
   are not normalised and a leak in those encodings is outside the proof.
 - Nothing about assets shorter than 32 bytes.
+- A reach record says where the run connected *through the witness*. A
+  process that ignores the proxy the run was pointed at, resolves names
+  through another path or tunnels inside an allowed connection is outside
+  the record; the record is only as complete as the boundary that forces
+  traffic through the witness (a sandbox whose direct egress is closed, a
+  firewall log fed as `socket` capture). The record says so through its
+  `capture`, and the verifier repeats it.
 - The witness must be honest about *what it ingested*. Multi-witness
   countersigning of the same egress (Countersign) removes the single point of
   trust; a single-witness sheet is a statement by that witness.
@@ -149,11 +250,19 @@ block-header fetch, exactly as the existing TACET verifiers do.
 
 Tooling (reference, Apache-2.0): the `tacet-pnx` command line
 (`pip install crovia-tacet`: `keygen`, `witness`, `prove`, `verify`; exit
-codes 0 absent / 1 present or uncovered / 2 invalid) and the GitHub Action
-`croviatrust/pnx-action`, which witnesses captured egress in a job, proves a
-set of assets and secrets, writes the verdict to the job summary and uploads
-the proof as an artifact. Both read capture logs as `.jsonl`
+codes 0 absent / 1 present, uncovered or outside-policy / 2 invalid) and the
+GitHub Action `croviatrust/pnx-action`, which witnesses captured egress in a
+job, proves a set of assets and secrets, writes the verdict to the job summary
+and uploads the proof as an artifact. Both read capture logs as `.jsonl`
 (`{"at": ..., "body": ...}` or `{"body_b64": ...}`) or one body per file.
+The reach record of §4a is added at witness time from a connection log
+(`witness --reach LOG --policy POLICY.json [--reach-mode enforce|observe]
+[--reach-salted]`; one `{"at", "host", "port"[, "outcome", "ip", "bytes_out",
+"bytes_in"]}` per line) and checked with `verify --policy POLICY.json
+[--name HOST ...]`; without `--policy` the verifier reports the verdict the
+record alone supports (§6 step 1b). The browser verifier at
+`croviatrust.com/registry/seal/verify/` performs the same check when a
+policy document is pasted next to the proof.
 
 ## 9. Conformance
 
@@ -172,6 +281,7 @@ any language can rebuild the inputs from the labels.
 | `pnx_002_proofs.json` | A witnessed run of four bodies (a raw leak, a leak quoted inside a JSON string that only `json-strings-v1` can find, a body shorter than a k-gram, unrelated traffic), its signed run sheet, and two proofs against it with the asset bytes: `clean` (two assets, verdict `absent`) and `exposure` (five assets: `absent`, `present` via raw bytes, `present` via `json-strings-v1`, `absent-partial`, `undetectable`; verdict `present`). A verifier MUST rebuild the run root from the bodies, MUST verify both proofs with the assets and, without the assets, MUST accept them with the §6 warning. |
 | `pnx_003_invalid.json` | **MUST fail** with the stated reason: tampered sheet (signature), forged asset verdict, forged overall verdict, path against a foreign root, an inclusion relabelled as absent, wrong asset bytes, missing asset bytes, substituted fingerprint set, dropped fingerprint, understated detection class, unknown normalisation layer, inconsistent parameters, wrong profile. Each case records `hash_only_ok`: whether a verifier *without* the asset bytes can see the fault. Substituted or dropped fingerprints are invisible to it, which is why §6 step 2 requires the warning; an understated class is not, because `asset_len` is in the proof. |
 | `pnx_004_sealed.json` | The `clean` and `exposure` proofs delivered inside an unmodified `crovia.seal.v1` (query = run id and asset hashes, `checks.pnx` = verdict, counts, run root), and four sealed faults: a forged verdict under a valid Seal, a query describing another proof, a proof modified after sealing, a tampered Seal signature. A verifier that stops at the Seal signature accepts the first three; a conformant one rejects all four. |
+| `pnx_005_reach.json` | The reach record of §4a: a policy document with an exact, a wildcard and a port-less rule and its hash; a connection log of seven attempts; the signed sheet an enforcing witness derives from it (three destinations, one blocked); the same log under `observe` mode (verdict `outside-policy` once the document is supplied, `unchecked` without it); the same record under `salted` disclosure with the host hashes; the sheet without a policy (`unpoliced`). Invalid cases that MUST fail with the stated reason: unsorted destinations, duplicate destination, wrong summary, unknown capture, unknown outcome, `blocked` under `none`, `host` under `salted`, policy hash that does not match the supplied document, a `blocked` destination the document allows, a tampered record under an unchanged signature. A draft 0.3 verifier accepts every valid sheet of this vector. |
 
 Run both suites from the repository root:
 
