@@ -228,7 +228,7 @@ def pnx_cases() -> None:
 
 def reach_cases() -> None:
     """The reach record (PNX.md §4a, vector pnx_005): valid under every mode and disclosure, faults rejected."""
-    from tacet import egress, reach
+    from tacet import egress, pnx, reach
 
     v = load("pnx_005_reach.json")
     policy = reach.Policy.from_json(v["policy"]["document"])
@@ -252,12 +252,22 @@ def reach_cases() -> None:
                  r.ok and r.verdict == exp["verdict"] and r.outside == exp["outside"] and r.reached == exp["reached"]
                  and (exp["warning_contains"] is None or any(exp["warning_contains"] in w for w in r.warnings)),
                  f"{r.verdict} {r.outside} {r.reached} {r.errors} {r.warnings}")
+        # The sheet on its own is a valid input (§6 steps 1 and 1b): verdict sheet-only, same reach verdict.
+        exp = vec["expect_with_policy"]
+        r, outer = pnx.verify_any(sheet, policy=policy, names=vec.get("names", ()))
+        case(f"pnx/005 {name}: sheet alone verifies as sheet-only, reach {exp['verdict']}",
+             r.ok and outer.get("sheet_only") and r.verdict == "sheet-only" and r.assets == {}
+             and r.reach is not None and r.reach.verdict == exp["verdict"] and r.reach.reached == exp["reached"],
+             f"{r.verdict} {r.errors} {r.reach and r.reach.verdict}")
     for name, vec in v["invalid"].items():
         s = vec["sheet"]
         errs = egress.verify_sheet(s)
         if not errs and vec["with_policy"]:
             errs = reach.verify_reach(s["reach"], unhex, policy).errors
         case(f"pnx/005 invalid/{name} rejected", any(vec["expect_error_contains"] in e for e in errs), "; ".join(errs) or "accepted")
+        r, _ = pnx.verify_any(s, policy=policy if vec["with_policy"] else None)
+        case(f"pnx/005 invalid/{name}: sheet alone rejected", not r.ok and any(vec["expect_error_contains"] in e for e in r.errors),
+             "; ".join(r.errors) or "accepted")
 
 
 def fixtures_stream(label: str, n: int) -> bytes:

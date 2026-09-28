@@ -6,8 +6,10 @@
  * Uses csc1(), ed25519Verify() and verifyChain() from seal-core.js and the sparse Merkle
  * map primitives exported by tacet-verify.js (window.tacetSmt).
  *
- * Accepts a bare proof ({profile, proof_version, sheet, assets, verdict}) or a sealed
- * bundle ({seal, query, proof}). With opts.assets = {label: Uint8Array} the fingerprints
+ * Accepts a bare proof ({profile, proof_version, sheet, assets, verdict}), a sealed
+ * bundle ({seal, query, proof}) or a run sheet on its own ({profile, root, witness, …}:
+ * a reach receipt of a run with nothing to prove against — §6 steps 1 and 1b only, no
+ * asset verdict, reported as "sheet-only"). With opts.assets = {label: Uint8Array} the fingerprints
  * of every asset are recomputed here; without them the paths are checked for the keys the
  * prover listed and the result carries the §6 warning: it proves non-inclusion of those
  * keys, not of any asset. No network is used.
@@ -205,6 +207,7 @@
                                assets: (proof.assets || []).map(a => ({ label: a.label, asset_sha256: a.asset_sha256 })) });
   const isPnxProof = obj => !!(obj && typeof obj === "object" && obj.profile === PROFILE && obj.proof_version === PROOF_VERSION && obj.sheet && Array.isArray(obj.assets));
   const isPnxEnvelope = obj => !!(obj && typeof obj === "object" && obj.seal && obj.query && isPnxProof(obj.proof));
+  const isPnxSheet = obj => !!(obj && typeof obj === "object" && obj.profile === PROFILE && typeof obj.root === "string" && obj.witness && !("sheet" in obj) && !("assets" in obj));
 
   /* ---- entry point (egress.py verify_pnx + pnx.py verify_any) ---- */
   async function verifyPnx(obj, steps, opts) {
@@ -218,9 +221,10 @@
     const warn = (label, det) => { warnings.push(label); note(label, det); };
 
     const sealed = isPnxEnvelope(obj);
-    const proof = sealed ? obj.proof : obj;
-    if (!isPnxProof(proof)) throw new Error("not a " + PROFILE + " proof (" + PROOF_VERSION + ")");
-    const sheet = proof.sheet;
+    const sheetOnly = !sealed && isPnxSheet(obj);
+    const proof = sealed ? obj.proof : sheetOnly ? null : obj;
+    if (!sheetOnly && !isPnxProof(proof)) throw new Error("not a " + PROFILE + " proof (" + PROOF_VERSION + ") or run sheet");
+    const sheet = sheetOnly ? obj : proof.sheet;
 
     if (sealed) {
       const seal = obj.seal, query = obj.query;
@@ -248,7 +252,8 @@
          sheet.egress.first_at + " → " + sheet.egress.last_at + "; normalisation: " + ((sheet.normalization || []).join(", ") || "none"));
     const root = unprefixed(sheet.root), salt = unhex(sheet.salt_hex);
     const k = sheet.params.k_gram, w = sheet.params.window;
-    err(proof.profile === PROFILE && proof.proof_version === PROOF_VERSION, "proof is " + PROFILE + " / " + PROOF_VERSION);
+    if (sheetOnly) note("run sheet verified alone: no proof, no asset judged", "the sheet says what the witness committed to and where the run connected (PNX §6)");
+    else err(proof.profile === PROFILE && proof.proof_version === PROOF_VERSION, "proof is " + PROFILE + " / " + PROOF_VERSION);
 
     // Reach record (PNX §4a / §6 step 1b): structure was checked by sheetErrors; this is the policy conformance.
     let reach = null;
@@ -273,6 +278,13 @@
                                                 : reach.verdict === UNPOLICED ? "no policy was in force; the destinations are stated, not judged"
                                                 : "the policy could not be checked against the destinations");
     } else if (opts.policy) warn("policy document supplied but the sheet carries no reach record");
+
+    if (sheetOnly) {
+      if (errors.length) throw new Error(errors[0]);
+      return { verdict: "sheet-only", sheetOnly: true, assets: {}, sealed: false, hashOnly: false, warnings, run: sheet.run_id,
+               witness: sheet.witness.id, bodies: sheet.egress.bodies, bytes: sheet.egress.bytes,
+               reach: reach && { verdict: reach.verdict, outside: reach.outside, reached: reach.reached } };
+    }
 
     hdr("— assets against the run root", (proof.assets || []).length + " asset(s)");
     const assets = opts.assets || null;
@@ -321,7 +333,7 @@
         "overall verdict '" + proof.verdict + "' does not match computed '" + overall + "'");
 
     if (errors.length) throw new Error(errors[0]);
-    return { verdict: overall, assets: computed, sealed, hashOnly: !assets, warnings, run: sheet.run_id,
+    return { verdict: overall, sheetOnly: false, assets: computed, sealed, hashOnly: !assets, warnings, run: sheet.run_id,
              witness: sheet.witness.id, bodies: sheet.egress.bodies, bytes: sheet.egress.bytes,
              reach: reach && { verdict: reach.verdict, outside: reach.outside, reached: reach.reached } };
   }
@@ -329,6 +341,7 @@
   window.verifyPnx = verifyPnx;
   window.isPnxProof = isPnxProof;
   window.isPnxEnvelope = isPnxEnvelope;
+  window.isPnxSheet = isPnxSheet;
   window.tacetPnx = { PROFILE, PROOF_VERSION, K_GRAM, WINDOW, kgramHashes, winnow, fingerprints, assetFingerprints, jsonStrings,
                       epochLeafKey, presentLeaf, sheetErrors, pnxQuery,
                       REACH_VERSION, POLICY_VERSION, ruleMatches, policyFrom, policyHash, hostHash, verifyReach };

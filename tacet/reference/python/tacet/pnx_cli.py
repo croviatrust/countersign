@@ -11,8 +11,15 @@ With a reach record (PNX.md §4a: where the run connected, under which policy):
                       --sheet run.sheet.json --state run.state.json
     tacet-pnx verify  pnx.proof.json --asset api_key=secret.txt --policy policy.json
 
+A run sheet on its own (a reach receipt of a run with nothing to prove against)
+is verified the same way; the report says ``sheet-only`` in place of an asset verdict:
+
+    tacet-pnx witness --run-id job-7 --key witness.key.json empty/ --reach connections.jsonl --policy policy.json \
+                      --sheet job.sheet.json --state job.state.json
+    tacet-pnx verify  job.sheet.json --policy policy.json
+
 Exit codes of ``verify`` (and of ``prove --fail-on-present``):
-    0  proof valid, every asset absent, reach within policy (or no reach record)
+    0  proof valid, every asset absent (or a sheet alone), reach within policy (or no reach record)
     1  proof valid, at least one asset present, undetectable or only partially covered,
        or a destination reached outside the policy
     2  proof invalid or unverifiable
@@ -26,7 +33,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import __version__ as TACET_VERSION
-from .egress import NORMALIZE_JSON_STRINGS, THRESHOLD, VERDICT_ABSENT, EgressWitness
+from .egress import NORMALIZE_JSON_STRINGS, THRESHOLD, VERDICT_ABSENT, VERDICT_SHEET_ONLY, EgressWitness
 from .keys import SigningKey
 from .pnx import (
     collect_assets,
@@ -154,13 +161,14 @@ def cmd_verify(a: argparse.Namespace) -> int:
         print(json.dumps(report, indent=1))
     else:
         proof = obj["proof"] if outer["sealed"] else obj
-        sheet = proof.get("sheet", {})
+        sheet = obj if outer.get("sheet_only") else proof.get("sheet", {})
         status = "VALID" if res.ok else "INVALID"
-        print(f"{status} · verdict {res.verdict} · run {sheet.get('run_id')} · witness {sheet.get('witness', {}).get('id')}"
+        what = "run sheet alone, no asset judged" if outer.get("sheet_only") else f"verdict {res.verdict}"
+        print(f"{status} · {what} · run {sheet.get('run_id')} · witness {sheet.get('witness', {}).get('id')}"
               + (f" · sealed by {outer.get('issuer_id')}" if outer["sealed"] else ""))
-        eg = sheet.get("egress", {})
-        print(f"  egress {eg.get('bodies')} bodies, {eg.get('bytes'):,} bytes, {eg.get('first_at')} → {eg.get('last_at')}; "
-              f"guarantee for shared substrings ≥ {sheet.get('params', {}).get('threshold', THRESHOLD)} bytes")
+        eg = sheet.get("egress") or {}
+        print(f"  egress {eg.get('bodies') or 0} bodies, {eg.get('bytes') or 0:,} bytes, {eg.get('first_at')} → {eg.get('last_at')}; "
+              f"guarantee for shared substrings ≥ {(sheet.get('params') or {}).get('threshold', THRESHOLD)} bytes")
         for label, v in res.assets.items():
             print(f"  {v:<14} {label}")
         if res.reach is not None and isinstance(sheet.get("reach"), dict):
@@ -178,7 +186,7 @@ def cmd_verify(a: argparse.Namespace) -> int:
             print(f"  warning  {wmsg}")
     if not res.ok:
         return EXIT_INVALID
-    if res.verdict != VERDICT_ABSENT:
+    if res.verdict not in (VERDICT_ABSENT, VERDICT_SHEET_ONLY):
         return EXIT_PRESENT
     if res.reach is not None and res.reach.verdict == VERDICT_OUTSIDE:
         return EXIT_PRESENT
@@ -237,7 +245,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--fail-on-present", action="store_true", help="exit 1 unless every asset is absent")
     p.set_defaults(fn=cmd_prove)
 
-    v = sub.add_parser("verify", help="verify a proof (bare or sealed) offline")
+    v = sub.add_parser("verify", help="verify a proof (bare or sealed) or a run sheet alone, offline")
     v.add_argument("proof", type=Path)
     asset_args(v)
     v.add_argument("--policy", type=Path, help="the policy document: check its hash and match every destination of the reach record against it")

@@ -5,7 +5,7 @@
 Reference implementation: `reference/python/tacet/egress.py` and `reach.py` (tests in `reference/python/tests/`);
 second implementation: `site/registry/seal/verify/pnx-verify.js` (browser); third: Causari (`re proxy --pnx`, Rust). Conformance vectors: §9.
 
-Changes in draft 0.4: §4a, the optional **reach record** (where a run connected, under which policy), its policy document, its verification (§6 step 1b) and its vector (`pnx_005_reach.json`). A draft 0.3 sheet is a valid draft 0.4 sheet; a draft 0.3 verifier accepts a draft 0.4 sheet and ignores the record.
+Changes in draft 0.4: §4a, the optional **reach record** (where a run connected, under which policy), its policy document, its verification (§6 step 1b) and its vector (`pnx_005_reach.json`); a run sheet verified on its own (§6, `sheet-only`). A draft 0.3 sheet is a valid draft 0.4 sheet; a draft 0.3 verifier accepts a draft 0.4 sheet and ignores the record.
 
 ## 1. The problem
 
@@ -218,6 +218,15 @@ protected string left the perimeter during a bounded window.
 No network is needed for steps 1–4. Step 5 needs one drand fetch and one
 block-header fetch, exactly as the existing TACET verifiers do.
 
+A run sheet may be published on its own, without a proof: a run that had
+nothing to prove against (a CI job behind an egress witness whose only claim
+is where it connected) publishes the signed sheet with its reach record as
+its receipt. A verifier given a sheet alone (an object with `root` and
+`witness` and no `sheet` member) performs steps 1 and 1b and reports
+`sheet-only` in place of an asset verdict: the object says what the witness
+committed to and where the run connected, nothing about any asset. The exit
+codes of §8 apply to the reach verdict as they do for a proof.
+
 ## 7. What a PNX proof does not claim
 
 - Nothing about bytes the witness did not see (traffic that bypassed the
@@ -250,7 +259,8 @@ block-header fetch, exactly as the existing TACET verifiers do.
 
 Tooling (reference, Apache-2.0): the `tacet-pnx` command line
 (`pip install crovia-tacet`: `keygen`, `witness`, `prove`, `verify`; exit
-codes 0 absent / 1 present, uncovered or outside-policy / 2 invalid) and the
+codes 0 absent, or a sheet alone / 1 present, uncovered or outside-policy /
+2 invalid) and the
 GitHub Action `croviatrust/pnx-action`, which witnesses captured egress in a
 job, proves a set of assets and secrets, writes the verdict to the job summary
 and uploads the proof as an artifact. Both read capture logs as `.jsonl`
@@ -260,9 +270,10 @@ The reach record of §4a is added at witness time from a connection log
 [--reach-salted]`; one `{"at", "host", "port"[, "outcome", "ip", "bytes_out",
 "bytes_in"]}` per line) and checked with `verify --policy POLICY.json
 [--name HOST ...]`; without `--policy` the verifier reports the verdict the
-record alone supports (§6 step 1b). The browser verifier at
-`croviatrust.com/registry/seal/verify/` performs the same check when a
-policy document is pasted next to the proof.
+record alone supports (§6 step 1b). `verify` takes a run sheet alone as it
+takes a proof (`sheet-only`, §6). The browser verifier at
+`croviatrust.com/registry/seal/verify/` performs the same checks when a
+policy document is pasted next to the proof or the sheet.
 
 ## 9. Conformance
 

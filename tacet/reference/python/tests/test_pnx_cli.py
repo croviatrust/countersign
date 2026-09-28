@@ -151,3 +151,43 @@ def test_leak_inside_json_body_is_detected_deterministically(ws):
     assert _run("witness", ws / "egress", "--run-id", "raw", "--key", ws / "w.key.json", "--raw-bytes-only",
                 "--sheet", ws / "raw.sheet.json", "--state", ws / "raw.state.json") == 0
     assert json.loads((ws / "raw.sheet.json").read_text())["normalization"] == []
+
+
+def test_a_reach_receipt_is_a_sheet_verified_alone(ws, capsys):
+    """A run with nothing to prove against (a CI job behind an egress witness)
+    publishes its signed sheet with the reach record; `verify` takes the sheet
+    as it takes a proof and reports `sheet-only` in place of an asset verdict."""
+    (ws / "empty").mkdir()
+    (ws / "policy.json").write_text(json.dumps({"version": "crovia.pnx.policy.v1", "allow": ["github.com:443"]}))
+    (ws / "other.json").write_text(json.dumps({"version": "crovia.pnx.policy.v1", "allow": ["example.org"]}))
+    (ws / "reach.jsonl").write_text(
+        json.dumps({"at": "2026-09-28T19:03:16Z", "host": "github.com", "port": 443, "outcome": "allowed",
+                    "bytes_out": 1396, "bytes_in": 655118, "ip": "140.82.114.3"}) + "\n"
+        + json.dumps({"at": "2026-09-28T19:03:16Z", "host": "pypi.org", "port": 443, "outcome": "blocked",
+                      "bytes_out": 0, "bytes_in": 0}) + "\n")
+    assert _run("witness", ws / "empty", "--run-id", "job-7", "--key", ws / "w.key.json",
+                "--reach", ws / "reach.jsonl", "--policy", ws / "policy.json",
+                "--sheet", ws / "job.sheet.json", "--state", ws / "job.state.json") == 0
+    sheet = json.loads((ws / "job.sheet.json").read_text())
+    assert sheet["egress"]["bodies"] == 0 and sheet["reach"]["summary"] == {
+        "destinations": 2, "connections": 2, "allowed": 1, "blocked": 1, "failed": 0}
+
+    assert _run("verify", ws / "job.sheet.json", "--policy", ws / "policy.json", "--json") == 0
+    rep = json.loads(capsys.readouterr().out)
+    assert rep["ok"] and rep["verdict"] == "sheet-only" and rep["sheet_only"] and rep["assets"] == {}
+    assert rep["reach"] == {"verdict": "within-policy", "outside": [], "reached": {}} and rep["warnings"] == []
+
+    # without the document the outcomes rest on the witness: valid, a warning, --strict says so
+    assert _run("verify", ws / "job.sheet.json") == 0
+    out = capsys.readouterr().out
+    assert "run sheet alone, no asset judged" in out and "within-policy" in out and "policy document not supplied" in out
+    assert _run("verify", ws / "job.sheet.json", "--strict") == 1
+    # another document: the bound hash does not match
+    assert _run("verify", ws / "job.sheet.json", "--policy", ws / "other.json") == 2
+    # a tampered sheet: the signature no longer holds
+    sheet["reach"]["destinations"][1]["outcome"] = "allowed"
+    (ws / "bad.sheet.json").write_text(json.dumps(sheet))
+    assert _run("verify", ws / "bad.sheet.json", "--policy", ws / "policy.json") == 2
+    # an object that is neither: rejected as malformed, not mistaken for a sheet
+    (ws / "junk.json").write_text(json.dumps({"profile": "crovia.pnx.v1", "hello": 1}))
+    assert _run("verify", ws / "junk.json") == 2

@@ -67,6 +67,7 @@ VERDICT_ABSENT = "absent"            # every fingerprint proven not in the map (
 VERDICT_ABSENT_PARTIAL = "absent-partial"  # K_GRAM <= len < THRESHOLD: exact k-grams absent, guarantee does not apply
 VERDICT_PRESENT = "present"          # at least one fingerprint proven in the map
 VERDICT_UNDETECTABLE = "undetectable"  # len < K_GRAM: no k-gram can be formed
+VERDICT_SHEET_ONLY = "sheet-only"    # a run sheet verified without a proof: no asset was judged (PNX.md §6)
 
 
 # --------------------------------------------------------------------------- fingerprints
@@ -306,6 +307,32 @@ def verify_sheet(sheet: dict[str, Any]) -> list[str]:
                 salt = b""
             errors += [f"reach: {e}" for e in verify_reach(sheet["reach"], salt).errors]
     return errors
+
+
+def is_sheet(obj: Any) -> bool:
+    """A signed run sheet on its own (§4), as opposed to a proof (§5) that wraps one."""
+    return isinstance(obj, dict) and "root" in obj and "witness" in obj and "sheet" not in obj and "assets" not in obj
+
+
+def verify_sheet_alone(sheet: dict[str, Any], *, policy: Policy | None = None,
+                       names: Iterable[str] = ()) -> PnxVerifyResult:
+    """PNX.md §6 steps 1 and 1b for a run sheet published without a proof (a
+    reach receipt, a run with nothing to prove against). The result carries
+    no asset verdict: ``verdict`` is ``sheet-only``."""
+    res = PnxVerifyResult(ok=True, verdict=VERDICT_SHEET_ONLY)
+    res.errors += verify_sheet(sheet)
+    if res.errors:
+        res.ok = False
+        return res
+    salt = bytes.fromhex(sheet["salt_hex"])
+    if isinstance(sheet.get("reach"), dict):
+        res.reach = verify_reach(sheet["reach"], salt, policy, names)
+        res.errors += [f"reach: {e}" for e in res.reach.errors]
+        res.warnings += [f"reach: {w_}" for w_ in res.reach.warnings]
+    elif policy is not None:
+        res.warnings.append("policy document supplied but the sheet carries no reach record")
+    res.ok = not res.errors
+    return res
 
 
 def verify_pnx(proof: dict[str, Any], assets: dict[str, bytes] | None = None, *,

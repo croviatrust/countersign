@@ -34,8 +34,9 @@ from a connection log and checked against the policy document:
 tacet-pnx witness egress/ --reach logs/connect.jsonl --policy egress-policy.json \
                   --reach-mode enforce [--reach-salted] ...                  # one {"at","host","port",...} per line
 tacet-pnx verify  pnx.proof.json --policy egress-policy.json [--name api.github.com]
+tacet-pnx verify  run.sheet.json --policy egress-policy.json   # a sheet alone: reach receipt, no asset judged
 ```
 
-Exit codes: 0 valid and every asset absent · 1 valid but present, undetectable,
+Exit codes: 0 valid and every asset absent (or a sheet alone) · 1 valid but present, undetectable,
 partial or outside-policy · 2 invalid. The GitHub Action `croviatrust/pnx-action` wraps the same
 three steps for CI (`../../action/`).

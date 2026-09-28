@@ -165,6 +165,14 @@ async function pnxCases() {
                && (exp.warning_contains === null || r.warnings.some(w => w.includes(exp.warning_contains))),
                `browser pnx/005 ${name} ${label}: verdict ${exp.verdict}`, `${r.verdict} ${JSON.stringify(r.outside)} ${JSON.stringify(r.reached)} ${r.errors} ${r.warnings}`);
       }
+      // The sheet on its own is a valid input: §6 steps 1 and 1b, verdict sheet-only, same reach verdict.
+      {
+        const exp = vec.expect_with_policy;
+        const r = await run(sheet, null, { policy: v.policy.document, names: vec.names || [] });
+        report(r.ok && r.result.sheetOnly && r.result.verdict === "sheet-only" && same(r.result.assets, {})
+               && r.result.reach && r.result.reach.verdict === exp.verdict && sameObj(r.result.reach.reached, exp.reached),
+               `browser pnx/005 ${name}: sheet alone verifies as sheet-only, reach ${exp.verdict}`, r.error || JSON.stringify(r.result && r.result.reach));
+      }
       // A pnx_002 proof over the same run root, with this sheet in place: the whole proof verifies end to end.
       if (sheet.root === base.sheet.root && sheet.salt_hex === base.sheet.salt_hex) {
         const exp = vec.expect_with_policy;
@@ -178,6 +186,9 @@ async function pnxCases() {
       let errs = await P.sheetErrors(s);
       if (!errs.length && vec.with_policy) errs = (await P.verifyReach(s.reach, rsalt, policy, [])).errors;
       report(errs.some(e => e.includes(vec.expect_error_contains)), `browser pnx/005 invalid/${name} rejected`, errs.join("; ") || "accepted");
+      const r = await run(s, null, vec.with_policy ? { policy: v.policy.document } : {});
+      report(!r.ok && (r.error.includes(vec.expect_error_contains) || failing(r.steps).includes(vec.expect_error_contains)),
+             `browser pnx/005 invalid/${name}: sheet alone rejected`, r.ok ? "accepted" : r.error);
     }
   }
 

@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TACET Specification — verifiable silence proofs, PNX profile, test vectors</title>
-<meta name="description" content="The canonical text of TACET (0.1-draft): silence proofs over a sparse Merkle transparency map with drand-opened, Bitcoin-closed epochs, and the PNX profile (Proof of Non-Exfiltration) for AI agents. Internet-Draft draft-crovia-tacet-01 and 137 tests every implementation must pass. Public domain (CC0).">
+<meta name="description" content="The canonical text of TACET (0.1-draft): silence proofs over a sparse Merkle transparency map with drand-opened, Bitcoin-closed epochs, and the PNX profile (Proof of Non-Exfiltration) for AI agents. Internet-Draft draft-crovia-tacet-01 and 151 tests every implementation must pass. Public domain (CC0).">
 <link rel="canonical" href="https://croviatrust.com/registry/tacet/spec/">
 <link rel="icon" type="image/png" href="https://croviatrust.com/logo.png">
 <link rel="alternate" type="text/markdown" href="https://croviatrust.com/registry/tacet/spec/SPEC.md">
 <link rel="alternate" type="text/plain" title="Internet-Draft" href="https://croviatrust.com/registry/tacet/spec/draft-crovia-tacet-01.txt">
 <meta property="og:title" content="TACET Specification — verifiable silence, PNX profile">
-<meta property="og:description" content="Canonical text, Internet-Draft draft-crovia-tacet-01 and 137 tests for TACET and PNX. Frozen text, public domain, offline-verifiable proofs.">
+<meta property="og:description" content="Canonical text, Internet-Draft draft-crovia-tacet-01 and 151 tests for TACET and PNX. Frozen text, public domain, offline-verifiable proofs.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://croviatrust.com/registry/tacet/spec/">
 <meta property="og:image" content="https://croviatrust.com/og-tacet.png?v=20260919">
@@ -18,7 +18,7 @@
 <meta name="twitter:image" content="https://croviatrust.com/og-tacet.png?v=20260919">
 <link rel="stylesheet" href="https://croviatrust.com/assets/crovia.css?v=20260919c">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&display=swap" rel="stylesheet">
-<script type="application/ld+json">[{"@context": "https://schema.org", "@type": "TechArticle", "headline": "TACET Specification — verifiable silence proofs, with the PNX profile", "alternativeHeadline": "TACET 0.1-draft · crovia.pnx.v1 draft 0.4", "url": "https://croviatrust.com/registry/tacet/spec/", "author": {"@type": "Organization", "name": "Crovia Trust", "url": "https://croviatrust.com"}, "license": "https://creativecommons.org/publicdomain/zero/1.0/", "inLanguage": "en", "isBasedOn": "https://datatracker.ietf.org/doc/draft-crovia-tacet/", "encodingFormat": "text/html", "identifier": ["sha256:7e36d4231084b235bf817f93129d83346406311fdf9f347ebf1f2ef135603d80", "sha256:1404b77e70345aac2e4a8ffa15ceeed7e61e9c9e067569dc89b7930ea250140e"], "dateModified": "2026-09-28", "about": [{"@type": "DefinedTerm", "name": "TACET", "description": "Verifiable silence proofs: offline-checkable evidence that a key stayed absent from a sparse Merkle transparency map across a contiguous range of anchored epochs."}, {"@type": "DefinedTerm", "name": "PNX", "description": "Proof of Non-Exfiltration: a TACET profile proving that none of a set of protected assets appeared in an AI agent's egress during a run."}]}, {"@context": "https://schema.org", "@type": "SoftwareSourceCode", "name": "crovia-tacet", "version": "0.5.0", "codeRepository": "https://github.com/croviatrust/countersign", "programmingLanguage": "Python", "license": "https://www.apache.org/licenses/LICENSE-2.0", "url": "https://pypi.org/project/crovia-tacet/", "author": {"@type": "Organization", "name": "Crovia Trust", "url": "https://croviatrust.com"}}]</script>
+<script type="application/ld+json">[{"@context": "https://schema.org", "@type": "TechArticle", "headline": "TACET Specification — verifiable silence proofs, with the PNX profile", "alternativeHeadline": "TACET 0.1-draft · crovia.pnx.v1 draft 0.4", "url": "https://croviatrust.com/registry/tacet/spec/", "author": {"@type": "Organization", "name": "Crovia Trust", "url": "https://croviatrust.com"}, "license": "https://creativecommons.org/publicdomain/zero/1.0/", "inLanguage": "en", "isBasedOn": "https://datatracker.ietf.org/doc/draft-crovia-tacet/", "encodingFormat": "text/html", "identifier": ["sha256:7e36d4231084b235bf817f93129d83346406311fdf9f347ebf1f2ef135603d80", "sha256:1e8ea08b8e8640ff914a0f385cb139997849a3e32c6dac5bc6d500ed0339d7b2"], "dateModified": "2026-09-28", "about": [{"@type": "DefinedTerm", "name": "TACET", "description": "Verifiable silence proofs: offline-checkable evidence that a key stayed absent from a sparse Merkle transparency map across a contiguous range of anchored epochs."}, {"@type": "DefinedTerm", "name": "PNX", "description": "Proof of Non-Exfiltration: a TACET profile proving that none of a set of protected assets appeared in an AI agent's egress during a run."}]}, {"@context": "https://schema.org", "@type": "SoftwareSourceCode", "name": "crovia-tacet", "version": "0.5.0", "codeRepository": "https://github.com/croviatrust/countersign", "programmingLanguage": "Python", "license": "https://www.apache.org/licenses/LICENSE-2.0", "url": "https://pypi.org/project/crovia-tacet/", "author": {"@type": "Organization", "name": "Crovia Trust", "url": "https://croviatrust.com"}}]</script>
 <style>
   .sp-wrap{max-width:1200px;margin:0 auto;padding:0 24px}
   .sp-hero{padding:64px 0 26px}
@@ -115,7 +115,7 @@
     <div class="sp-strip">
       <div class="sp-stat"><div class="n">0.1-draft</div><div class="l">Working draft · text CC0, code Apache-2.0</div></div>
       <a class="sp-stat" href="https://datatracker.ietf.org/doc/draft-crovia-tacet/" rel="noopener"><div class="n">draft-crovia-tacet-01</div><div class="l">Internet-Draft · IETF datatracker ↗</div></a>
-      <a class="sp-stat" href="#vectors"><div class="n">137 tests</div><div class="l">16 vector files · Python and JS runners</div></a>
+      <a class="sp-stat" href="#vectors"><div class="n">151 tests</div><div class="l">16 vector files · Python and JS runners</div></a>
       <a class="sp-stat" href="https://github.com/croviatrust/countersign" rel="noopener"><div class="n">0.5.0</div><div class="l">reference · PyPI crovia-tacet · crovia-tacet-operator ↗</div></a>
       <a class="sp-stat" href="/registry/tacet/spec/SPEC.md"><div class="n">7e36d4231084…</div><div class="l">SHA-256 of SPEC.md as rendered</div></a>
     </div>
@@ -698,13 +698,13 @@ verifier in <code>site/registry/seal/verify/</code>.</p>
 <p><em>TACET is an open protocol stewarded by Crovia Trust. The text of this
 specification is dedicated to the public domain (CC0).</em></p>
       </article>
-      <div class="sp-part" id="pnx"><span class="k">Part II · PNX profile · crovia.pnx.v1</span><span class="m">source <a href="/registry/tacet/spec/PNX.md">PNX.md</a> · sha256 1404b77e70345aac… · 2026-09-28</span></div>
+      <div class="sp-part" id="pnx"><span class="k">Part II · PNX profile · crovia.pnx.v1</span><span class="m">source <a href="/registry/tacet/spec/PNX.md">PNX.md</a> · sha256 1e8ea08b8e8640ff… · 2026-09-28</span></div>
       <article class="sp-doc" id="pnx-spec">
 <h1 id="pnx-pnx-proof-of-non-exfiltration">PNX — Proof of Non-Exfiltration</h1>
 <p><strong>TACET profile <code>crovia.pnx.v1</code> · status: draft 0.4 · 2026-09-28</strong></p>
 <p>Reference implementation: <code>reference/python/tacet/egress.py</code> and <code>reach.py</code> (tests in <code>reference/python/tests/</code>);
 second implementation: <code>site/registry/seal/verify/pnx-verify.js</code> (browser); third: Causari (<code>re proxy --pnx</code>, Rust). Conformance vectors: §9.</p>
-<p>Changes in draft 0.4: §4a, the optional <strong>reach record</strong> (where a run connected, under which policy), its policy document, its verification (§6 step 1b) and its vector (<code>pnx_005_reach.json</code>). A draft 0.3 sheet is a valid draft 0.4 sheet; a draft 0.3 verifier accepts a draft 0.4 sheet and ignores the record.</p>
+<p>Changes in draft 0.4: §4a, the optional <strong>reach record</strong> (where a run connected, under which policy), its policy document, its verification (§6 step 1b) and its vector (<code>pnx_005_reach.json</code>); a run sheet verified on its own (§6, <code>sheet-only</code>). A draft 0.3 sheet is a valid draft 0.4 sheet; a draft 0.3 verifier accepts a draft 0.4 sheet and ignores the record.</p>
 <h2 id="pnx-1-the-problem">1. The problem</h2>
 <p>Enterprises now run AI agents with read access to source code, secrets and
 customer data. When an incident is suspected, or when an auditor asks, the only
@@ -909,6 +909,14 @@ protected string left the perimeter during a bounded window.</p>
 </ol>
 <p>No network is needed for steps 1–4. Step 5 needs one drand fetch and one
 block-header fetch, exactly as the existing TACET verifiers do.</p>
+<p>A run sheet may be published on its own, without a proof: a run that had
+nothing to prove against (a CI job behind an egress witness whose only claim
+is where it connected) publishes the signed sheet with its reach record as
+its receipt. A verifier given a sheet alone (an object with <code>root</code> and
+<code>witness</code> and no <code>sheet</code> member) performs steps 1 and 1b and reports
+<code>sheet-only</code> in place of an asset verdict: the object says what the witness
+committed to and where the run connected, nothing about any asset. The exit
+codes of §8 apply to the reach verdict as they do for a proof.</p>
 <h2 id="pnx-7-what-a-pnx-proof-does-not-claim">7. What a PNX proof does not claim</h2>
 <ul>
 <li>Nothing about bytes the witness did not see (traffic that bypassed the
@@ -941,7 +949,8 @@ block-header fetch, exactly as the existing TACET verifiers do.</p>
 </ul>
 <p>Tooling (reference, Apache-2.0): the <code>tacet-pnx</code> command line
 (<code>pip install crovia-tacet</code>: <code>keygen</code>, <code>witness</code>, <code>prove</code>, <code>verify</code>; exit
-codes 0 absent / 1 present, uncovered or outside-policy / 2 invalid) and the
+codes 0 absent, or a sheet alone / 1 present, uncovered or outside-policy /
+2 invalid) and the
 GitHub Action <code>croviatrust/pnx-action</code>, which witnesses captured egress in a
 job, proves a set of assets and secrets, writes the verdict to the job summary
 and uploads the proof as an artifact. Both read capture logs as <code>.jsonl</code>
@@ -951,9 +960,10 @@ The reach record of §4a is added at witness time from a connection log
 [--reach-salted]</code>; one <code>{"at", "host", "port"[, "outcome", "ip", "bytes_out",
 "bytes_in"]}</code> per line) and checked with <code>verify --policy POLICY.json
 [--name HOST ...]</code>; without <code>--policy</code> the verifier reports the verdict the
-record alone supports (§6 step 1b). The browser verifier at
-<code>croviatrust.com/registry/seal/verify/</code> performs the same check when a
-policy document is pasted next to the proof.</p>
+record alone supports (§6 step 1b). <code>verify</code> takes a run sheet alone as it
+takes a proof (<code>sheet-only</code>, §6). The browser verifier at
+<code>croviatrust.com/registry/seal/verify/</code> performs the same checks when a
+policy document is pasted next to the proof or the sheet.</p>
 <h2 id="pnx-9-conformance">9. Conformance</h2>
 <p>The vectors live in <code>conformance/vectors/v1/</code> next to the TACET core vectors,
 are generated deterministically by <code>conformance/generate_vectors.py</code> and are
@@ -1010,7 +1020,7 @@ node tacet/conformance/run_conformance_js.cjs
   <div class="sp-grid" style="margin-top:22px">
     <div class="sp-card"><div class="k">Run the suite</div><h3>Python and JavaScript</h3><pre>git clone https://github.com/croviatrust/countersign && cd countersign
 pip install crovia-seal -e tacet/reference/python
-python3 tacet/conformance/run_conformance.py      # 137 passed, 0 failed
+python3 tacet/conformance/run_conformance.py      # 151 passed, 0 failed
 node tacet/conformance/run_conformance_js.cjs</pre></div>
     <div class="sp-card"><div class="k">Live data</div><h3>The same objects, in production</h3><p>The observatory at <a href="/registry/tacet/">/registry/tacet/</a> publishes hourly epoch sheets, <a href="/registry/data/tacet/latest.json">latest.json</a>, the <a href="/registry/data/tacet/trust_root.json">trust root</a> and one silence proof per observed model, each a <code>crovia.seal.v1</code> you can drop into the <a href="/registry/seal/verify/">browser verifier</a>.</p></div>
   </div>
@@ -1023,7 +1033,7 @@ pip install crovia-tacet-operator   # run an observatory of your own</pre></div>
     <div class="sp-card"><div class="k">Built on</div><h3>Crovia Seal</h3><p>Every TACET proof travels as an unmodified <code>crovia.seal.v1</code>. The Seal text, its Internet-Draft and its vectors: <a href="/registry/seal/spec/">/registry/seal/spec/</a>. Anchors: <a href="https://opentimestamps.org" rel="noopener">OpenTimestamps</a> above, <a href="https://drand.love" rel="noopener">drand</a> below.</p></div>
     <div class="sp-card"><div class="k">Companions</div><h3>Observatory, report, API</h3><p><a href="/registry/tacet/">TACET live</a> · <a href="/report/">Weekly Silence Report</a> · <a href="/m/">Model records</a> · <a href="/registry/api/">Data &amp; API</a> · <a href="/registry/seal/threat-model/">Seal threat model</a> · <a href="/llms.txt">llms.txt</a></p></div>
   </div>
-  <p class="sp-end">Specification text dedicated to the public domain under CC0 1.0. Built from SPEC.md <span class="mono">sha256:7e36d4231084b235bf817f93129d83346406311fdf9f347ebf1f2ef135603d80</span> and PNX.md <span class="mono">sha256:1404b77e70345aac2e4a8ffa15ceeed7e61e9c9e067569dc89b7930ea250140e</span>. Corrections: <a href="https://github.com/croviatrust/countersign/issues" rel="noopener">open an issue</a> or write to <a href="mailto:info@croviatrust.com">info@croviatrust.com</a>.</p>
+  <p class="sp-end">Specification text dedicated to the public domain under CC0 1.0. Built from SPEC.md <span class="mono">sha256:7e36d4231084b235bf817f93129d83346406311fdf9f347ebf1f2ef135603d80</span> and PNX.md <span class="mono">sha256:1e8ea08b8e8640ff914a0f385cb139997849a3e32c6dac5bc6d500ed0339d7b2</span>. Corrections: <a href="https://github.com/croviatrust/countersign/issues" rel="noopener">open an issue</a> or write to <a href="mailto:info@croviatrust.com">info@croviatrust.com</a>.</p>
 </main>
 <footer class="cv-foot">
   <div class="cv-foot-inner">

@@ -162,7 +162,9 @@
        fingerprints recomputed byte for byte. Same checks as <span class="mono">tacet-pnx verify</span>.
        If the run sheet carries a <a href="/registry/tacet/spec/#pnx-4a-the-reach-record">reach record</a> (where the
        run connected, under which policy), paste the policy document below to have its hash recomputed and every
-       destination matched against the rules; without it the page reports only what the record alone supports.</p>
+       destination matched against the rules; without it the page reports only what the record alone supports.
+       A signed run sheet pasted on its own (the reach receipt of a job that had nothing to prove against) is
+       verified the same way and reported as <span class="mono">sheet-only</span>: no asset is judged.</p>
     <textarea id="policyInput" class="small" spellcheck="false" placeholder='{"version":"crovia.pnx.policy.v1","allow":["api.github.com:443","*.githubusercontent.com:443"]}   — reach policy document (optional)'></textarea>
     <div class="vf-row" style="margin-top:10px">
       <button class="vf-btn" id="btnPnx">Load a PNX conformance proof</button>
@@ -199,7 +201,7 @@
 <script src="/registry/seal/verify/seal-core.js?v=20260920a"></script>
 <script src="/registry/seal/verify/ots-verify.js?v=20260920a"></script>
 <script src="/registry/seal/verify/tacet-verify.js?v=20260920a"></script>
-<script src="/registry/seal/verify/pnx-verify.js?v=20260928a"></script>
+<script src="/registry/seal/verify/pnx-verify.js?v=20260928b"></script>
 <script>
 "use strict";
 
@@ -225,22 +227,23 @@ async function run() {
       catch (_) { throw new Error("input is not valid JSON (one seal, or one seal per line)"); }
     }
 
-    if (single && window.verifyPnx && (isPnxEnvelope(single) || isPnxProof(single))) {
-      const proof = isPnxEnvelope(single) ? single.proof : single;
+    if (single && window.verifyPnx && (isPnxEnvelope(single) || isPnxProof(single) || isPnxSheet(single))) {
+      const proof = isPnxEnvelope(single) ? single.proof : isPnxProof(single) ? single : null;
       const content = $("contentInput").value;
       // One pasted asset can be checked byte for byte when the proof covers exactly one asset.
-      const assets = content && proof.assets.length === 1 ? { [proof.assets[0].label]: enc.encode(content) } : null;
+      const assets = proof && content && proof.assets.length === 1 ? { [proof.assets[0].label]: enc.encode(content) } : null;
       const policyRaw = $("policyInput").value.trim();
       let policy = null;
       if (policyRaw) { try { policy = JSON.parse(policyRaw); } catch (_) { throw new Error("the policy document is not valid JSON"); } }
       const r = await verifyPnx(single, steps, { ...(assets ? { assets } : {}), ...(policy ? { policy } : {}) });
       const n = Object.keys(r.assets).length, present = Object.values(r.assets).filter(v => v === "present").length;
-      const what = r.verdict === "absent" ? n + " asset(s) proven absent from the witnessed egress"
+      const what = r.sheetOnly ? "run sheet verified alone: no asset judged"
+                 : r.verdict === "absent" ? n + " asset(s) proven absent from the witnessed egress"
                  : r.verdict === "present" ? present + " of " + n + " asset(s) <b>present</b> in the witnessed egress — signed evidence of exposure"
                  : "mixed: no asset present, but some are below the detection threshold";
       verdict.className = "vf-verdict ok";
-      verdict.innerHTML = "&#10003;&nbsp; VALID <span class='sub'>PNX proof (" + (r.sealed ? "sealed, " : "") + "run <b>" + escapeHtml(r.run) + "</b>, witness "
-        + escapeHtml(r.witness) + "): verdict <b>" + r.verdict.toUpperCase() + "</b> — " + what + "; " + r.bodies + " bodies, " + r.bytes + " bytes witnessed"
+      verdict.innerHTML = "&#10003;&nbsp; VALID <span class='sub'>" + (r.sheetOnly ? "PNX run sheet (" : "PNX proof (" + (r.sealed ? "sealed, " : "")) + "run <b>" + escapeHtml(r.run) + "</b>, witness "
+        + escapeHtml(r.witness) + "): " + (r.sheetOnly ? what : "verdict <b>" + r.verdict.toUpperCase() + "</b> — " + what) + "; " + r.bodies + " bodies, " + r.bytes + " bytes witnessed"
         + (r.hashOnly ? ". Hash-only: asset bytes not supplied, so this proves non-inclusion of the listed keys, not of any asset." : ".")
         + (r.reach ? " Reach: <b>" + escapeHtml(r.reach.verdict) + "</b>" + (r.reach.outside.length ? " (" + escapeHtml(r.reach.outside.join(", ")) + ")" : "") + "." : "") + "</span>";
       renderSteps(steps, stepsEl);

@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any
 
 from .canonical import canonicalize
-from .egress import PRESENT, PROFILE, EgressWitness, PnxVerifyResult, verify_pnx
+from .egress import PRESENT, PROFILE, EgressWitness, PnxVerifyResult, is_sheet, verify_pnx, verify_sheet_alone
 from .reach import Policy, ReachLog
 from .hashing import prefixed, sha256
 from .keys import SigningKey
@@ -225,10 +225,15 @@ def seal_pnx(proof: dict[str, Any], issuer: SigningKey, *, tacet_version: str, a
 
 def verify_any(obj: dict[str, Any], assets: dict[str, bytes] | None = None, *,
                policy: Policy | None = None, names: Iterable[str] = ()) -> tuple[PnxVerifyResult, dict[str, Any]]:
-    """Verify a bare PNX proof or a sealed bundle. Returns (inner result, outer info).
+    """Verify a bare PNX proof, a sealed bundle, or a run sheet on its own.
+    Returns (inner result, outer info).
 
-    ``policy`` and ``names`` reach the reach-record check (PNX.md §6 step 1b)."""
+    ``policy`` and ``names`` reach the reach-record check (PNX.md §6 step 1b).
+    A sheet alone gets steps 1 and 1b and the verdict ``sheet-only``."""
     outer: dict[str, Any] = {"sealed": False}
+    if is_sheet(obj):
+        outer["sheet_only"] = True
+        return verify_sheet_alone(obj, policy=policy, names=names), outer
     proof = obj
     if "seal" in obj and "proof" in obj:
         outer["sealed"] = True
