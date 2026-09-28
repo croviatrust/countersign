@@ -21,6 +21,23 @@ inputs:
       (pass them with `env:` on this step). Labels become env:NAME; values never enter the proof.
     required: false
     default: ""
+  reach:
+    description: >
+      Where the run connected, as the witness saw it: newline-separated .jsonl connection logs
+      ({"at": "...", "host": "...", "port": 443[, "outcome", "ip", "bytes_out", "bytes_in"]} per line).
+      Adds the reach record (PNX §4a) to the run sheet. Needs crovia-tacet >= 0.5.0.
+    required: false
+    default: ""
+  policy:
+    description: >
+      The crovia.pnx.policy.v1 document the egress policy was taken from. Bound by hash in the reach
+      record and used again at verification to match every destination against its rules.
+    required: false
+    default: ""
+  reach-mode:
+    description: "enforce (destinations outside the policy were blocked) or observe (everything relayed and recorded)."
+    required: false
+    default: "enforce"
   run-id:
     description: "Identifier of the run being attested."
     required: false
@@ -45,7 +62,7 @@ inputs:
     required: false
     default: "urn:github:${{ github.repository }}:pnx-issuer"
   fail-on-present:
-    description: "Fail the step unless every asset is proven absent (present, undetectable or partial coverage fail)."
+    description: "Fail the step unless every asset is proven absent (present, undetectable, partial coverage or a destination outside the policy fail)."
     required: false
     default: "true"
   output-dir:
@@ -73,6 +90,9 @@ outputs:
   verdict:
     description: "absent | present | mixed"
     value: ${{ steps.prove.outputs.verdict }}
+  reach:
+    description: "within-policy | outside-policy | unchecked | unpoliced, or empty when no reach log was given."
+    value: ${{ steps.prove.outputs.reach }}
   proof:
     description: "Path of the proof (bare or sealed)."
     value: ${{ steps.prove.outputs.proof }}
@@ -103,18 +123,33 @@ runs:
         PNX_WITNESS_ID: ${{ inputs.witness-id }}
         PNX_WITNESS_SEED: ${{ inputs.witness-seed }}
         PNX_OUT: ${{ inputs.output-dir }}
+        PNX_REACH: ${{ inputs.reach }}
+        PNX_POLICY: ${{ inputs.policy }}
+        PNX_REACH_MODE: ${{ inputs.reach-mode }}
       run: |
         set -euo pipefail
         mkdir -p "$PNX_OUT"
         mapfile -t paths < <(printf '%s\n' "$PNX_EGRESS" | sed '/^[[:space:]]*$/d')
         if [ "${#paths[@]}" -eq 0 ]; then echo "::error::input 'egress' is empty"; exit 2; fi
+        reach_args=()
+        if [ -n "$PNX_REACH" ]; then
+          if ! python3 -c 'import sys, tacet; v = tuple(int(x) for x in tacet.__version__.split(".")[:2]); sys.exit(0 if v >= (0, 5) else 1)'; then
+            echo "::error::the 'reach' input needs crovia-tacet >= 0.5.0 (set tacet-version: \">=0.5.0\")"; exit 2
+          fi
+          while IFS= read -r l; do [ -z "$l" ] && continue; reach_args+=(--reach "$l"); done < <(printf '%s\n' "$PNX_REACH")
+          reach_args+=(--reach-mode "$PNX_REACH_MODE")
+          if [ -n "$PNX_POLICY" ]; then reach_args+=(--policy "$PNX_POLICY");
+          elif [ "$PNX_REACH_MODE" = "enforce" ]; then echo "::error::reach-mode 'enforce' needs the 'policy' input"; exit 2; fi
+        elif [ -n "$PNX_POLICY" ]; then
+          echo "::warning::'policy' given without 'reach': no reach record is added to the sheet"
+        fi
         if [ -z "$PNX_WITNESS_SEED" ]; then
           echo "::warning::no witness-seed given: using an ephemeral witness key for this run"
           PNX_WITNESS_SEED="$(python3 -c 'import os;print(os.urandom(32).hex())')"
           export PNX_WITNESS_SEED
         fi
         tacet-pnx witness "${paths[@]}" --run-id "$PNX_RUN_ID" --key-env PNX_WITNESS_SEED --key-id "$PNX_WITNESS_ID" \
-          --sheet "$PNX_OUT/run.sheet.json" --state "$PNX_OUT/run.state.json"
+          --sheet "$PNX_OUT/run.sheet.json" --state "$PNX_OUT/run.state.json" "${reach_args[@]}"
         echo "sheet=$PNX_OUT/run.sheet.json" >> "$GITHUB_OUTPUT"
         echo "root=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["root"])' "$PNX_OUT/run.sheet.json")" >> "$GITHUB_OUTPUT"
 
@@ -128,6 +163,8 @@ runs:
         PNX_SEAL_ISSUER: ${{ inputs.seal-issuer-id }}
         PNX_OUT: ${{ inputs.output-dir }}
         PNX_FAIL: ${{ inputs.fail-on-present }}
+        PNX_POLICY: ${{ inputs.policy }}
+        PNX_REACH: ${{ inputs.reach }}
       run: |
         set -euo pipefail
         args=()
@@ -149,12 +186,16 @@ runs:
         set -e
         [ "$rc" -eq 0 ] || exit "$rc"
         set +e
-        tacet-pnx verify "$out" "${args[@]}" --json > "$PNX_OUT/verify.json"
+        verify_args=()
+        if [ -n "$PNX_REACH" ] && [ -n "$PNX_POLICY" ]; then verify_args=(--policy "$PNX_POLICY"); fi
+        tacet-pnx verify "$out" "${args[@]}" "${verify_args[@]}" --json > "$PNX_OUT/verify.json"
         vrc=$?
         set -e
         rm -f "$PNX_OUT/run.state.json"
         verdict="$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["verdict"])' "$PNX_OUT/verify.json")"
+        reach="$(python3 -c 'import json,sys;print((json.load(open(sys.argv[1])).get("reach") or {}).get("verdict", ""))' "$PNX_OUT/verify.json")"
         echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
+        echo "reach=$reach" >> "$GITHUB_OUTPUT"
         echo "proof=$out" >> "$GITHUB_OUTPUT"
         python3 - "$PNX_OUT/verify.json" "$PNX_OUT/run.sheet.json" "$out" >> "$GITHUB_STEP_SUMMARY" <<'PY'
         import json, sys
@@ -166,6 +207,18 @@ runs:
         print("| asset | verdict |\n|---|---|")
         for label, verdict in v["assets"].items():
             print(f"| `{label}` | {verdict} |")
+        r, sr = v.get("reach"), s.get("reach")
+        if r and sr:
+            sm, pol = sr["summary"], sr["policy"]
+            ricon = {"within-policy": "✅", "outside-policy": "❌", "unchecked": "⚠️", "unpoliced": "ℹ️"}.get(r["verdict"], "⚠️")
+            print(f"\n{ricon} Reach: `{r['verdict']}` · {sm['destinations']} destinations, {sm['connections']} connections"
+                  f" ({sm['allowed']} allowed, {sm['blocked']} blocked, {sm['failed']} failed) · policy {pol['kind']} {pol['mode']}"
+                  + (f" `{pol['hash'][:23]}…`" if pol.get("hash") else "") + f" · {sr['disclosure']} disclosure\n")
+            if sr["disclosure"] == "clear":
+                print("| destination | outcome | connections |\n|---|---|---|")
+                for d in sr["destinations"]:
+                    print(f"| `{d['host']}:{d['port']}` | {d['outcome']} | {d['connections']} |")
+            for o in r.get("outside", []): print(f"\n> ❌ reached outside the policy: `{o}`")
         for e in v.get("errors", []): print(f"\n> ❌ {e}")
         for w in v.get("warnings", []): print(f"\n> ⚠️ {w}")
         print(f"\nProof: `{sys.argv[3]}` · verify anywhere with `pip install crovia-tacet && tacet-pnx verify {sys.argv[3]}` · "
@@ -173,7 +226,8 @@ runs:
         PY
         if [ "$vrc" -ge 2 ]; then echo "::error::PNX proof failed verification"; exit 2; fi
         if [ "$PNX_FAIL" = "true" ] && [ "$vrc" -ne 0 ]; then
-          echo "::error::PNX verdict '$verdict': at least one protected asset is present, undetectable or only partially covered"
+          if [ "$reach" = "outside-policy" ]; then echo "::error::PNX reach '$reach': the run connected to a destination the policy does not allow"; fi
+          echo "::error::PNX verdict '$verdict': at least one protected asset is present, undetectable or only partially covered, or a destination lies outside the policy"
           exit 1
         fi
 

@@ -85,11 +85,14 @@ or partial · `2` proof invalid.
 | `witness-id` | `urn:github:owner/repo:pnx-witness` | witness key id |
 | `witness-seed` | ephemeral | hex 32-byte Ed25519 seed (secret); stable identity across runs |
 | `seal-seed` | | issuer seed; delivers the proof inside a `crovia.seal.v1` |
-| `fail-on-present` | `true` | fail unless every asset is `absent` |
+| `reach` | | `.jsonl` connection logs (`{"at","host","port"[, "outcome","ip","bytes_out","bytes_in"]}`): adds the reach record — where the run connected — to the sheet (crovia-tacet ≥ 0.5.0) |
+| `policy` | | `crovia.pnx.policy.v1` document (`{"version": ..., "allow": ["api.github.com:443", "*.githubusercontent.com:443"]}`); bound by hash in the record and matched again at verification |
+| `reach-mode` | `enforce` | `enforce` (destinations outside the policy were blocked) or `observe` |
+| `fail-on-present` | `true` | fail unless every asset is `absent` and, with a reach record, the run stayed `within-policy` |
 | `output-dir` | `pnx` | where the sheet, proof and private state go (state is deleted after proving) |
 | `upload-artifact` / `artifact-name` | `true` / `pnx-proof` | artifact upload |
 
-Outputs: `verdict`, `proof`, `sheet`, `root`.
+Outputs: `verdict`, `reach` (`within-policy` · `outside-policy` · `unchecked` · `unpoliced`, empty without a reach log), `proof`, `sheet`, `root`.
 
 ### Capturing egress
 
@@ -100,6 +103,12 @@ outbound bodies are visible in clear:
   `.jsonl` with one `{"at": ..., "body": ...}` object per request;
 - the agent's own request log or transcript directory;
 - a CI sidecar that tees requests to files.
+
+With `reach`, the sheet also states **where** the run connected: every destination host and
+port the proxy saw, with its outcome under the policy (`allowed`, `blocked`, `failed`),
+connection and byte counts. The policy document is bound by hash; the verifier recomputes
+it and matches every destination against the rules, so a run that reached a host outside
+the allowlist is `outside-policy` — a signed finding, not a log line.
 
 Traffic that bypasses the capture point is outside the proof. This is stated in the sheet
 (`egress.bodies`, `egress.bytes`) and in the specification:
