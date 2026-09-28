@@ -55,6 +55,7 @@ WHAT = {
     "pnx_002_proofs": "PNX: a witnessed run, its signed sheet, a clean proof and an exposure proof with the asset bytes; hash-only mode warns (PNX §4–6)",
     "pnx_003_invalid": "PNX: tampered sheet, forged verdicts, foreign root, relabelled inclusion, wrong or missing assets, substituted fingerprints, unknown layer, bad params, wrong profile",
     "pnx_004_sealed": "PNX: proofs delivered inside an unmodified crovia.seal.v1, and four sealed faults a verifier that stops at the Seal would accept",
+    "pnx_005_reach": "PNX: the reach record — policy document and hash, a connection log, the sheets an enforcing / observing / salted / unpoliced witness derives, host hashes, and ten faults that MUST fail (PNX §4a, §6 step 1b)",
 }
 
 
