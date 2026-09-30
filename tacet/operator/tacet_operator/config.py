@@ -83,6 +83,7 @@ class Settings:
     featured_every_epoch: int = 40       # featured targets observed in every epoch
     request_delay_s: float = 0.6
     request_timeout_s: float = 25.0
+    collection_budget_s: float = 20 * 60  # leave ample time before the next hourly invocation
     featured: list = field(default_factory=list)
     targets_file: Path | None = None     # newline-separated org/model ids
 
@@ -95,6 +96,8 @@ class Settings:
             s.per_epoch_budget = int(os.environ["TACET_BUDGET"])
         if os.environ.get("TACET_TARGETS"):
             s.targets_file = Path(os.environ["TACET_TARGETS"])
+        if os.environ.get("TACET_COLLECTION_BUDGET_S"):
+            s.collection_budget_s = float(os.environ["TACET_COLLECTION_BUDGET_S"])
         return s
 
 

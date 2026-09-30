@@ -82,7 +82,9 @@ def health(rows: List[Dict[str, Any]], now: Optional[datetime] = None) -> Dict[s
     empty = [r["epoch"] for r in recent if not r.get("snapshots")]
     pending = [r for r in rows if r.get("closed") != "bitcoin"]
     oldest_pending = pending[0] if pending else None
-    oldest_pending_age = now_s - _ts(oldest_pending["epoch_end"]) if oldest_pending else None
+    # The current epoch ends in the future. A pending anchor cannot have a
+    # negative age; it is simply zero seconds old until the epoch closes.
+    oldest_pending_age = max(0, now_s - _ts(oldest_pending["epoch_end"])) if oldest_pending else None
 
     # rows without fetch times (older index files) count from the start of their hour: the conservative reading
     age = now_s - _ts(last_obs.get("last_fetched_at") or last_obs["epoch_start"]) if last_obs else None

@@ -263,7 +263,9 @@ def test_health_is_fail_closed():
                 "last_fetched_at": fmt(start + timedelta(seconds=first_delay + 90)) if snaps else None}
     rows = [row(e, closed="bitcoin" if e < 29 else "pending") for e in range(30)]
     now = GENESIS + timedelta(seconds=EPOCH_SECONDS * 29 + 1200)
-    assert health(rows, now)["state"] == "ok"
+    healthy = health(rows, now)
+    assert healthy["state"] == "ok"
+    assert healthy["anchoring"]["oldest_pending_age_seconds"] == 0
     assert health([], now)["state"] == "stale"
     # two epochs behind
     h = health(rows, now + timedelta(hours=2))
@@ -282,6 +284,52 @@ def test_health_is_fail_closed():
     # the latest epoch is a back-fill
     h = health(rows[:29] + [row(29, snaps=0, closed="pending")], now)
     assert h["state"] == "degraded" and any("back-fill" in r for r in h["reasons"])
+
+
+def test_collection_budget_stops_cleanly_and_preserves_rotation(env):
+    s, keys = env
+    fd, fo = FakeDrand(), FakeOTS()
+    s.featured = [SILENT]
+    s.per_epoch_budget = 4
+    s.featured_every_epoch = 1
+    s.collection_budget_s = 2
+    s.targets_file = s.paths.state / "targets.txt"
+    s.targets_file.write_text("\n".join([SILENT, DISCLOSED, DOWN, GATED]) + "\n")
+
+    class Clock:
+        value = 0.0
+
+        def now(self):
+            return self.value
+
+    clock = Clock()
+
+    def timed_fetcher(url, timeout):
+        result = fake_fetcher(url, timeout)
+        clock.value += 1
+        return result
+
+    runner = EpochRunner(
+        s, keys, fetcher=timed_fetcher, drand_round=fd.round, ots_stamp=fo.stamp,
+        sleep=lambda _: None, monotonic=clock.now)
+    sheet = runner.run(now=GENESIS + timedelta(minutes=5))
+
+    assert sheet["epoch"] == 0
+    assert len(State(s.paths).load_snapshots(0)) == 2
+    assert State(s.paths).cursor() == 1  # only DISCLOSED advanced the rotating cursor
+    summary = json.loads((s.paths.fetch_log / "0.summary.json").read_text())
+    assert summary == {
+        "attempted_targets": 2,
+        "collection_budget_s": 2,
+        "cursor_after": 1,
+        "cursor_before": 0,
+        "duration_ms": 2000,
+        "epoch": 0,
+        "failed_fetches": 0,
+        "planned_targets": 4,
+        "stopped_reason": "collection_budget_exhausted",
+        "successful_snapshots": 2,
+    }
 
 
 def test_transient_relay_failure_does_not_cost_the_hour(env):

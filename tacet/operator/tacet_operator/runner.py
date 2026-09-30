@@ -79,7 +79,8 @@ class EpochRunner:
                  drand_latest: Callable[[], Dict[str, Any]] = drand_mod.fetch_latest,
                  drand_round: Optional[Callable[[int], Dict[str, Any]]] = None,
                  ots_stamp: Optional[Callable[[bytes, Any], None]] = ots_mod.stamp,
-                 sleep: Callable[[float], None] = time.sleep):
+                 sleep: Callable[[float], None] = time.sleep,
+                 monotonic: Callable[[], float] = time.monotonic):
         self.s = settings
         self.keys = keys
         self.state = State(settings.paths)
@@ -88,6 +89,7 @@ class EpochRunner:
         self.drand_round = drand_round or drand_mod.fetch_round
         self.ots_stamp = ots_stamp
         self.sleep = sleep
+        self.monotonic = monotonic
         self.evaluate, self.pred_version, self.pred_code_hash = load_predicate(PREDICATE_ID)
 
     # -- public entry points ------------------------------------------------------
@@ -172,16 +174,28 @@ class EpochRunner:
         return self._finish(epoch, opened, [], [], m)
 
     def _emit_observed(self, epoch: int) -> Dict[str, Any]:
+        collection_started = self.monotonic()
         opened = self._open(epoch)
         m = self.state.load_map()
         all_targets = load_list(self.s.targets_file) if self.s.targets_file and self.s.targets_file.exists() else []
         featured = self.s.featured or FEATURED_DEFAULT
-        picked, cursor = plan_epoch(all_targets, featured, self.state.cursor(), self.s.per_epoch_budget, self.s.featured_every_epoch)
+        initial_cursor = self.state.cursor()
+        picked, planned_cursor = plan_epoch(
+            all_targets, featured, initial_cursor, self.s.per_epoch_budget, self.s.featured_every_epoch)
+        featured_set = set(list(dict.fromkeys(featured))[:min(self.s.featured_every_epoch, self.s.per_epoch_budget)])
+        rotating = [t for t in all_targets if t not in featured_set]
         snaps: List[Dict[str, Any]] = []
         changes: List[Tuple[bytes, bytes]] = []
         fetch_log: List[Dict[str, Any]] = []
+        attempted: List[str] = []
+        stopped_reason = None
         for target in picked:
+            if self.monotonic() - collection_started >= self.s.collection_budget_s:
+                stopped_reason = "collection_budget_exhausted"
+                log.warning("epoch %s: collection budget exhausted after %s/%s targets", epoch, len(attempted), len(picked))
+                break
             f = self._observe(target)
+            attempted.append(target)
             fetch_log.append({"target_id": target, "url": f.url, "status": f.status, "len": len(f.body),
                               "ms": f.elapsed_ms, "error": f.error, "at": f.fetched_at})
             if f.status != 200 or not f.body:
@@ -196,9 +210,30 @@ class EpochRunner:
             snaps.append(snap)
             changes.extend(self._transition(m, target, snap))
             self.sleep(self.s.request_delay_s)
+        if len(attempted) == len(picked):
+            cursor = planned_cursor
+        elif rotating:
+            rotating_attempted = sum(1 for target in attempted if target not in featured_set)
+            cursor = (initial_cursor % len(rotating) + rotating_attempted) % len(rotating)
+        else:
+            cursor = initial_cursor
         self.state.save_cursor(cursor)
         (self.s.paths.fetch_log / f"{epoch}.jsonl").write_text(
             "".join(json.dumps(r, sort_keys=True) + "\n" for r in fetch_log), encoding="utf-8")
+        summary = {
+            "epoch": epoch,
+            "planned_targets": len(picked),
+            "attempted_targets": len(attempted),
+            "successful_snapshots": len(snaps),
+            "failed_fetches": len(attempted) - len(snaps),
+            "duration_ms": int((self.monotonic() - collection_started) * 1000),
+            "collection_budget_s": self.s.collection_budget_s,
+            "stopped_reason": stopped_reason,
+            "cursor_before": initial_cursor,
+            "cursor_after": cursor,
+        }
+        (self.s.paths.fetch_log / f"{epoch}.summary.json").write_text(
+            json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         return self._finish(epoch, opened, snaps, changes, m)
 
     def _observe(self, target: str) -> Fetched:

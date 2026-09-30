@@ -19,7 +19,10 @@ daily        tacet-operator publish --proofs rebuild featured silence proofs (cr
 2. Fetches the surfaces of the featured targets and of a rotating slice of the
    target list (default 120 per hour, 0.6 s apart, `crovia-tacet-observer` user
    agent). Surface = the raw model card `…/raw/main/README.md`; for gated
-   repositories (401/403) the rendered model page.
+   repositories (401/403) the rendered model page. Collection has a 20-minute
+   wall-clock budget by default (`TACET_COLLECTION_BUDGET_S` overrides it), so
+   slow or unreachable surfaces cannot occupy the next hourly invocation.
+   Unattempted rotating targets retain their cursor position for the next run.
 3. Runs the public predicate `crovia.pred.hf-card-training-data 1.0.0`
    ([source](tacet_operator/predicates/hf_card_training_data_v1.py), hashed
    byte-for-byte into every snapshot) on the bytes and signs a **snapshot**
@@ -38,6 +41,11 @@ The operator is the only writer; all changes of an epoch are applied in one
 batch, so the sheet's root is the root at `epoch_end`. Missed hours are
 back-filled with empty sheets (historical drand round): the chain stays
 contiguous and those hours contribute no silence.
+
+Each observed run writes `state/fetch_log/<epoch>.summary.json` with planned,
+attempted, successful and failed counts, duration, cursor movement and the stop
+reason. This operational record is not part of the signed protocol objects and
+does not change verification of existing or future proofs.
 
 ## Silence proofs
 
