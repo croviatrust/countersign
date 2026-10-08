@@ -121,12 +121,10 @@ class Contracts(unittest.TestCase):
         self.assertEqual(out["catalog_total"], 3)
         self.assertEqual(out["returned"], 3)
         self.assertEqual(out["limit"], 25)
-        capped = self.mcp.tool_search_models({"query": "", "limit": 0})
-        self.assertEqual(capped["limit"], 1)
-        self.assertEqual(capped["returned"], 1)
-        self.assertEqual(capped["matched"], 3)
-        high = self.mcp.tool_search_models({"limit": 500})
-        self.assertEqual(high["limit"], 100)
+        for bad in (0, 101, 500, -1):
+            rejected = self.mcp.tool_search_models({"query": "", "limit": bad})
+            self.assertIn("error", rejected, bad)
+            self.assertNotIn("results", rejected, bad)
 
     def test_a_non_integer_limit_is_rejected(self):
         for bad in (1.5, "1", True):

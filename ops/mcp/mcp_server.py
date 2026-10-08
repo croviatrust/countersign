@@ -167,12 +167,12 @@ def tool_lookup_model(a: dict) -> dict:
 
 
 def _search_limit(value: Any) -> int | dict:
-    """Default 25 when omitted or blank. Integers are clamped to 1..100."""
+    """Default 25 when omitted or blank. Any other value must be an integer in 1..100."""
     if value is None or value == "":
         return 25
-    if isinstance(value, bool) or not isinstance(value, int):
+    if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= 100:
         return {"error": "limit must be an integer from 1 to 100 inclusive; omit it to use 25"}
-    return max(1, min(value, 100))
+    return value
 
 
 def tool_search_models(a: dict) -> dict:
@@ -373,10 +373,10 @@ TOOLS = [
      "inputSchema": {"type": "object", "properties": {"model": {"type": "string", "description": "Hugging Face model id, org/name. Required. Empty is an error. Example: Qwen/Qwen3-32B."}}, "required": ["model"]},
      "annotations": _CLOSED, "_fn": tool_lookup_model},
     {"name": "search_models", "title": "Page of model ids",
-     "description": "A page of observed model ids whose id contains query, compared case-insensitively, in catalog order, not a ranking. query omitted or empty matches the whole catalog and still returns at most limit rows. limit is an integer, default 25, clamped into 1..100; a non-integer is an error and nothing is searched. The response keeps four different numbers: returned (rows in results), matched (ids matching the query before the limit), catalog_total (every record, matching or not), and limit (the limit actually applied). A short page is not the size of the catalog. This is not a verdict and not a proof. Reads published files only.",
+     "description": "A page of observed model ids whose id contains query, compared case-insensitively, in catalog order, not a ranking. query omitted or empty matches the whole catalog and still returns at most limit rows. limit is an integer from 1 to 100, default 25 when omitted; anything else is an error and nothing is searched. The response keeps four different numbers: returned (rows in results), matched (ids matching the query before the limit), catalog_total (every record, matching or not), and limit (the limit actually applied). A short page is not the size of the catalog. This is not a verdict and not a proof. Reads published files only.",
      "inputSchema": {"type": "object", "properties": {
          "query": {"type": "string", "description": "Substring of the model id. Omit it, or pass an empty string, to match the whole catalog. The page is still capped by limit."},
-         "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25, "description": "Maximum rows in results. Default 25. Integers below 1 become 1 and integers above 100 become 100. A non-integer is rejected."},
+         "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25, "description": "Maximum rows in results. Default 25 when omitted. An integer outside 1..100, or a non-integer, is rejected and nothing is searched."},
      }},
      "annotations": _CLOSED, "_fn": tool_search_models},
     {"name": "get_silence_proof", "title": "One silence proof or its bundle",
