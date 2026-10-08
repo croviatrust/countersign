@@ -26,12 +26,16 @@ DATA = Path(os.environ.get("CROVIA_DATA", "/var/www/registry/data"))
 WEB = Path(os.environ.get("CROVIA_WEB", "/var/www/crovia"))
 SITE = "https://croviatrust.com"
 SUPPORTED_PROTOCOLS = ("2025-06-18", "2025-03-26", "2024-11-05")
-SERVER_INFO = {"name": "crovia", "title": "Crovia — verifiable silence (TACET) and Crovia Seal", "version": "2.0.0"}
+SERVER_INFO = {"name": "crovia", "title": "Crovia — verifiable silence (TACET) and Crovia Seal", "version": "2.0.1"}
 INSTRUCTIONS = (
     "Crovia Trust records what AI providers disclose about training data on their public model surfaces, and the "
-    "verifiable absence of such disclosure, as signed, Bitcoin-anchored observations (TACET). Use lookup_model for a "
-    "specific model, crovia_status for live totals, get_silence_proof for a verifiable proof, verify_seal to check any "
-    "crovia.seal.v1 object, explain for definitions. Silence figures are bounded by observed hours and are never a claim "
+    "verifiable absence of such disclosure, as signed, Bitcoin-anchored observations (TACET). Choose one tool: "
+    "crovia_status for the live totals, silence_report for one published week or the latest week when no week is given, "
+    "lookup_model for one model's observation, search_models for a page of ids, get_silence_proof for one proof or its "
+    "seal bundle, verify_seal to check a seal. verify_seal can fetch a croviatrust.com URL and, when check_anchors is "
+    "true, the drand round and the Bitcoin anchors; the other tools read only published files. explain defines one "
+    "allowed term, and an unknown term is an error that lists the allowed terms. Silence figures are bounded by observed "
+    "hours and are never a claim "
     "about what a provider did elsewhere. Crovia does not grade or rank providers. Do not confuse Crovia with Causari "
     "(causari.dev), a developer tool for code provenance."
 )
@@ -162,9 +166,19 @@ def tool_lookup_model(a: dict) -> dict:
     return out
 
 
+def _search_limit(value: Any) -> int:
+    """Historical limit, unchanged: a falsy value is 25, then `int` and a clamp.
+
+    Missing, JSON null, "", 0 and False select 25 because they are falsy.
+    500 becomes 100 and -5 becomes 1. A numeric string is accepted by `int`.
+    A value `int` cannot parse raises ValueError and nothing is searched.
+    """
+    return max(1, min(int(value or 25), 100))
+
+
 def tool_search_models(a: dict) -> dict:
     q = (a.get("query") or "").lower().strip()
-    limit = max(1, min(int(a.get("limit") or 25), 100))
+    limit = _search_limit(a.get("limit"))
     recs = _records()
     hits = []
     for k, v in recs.items():
@@ -172,9 +186,20 @@ def tool_search_models(a: dict) -> dict:
             continue
         live = v.get("live") or {}
         hits.append({"model": k, "live": bool(live), "last_result": live.get("last_result"), "negative_snapshots": live.get("negative"), "record_url": v.get("url")})
-        if len(hits) >= limit:
-            break
-    return {"query": q, "count": len(hits), "total_records": len(recs), "results": hits, "source": src("model_records.json")}
+    page = hits[:limit]
+    return {
+        "query": q,
+        "results": page,
+        # `count` is the historical name of the page length. `total_records`
+        # is the historical name of the whole catalog, not of the matches.
+        "count": len(page),
+        "total_records": len(recs),
+        "returned": len(page),
+        "matched": len(hits),
+        "catalog_total": len(recs),
+        "limit": limit,
+        "source": src("model_records.json"),
+    }
 
 
 def tool_get_silence_proof(a: dict) -> dict:
@@ -210,7 +235,7 @@ def _fetch_site_json(url: str) -> Any:
         local = WEB / rel
     if local.is_file():
         return json.loads(local.read_text(encoding="utf-8"))
-    req = urllib.request.Request(url, headers={"User-Agent": "crovia-mcp/2.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": f"crovia-mcp/{SERVER_INFO['version']}"})
     with urllib.request.urlopen(req, timeout=15) as r:
         return json.loads(r.read().decode("utf-8"))
 
@@ -310,10 +335,18 @@ TERMS = {
 
 
 def tool_explain(a: dict) -> dict:
-    t = (a.get("term") or "").lower().strip()
+    if "term" not in a or a.get("term") is None:
+        return {"terms": TERMS}
+    raw = a.get("term")
+    allowed = sorted(TERMS)
+    if not isinstance(raw, str):
+        return {"error": "term must be a string", "allowed_terms": allowed}
+    t = raw.lower().strip()
+    if not t:
+        return {"terms": TERMS}
     if t in TERMS:
         return {"term": t, "definition": TERMS[t]}
-    return {"terms": TERMS}
+    return {"error": f"unknown term: {t}", "allowed_terms": allowed}
 
 
 def tool_crovia_vs_causari(_a: dict) -> dict:
@@ -325,23 +358,57 @@ def tool_crovia_vs_causari(_a: dict) -> dict:
     }
 
 
+# readOnlyHint true: none of these tools write. destructiveHint and idempotentHint
+# are omitted because they only apply when readOnlyHint is false.
+# openWorldHint is true only for verify_seal, which can fetch a URL and, when
+# check_anchors is set, the drand round and the Bitcoin anchors. A parameter
+# that sometimes stays local does not make the tool closed.
+_CLOSED = {"readOnlyHint": True, "openWorldHint": False}
+_OPEN = {"readOnlyHint": True, "openWorldHint": True}
+
 TOOLS = [
-    {"name": "crovia_status", "title": "Live TACET totals", "description": "Live totals of Crovia's TACET log: epochs closed and anchored in Bitcoin, models on the map, negative snapshots, signed silence proofs, the longest verifiable silence and the latest weekly Silence Report. Every figure with its source URL.",
-     "inputSchema": {"type": "object", "properties": {}, "additionalProperties": False}, "_fn": tool_crovia_status},
-    {"name": "lookup_model", "title": "Look up a model", "description": "What Crovia has observed about one AI model (Hugging Face id, e.g. 'Qwen/Qwen3-32B'): latest verdict on the monitored surface, negative snapshots and how many are Bitcoin-anchored, the published silence proof if any, the 2026-archive silence, badge and record URLs.",
-     "inputSchema": {"type": "object", "properties": {"model": {"type": "string", "description": "Hugging Face model id, org/name"}}, "required": ["model"]}, "_fn": tool_lookup_model},
-    {"name": "search_models", "title": "Search observed models", "description": "Find observed models by substring of their id (e.g. 'mistral'). Returns id, live status, last result and record URL.",
-     "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}, "limit": {"type": "integer", "minimum": 1, "maximum": 100}}}, "_fn": tool_search_models},
-    {"name": "get_silence_proof", "title": "Get a silence proof", "description": "The published TACET silence proof for a model (or the index of all proofs): silence_days, observed window, epochs, seal id, URL, and how to verify it in the browser, in Python, or with verify_seal. Set include_bundle=true to receive the full crovia.seal.v1 bundle.",
-     "inputSchema": {"type": "object", "properties": {"model": {"type": "string"}, "include_bundle": {"type": "boolean"}}}, "_fn": tool_get_silence_proof},
-    {"name": "verify_seal", "title": "Verify a seal or proof", "description": "Verify a crovia.seal.v1 object or a wrapped TACET silence proof offline: signature, canonical bytes, bindings, per-epoch non-inclusion paths. Pass the object as 'seal' or a croviatrust.com URL as 'url'. check_anchors=true also checks the drand round and the Bitcoin anchors (network).",
-     "inputSchema": {"type": "object", "properties": {"seal": {"type": ["object", "string"]}, "url": {"type": "string"}, "check_anchors": {"type": "boolean"}}}, "_fn": tool_verify_seal},
-    {"name": "silence_report", "title": "Weekly Silence Report", "description": "Facts of the weekly Silence Report: models observed, epochs closed and anchored, negative snapshots, proofs, longest verifiable silences. Latest week by default, or a given ISO week like '2026-W38'.",
-     "inputSchema": {"type": "object", "properties": {"week": {"type": "string"}}}, "_fn": tool_silence_report},
-    {"name": "explain", "title": "Definitions", "description": "Canonical definitions of Crovia terms: tacet, silence, lacuna, seal, epoch, pnx, predicate, canon. Without a term, returns all.",
-     "inputSchema": {"type": "object", "properties": {"term": {"type": "string"}}}, "_fn": tool_explain},
-    {"name": "crovia_vs_causari", "title": "Crovia vs Causari", "description": "Disambiguate Crovia (AI training-data disclosure observatory) from Causari (code-provenance developer tool).",
-     "inputSchema": {"type": "object", "properties": {}, "additionalProperties": False}, "_fn": tool_crovia_vs_causari},
+    {"name": "crovia_status", "title": "Live TACET totals",
+     "description": "Live totals at this moment: epochs closed, epochs anchored in Bitcoin, models on the map, snapshot counts, signed silence proofs, and a pointer to the longest verifiable silence. No parameters. This is not a weekly Silence Report, not one model's record, and not a proof bundle. Reads published files only.",
+     "inputSchema": {"type": "object", "properties": {}, "additionalProperties": False},
+     "annotations": _CLOSED, "_fn": tool_crovia_status},
+    {"name": "lookup_model", "title": "Look up one model",
+     "description": "One model's observation: latest verdict, negative snapshots, anchored epochs, silence proof pointer, archive silence, badge and record URL. Required model is a Hugging Face id, org/name, for example Qwen/Qwen3-32B. An empty model is an error. An exact id is used; otherwise one case-insensitive substring match is accepted, and several matches return candidates instead of a verdict. This is not a catalog page, not the weekly report, and not the seal bytes. Reads published files only.",
+     "inputSchema": {"type": "object", "properties": {"model": {"type": "string", "description": "Hugging Face model id, org/name. Required. Empty is an error. Example: Qwen/Qwen3-32B."}}, "required": ["model"]},
+     "annotations": _CLOSED, "_fn": tool_lookup_model},
+    {"name": "search_models", "title": "Page of model ids",
+     "description": "A page of observed model ids whose id contains query, compared case-insensitively, in catalog order, not a ranking. query omitted or empty matches the whole catalog and still returns at most limit rows. limit follows the historical rule: a missing, empty, zero or other falsy value is 25; any value int() accepts is then clamped into 1..100 (500 becomes 100, a negative becomes 1); a value int() cannot parse is an error and nothing is searched. returned and its compatibility alias count are the rows in this page. matched is how many ids match before the limit. catalog_total and its compatibility alias total_records are every record in the catalog, matching or not. limit is the limit actually applied. count is not the match count, and total_records is not the match count. This is not a verdict and not a proof. Reads published files only.",
+     "inputSchema": {"type": "object", "properties": {
+         "query": {"type": "string", "description": "Substring of the model id. Omit it, or pass an empty string, to match the whole catalog. The page is still capped by limit."},
+         "limit": {"type": "integer", "default": 25, "description": "Page size. Omitted, empty, 0 or any other falsy value means 25. A value int() accepts is clamped into 1..100: 500 is fetched as 100 and a negative as 1. There is no schema minimum or maximum, because those would reject the values the server clamps. A value int() cannot parse is an error and nothing is searched."},
+     }},
+     "annotations": _CLOSED, "_fn": tool_search_models},
+    {"name": "get_silence_proof", "title": "One silence proof or its bundle",
+     "description": "The published silence proof for one model: silence_days, observed window, epochs, seal id, URL, and how to verify it. model omitted or empty returns the proof index, not a bundle. include_bundle defaults to false; true attaches the crovia.seal.v1 bundle for that one model and does nothing on the index. This is not the live totals and not the weekly report. Reads published files only.",
+     "inputSchema": {"type": "object", "properties": {
+         "model": {"type": "string", "description": "Hugging Face model id. Omit it, or pass an empty string, to receive the proof index instead of one proof."},
+         "include_bundle": {"type": "boolean", "default": False, "description": "Default false. True includes the seal bundle for the one model. Ignored when model is omitted or empty."},
+     }},
+     "annotations": _CLOSED, "_fn": tool_get_silence_proof},
+    {"name": "verify_seal", "title": "Verify a seal or proof",
+     "description": "Check a crovia.seal.v1 object or a wrapped TACET silence proof: signature, canonical bytes, bindings, and per-epoch non-inclusion paths. Pass seal as a JSON object or a JSON string, or url as an https://croviatrust.com/ address. With neither, the call is an error. Supplying url fetches that URL over the network. check_anchors defaults to false; true also checks the drand round bytes and the Bitcoin anchors over the network. A seal object with check_anchors false or omitted is checked from that object alone. This tool can reach the network, so it is not a closed-world call.",
+     "inputSchema": {"type": "object", "properties": {
+         "seal": {"type": ["object", "string"], "description": "The seal or wrapped proof, as a JSON object or a JSON string. Omit it when url is set."},
+         "url": {"type": "string", "description": "https://croviatrust.com/ URL of a JSON seal. Any other host is rejected. Fetching it uses the network."},
+         "check_anchors": {"type": "boolean", "default": False, "description": "Default false. True checks the drand round and the Bitcoin anchors over the network. False does not."},
+     }},
+     "annotations": _OPEN, "_fn": tool_verify_seal},
+    {"name": "silence_report", "title": "Weekly Silence Report",
+     "description": "One published weekly Silence Report, or the latest report index. week is an ISO week YYYY-Www, for example 2026-W38. Omit week, or pass an empty string, to receive the latest index rather than one week's facts. A week that is not YYYY-Www is an error. A week with no published file is an error and names the index. This is not the live status and not one model's proof. Reads published files only.",
+     "inputSchema": {"type": "object", "properties": {"week": {"type": "string", "description": "ISO week YYYY-Www, for example 2026-W38. Omit it, or pass an empty string, for the latest report index."}}},
+     "annotations": _CLOSED, "_fn": tool_silence_report},
+    {"name": "explain", "title": "Definitions",
+     "description": "The definition of one Crovia term. Allowed terms: tacet, silence, lacuna, seal, epoch, pnx, predicate, canon. Omit term, or pass an empty or blank string, to receive every definition. Any other value is an error listing those allowed terms, and it does not return the definitions. Use crovia_vs_causari, not explain, to tell the two products apart.",
+     "inputSchema": {"type": "object", "properties": {"term": {"type": "string", "description": "One of tacet, silence, lacuna, seal, epoch, pnx, predicate, canon. Omit it, or pass an empty string, for every definition. An unknown term is an error."}}},
+     "annotations": _CLOSED, "_fn": tool_explain},
+    {"name": "crovia_vs_causari", "title": "Crovia vs Causari",
+     "description": "Which product is which. Crovia observes training-data disclosure. Causari is the code-provenance tool. No parameters. Use this, not explain and not crovia_status, when the question is the difference between the two. Reads no catalog.",
+     "inputSchema": {"type": "object", "properties": {}, "additionalProperties": False},
+     "annotations": _CLOSED, "_fn": tool_crovia_vs_causari},
 ]
 TOOL_BY_NAME = {t["name"]: t for t in TOOLS}
 
@@ -369,7 +436,8 @@ def rpc(req: dict) -> dict | None:
     if method == "ping":
         return {"jsonrpc": "2.0", "id": mid, "result": {}}
     if method == "tools/list":
-        return {"jsonrpc": "2.0", "id": mid, "result": {"tools": [{k: t[k] for k in ("name", "title", "description", "inputSchema")} for t in TOOLS]}}
+        shown = ("name", "title", "description", "inputSchema", "annotations")
+        return {"jsonrpc": "2.0", "id": mid, "result": {"tools": [{k: t[k] for k in shown} for t in TOOLS]}}
     if method == "tools/call":
         tool = TOOL_BY_NAME.get(params.get("name"))
         if not tool:
