@@ -26,7 +26,7 @@ DATA = Path(os.environ.get("CROVIA_DATA", "/var/www/registry/data"))
 WEB = Path(os.environ.get("CROVIA_WEB", "/var/www/crovia"))
 SITE = "https://croviatrust.com"
 SUPPORTED_PROTOCOLS = ("2025-06-18", "2025-03-26", "2024-11-05")
-SERVER_INFO = {"name": "crovia", "title": "Crovia — verifiable silence (TACET) and Crovia Seal", "version": "2.0.0"}
+SERVER_INFO = {"name": "crovia", "title": "Crovia — verifiable silence (TACET) and Crovia Seal", "version": "2.0.1"}
 INSTRUCTIONS = (
     "Crovia Trust records what AI providers disclose about training data on their public model surfaces, and the "
     "verifiable absence of such disclosure, as signed, Bitcoin-anchored observations (TACET). Choose one tool: "
@@ -166,20 +166,19 @@ def tool_lookup_model(a: dict) -> dict:
     return out
 
 
-def _search_limit(value: Any) -> int | dict:
-    """Default 25 when omitted or blank. Any other value must be an integer in 1..100."""
-    if value is None or value == "":
-        return 25
-    if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= 100:
-        return {"error": "limit must be an integer from 1 to 100 inclusive; omit it to use 25"}
-    return value
+def _search_limit(value: Any) -> int:
+    """Historical limit, unchanged: a falsy value is 25, then `int` and a clamp.
+
+    Missing, JSON null, "", 0 and False select 25 because they are falsy.
+    500 becomes 100 and -5 becomes 1. A numeric string is accepted by `int`.
+    A value `int` cannot parse raises ValueError and nothing is searched.
+    """
+    return max(1, min(int(value or 25), 100))
 
 
 def tool_search_models(a: dict) -> dict:
     q = (a.get("query") or "").lower().strip()
     limit = _search_limit(a.get("limit"))
-    if isinstance(limit, dict):
-        return limit
     recs = _records()
     hits = []
     for k, v in recs.items():
@@ -191,6 +190,10 @@ def tool_search_models(a: dict) -> dict:
     return {
         "query": q,
         "results": page,
+        # `count` is the historical name of the page length. `total_records`
+        # is the historical name of the whole catalog, not of the matches.
+        "count": len(page),
+        "total_records": len(recs),
         "returned": len(page),
         "matched": len(hits),
         "catalog_total": len(recs),
@@ -232,7 +235,7 @@ def _fetch_site_json(url: str) -> Any:
         local = WEB / rel
     if local.is_file():
         return json.loads(local.read_text(encoding="utf-8"))
-    req = urllib.request.Request(url, headers={"User-Agent": "crovia-mcp/2.0"})
+    req = urllib.request.Request(url, headers={"User-Agent": f"crovia-mcp/{SERVER_INFO['version']}"})
     with urllib.request.urlopen(req, timeout=15) as r:
         return json.loads(r.read().decode("utf-8"))
 
@@ -373,10 +376,10 @@ TOOLS = [
      "inputSchema": {"type": "object", "properties": {"model": {"type": "string", "description": "Hugging Face model id, org/name. Required. Empty is an error. Example: Qwen/Qwen3-32B."}}, "required": ["model"]},
      "annotations": _CLOSED, "_fn": tool_lookup_model},
     {"name": "search_models", "title": "Page of model ids",
-     "description": "A page of observed model ids whose id contains query, compared case-insensitively, in catalog order, not a ranking. query omitted or empty matches the whole catalog and still returns at most limit rows. limit is an integer from 1 to 100, default 25 when omitted; anything else is an error and nothing is searched. The response keeps four different numbers: returned (rows in results), matched (ids matching the query before the limit), catalog_total (every record, matching or not), and limit (the limit actually applied). A short page is not the size of the catalog. This is not a verdict and not a proof. Reads published files only.",
+     "description": "A page of observed model ids whose id contains query, compared case-insensitively, in catalog order, not a ranking. query omitted or empty matches the whole catalog and still returns at most limit rows. limit follows the historical rule: a missing, empty, zero or other falsy value is 25; any value int() accepts is then clamped into 1..100 (500 becomes 100, a negative becomes 1); a value int() cannot parse is an error and nothing is searched. returned and its compatibility alias count are the rows in this page. matched is how many ids match before the limit. catalog_total and its compatibility alias total_records are every record in the catalog, matching or not. limit is the limit actually applied. count is not the match count, and total_records is not the match count. This is not a verdict and not a proof. Reads published files only.",
      "inputSchema": {"type": "object", "properties": {
          "query": {"type": "string", "description": "Substring of the model id. Omit it, or pass an empty string, to match the whole catalog. The page is still capped by limit."},
-         "limit": {"type": "integer", "minimum": 1, "maximum": 100, "default": 25, "description": "Maximum rows in results. Default 25 when omitted. An integer outside 1..100, or a non-integer, is rejected and nothing is searched."},
+         "limit": {"type": "integer", "default": 25, "description": "Page size. Omitted, empty, 0 or any other falsy value means 25. A value int() accepts is clamped into 1..100: 500 is fetched as 100 and a negative as 1. There is no schema minimum or maximum, because those would reject the values the server clamps. A value int() cannot parse is an error and nothing is searched."},
      }},
      "annotations": _CLOSED, "_fn": tool_search_models},
     {"name": "get_silence_proof", "title": "One silence proof or its bundle",

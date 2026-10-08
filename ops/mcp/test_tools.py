@@ -104,15 +104,17 @@ class Contracts(unittest.TestCase):
 
     def test_search_separates_returned_matched_catalog_and_limit(self):
         out = self.mcp.tool_search_models({"query": "mistral", "limit": 1})
-        self.assertEqual(out["returned"], 1)
         self.assertEqual(len(out["results"]), 1)
+        self.assertEqual(out["returned"], 1)
+        self.assertEqual(out["count"], 1)
         self.assertEqual(out["matched"], 2)
         self.assertEqual(out["catalog_total"], 3)
+        self.assertEqual(out["total_records"], 3)
         self.assertEqual(out["limit"], 1)
-        self.assertNotIn("count", out)
-        self.assertNotIn("total_records", out)
-        self.assertTrue(out["matched"] > out["returned"])
-        self.assertGreater(out["catalog_total"], out["matched"])
+        self.assertEqual(out["count"], out["returned"])
+        self.assertEqual(out["total_records"], out["catalog_total"])
+        self.assertGreater(out["matched"], out["count"])
+        self.assertGreater(out["total_records"], out["matched"])
 
     def test_empty_query_matches_the_catalog_and_still_respects_the_limit(self):
         out = self.mcp.tool_search_models({})
@@ -121,16 +123,26 @@ class Contracts(unittest.TestCase):
         self.assertEqual(out["catalog_total"], 3)
         self.assertEqual(out["returned"], 3)
         self.assertEqual(out["limit"], 25)
-        for bad in (0, 101, 500, -1):
-            rejected = self.mcp.tool_search_models({"query": "", "limit": bad})
-            self.assertIn("error", rejected, bad)
-            self.assertNotIn("results", rejected, bad)
+        zero = self.mcp.tool_search_models({"query": "", "limit": 0})
+        self.assertEqual(zero["limit"], 25)
+        self.assertEqual(zero["count"], zero["returned"])
+        self.assertEqual(zero["total_records"], zero["catalog_total"])
+        self.assertEqual(self.mcp.tool_search_models({"limit": 500})["limit"], 100)
+        self.assertEqual(self.mcp.tool_search_models({"limit": -5})["limit"], 1)
+        self.assertEqual(self.mcp.tool_search_models({"limit": "10"})["limit"], 10)
+        self.assertEqual(self.mcp.tool_search_models({"limit": 1.5})["limit"], 1)
+        self.assertEqual(self.mcp.tool_search_models({"limit": True})["limit"], 1)
+        self.assertEqual(self.mcp.tool_search_models({"limit": False})["limit"], 25)
 
-    def test_a_non_integer_limit_is_rejected(self):
-        for bad in (1.5, "1", True):
-            out = self.mcp.tool_search_models({"query": "mistral", "limit": bad})
-            self.assertIn("error", out, bad)
-            self.assertNotIn("results", out)
+    def test_a_limit_int_cannot_parse_searches_nothing(self):
+        self.assertEqual(self.mcp.tool_search_models({"limit": {}})["limit"], 25)
+        for bad in ("nope", {"n": 1}, [1]):
+            with self.assertRaises((ValueError, TypeError)):
+                self.mcp.tool_search_models({"query": "mistral", "limit": bad})
+        rpc = self.mcp.rpc({"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                            "params": {"name": "search_models", "arguments": {"limit": "nope"}}})
+        self.assertTrue(rpc["result"]["isError"])
+        self.assertNotIn("results", rpc["result"]["content"][0]["text"])
 
     def test_annotations_match_the_network_behavior(self):
         listed = self.mcp.rpc({"jsonrpc": "2.0", "id": 1, "method": "tools/list"})["result"]["tools"]
@@ -142,10 +154,19 @@ class Contracts(unittest.TestCase):
             self.assertNotIn("destructiveHint", ann, name)
             self.assertNotIn("idempotentHint", ann, name)
             self.assertEqual(ann["openWorldHint"], name == "verify_seal", name)
+        import inspect
+        for name, tool in self.mcp.TOOL_BY_NAME.items():
+            body = inspect.getsource(tool["_fn"])
+            reaches = "_fetch_site_json" in body or "urlopen" in body or "urllib" in body or "check_anchors" in body
+            self.assertEqual(reaches, name == "verify_seal", name)
         seal = by_name["verify_seal"]
         self.assertIn("network", seal["description"])
         self.assertFalse(seal["inputSchema"]["properties"]["check_anchors"]["default"])
-        self.assertEqual(by_name["search_models"]["inputSchema"]["properties"]["limit"]["default"], 25)
+        limit_schema = by_name["search_models"]["inputSchema"]["properties"]["limit"]
+        self.assertEqual(limit_schema["default"], 25)
+        self.assertNotIn("minimum", limit_schema)
+        self.assertNotIn("maximum", limit_schema)
+        self.assertEqual(self.mcp.SERVER_INFO["version"], "2.0.1")
         init = self.mcp.rpc({"jsonrpc": "2.0", "id": 1, "method": "initialize",
                              "params": {"protocolVersion": "2024-11-05"}})
         self.assertEqual(init["result"]["protocolVersion"], "2024-11-05")
