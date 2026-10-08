@@ -69,7 +69,8 @@ jobs:
           EOF
       - name: Scripts compile
         run: |
-          python -m py_compile tools/audit_surfaces.py
+          python -m py_compile tools/audit_surfaces.py ops/mcp/mcp_server.py
+          python ops/mcp/test_tools.py
           shopt -s nullglob
           for f in ops/phase0/*.py; do python -m py_compile "$f"; done
           for f in ops/phase0/*.sh site/deploy.sh; do bash -n "$f"; done
