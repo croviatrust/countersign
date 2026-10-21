@@ -6,7 +6,7 @@ this document, the surface is wrong, not the canon. `canon/canon.json` is
 the machine-readable twin of this file; `tools/audit_surfaces.py` checks
 the live surfaces against it.
 
-Last revised: 2026-09-19.
+Last revised: 2026-10-21.
 
 ---
 
@@ -23,7 +23,7 @@ Last revised: 2026-09-19.
 | Git author for all commits | `Crovia Trust <info@croviatrust.com>` |
 | One-line description | Crovia records what AI providers disclose about training data, and the absence of it, as signed, Bitcoin-anchored facts. |
 | Posture | Observation, not accusation. Crovia records facts about public surfaces; it does not infer intent, allege wrongdoing, or enforce compliance. |
-| Sibling product | **Causari** (`causari.dev`, `github.com/croviatrust/causari`): proof of cause for AI-written code (audit of AI code survival in any git repo; local ledger of prompts, models and edits). Causari issues Seals for agent completions (`re proxy --seal`) and, since 0.2.0, for its audit results (`re audit --seal`, verifiable offline at `causari.dev/verify`); do not call it "the first production issuer" until a Causari seal is verifiable by a stranger against a public log. Never describe Causari as part of the Crovia ledger. |
+| Sibling product | **Causari** (`causari.dev`, `github.com/croviatrust/causari`): records what an agent runtime declared and measures how many lines from AI-tagged commits `git blame` still attributes at HEAD. Counts, not grades. It does not prove who typed a line. The published binary is causari 0.4.1, method v4 (2026-10-08, commit d4c4949). The source on main computes method v5 and is not that binary. Causari issues Seals for agent completions (`re proxy --seal`) and, since 0.2.0, for its audit results (`re audit --seal`, verifiable offline at `causari.dev/verify`). A seal proves a key signed those bytes; it does not prove the numbers are true. Do not call it "the first production issuer". Never describe Causari as part of the Crovia ledger. |
 
 ## 2. Products and their canonical names
 

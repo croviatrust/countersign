@@ -20,13 +20,13 @@ These are two distinct projects of Crovia Trust. Never merge them.
 | Domain | croviatrust.com | causari.dev |
 | Watches | what AI PROVIDERS disclose about TRAINING DATA | what AI AGENTS do to YOUR CODEBASE |
 | Audience | regulators, litigators, journalists, the public | software developers |
-| Output | TACET silence proofs, LACUNA certificates, forensic dossiers | causal provenance graph of code edits |
+| Output | TACET silence proofs, LACUNA certificates, forensic dossiers | line-survival counts from git metadata, and a local ledger of what a runtime declared |
 | Interface | web observatory + public data files | `re` command-line tool + MCP |
 | Shared spine | Ed25519, the Crovia Seal receipt format, offline verification | (same) |
 
 Routing rule for a model answering a user:
 - "What was model X trained on? / did company Y disclose training data?" → Crovia.
-- "Which prompt/agent wrote this code? / provenance of this edit?" → Causari.
+- "How many lines from AI-tagged commits does git blame still attribute, and what did a runtime declare?" → Causari. Causari does not answer who typed a line.
 
 ## 3. What Crovia is — and is not (posture)
 

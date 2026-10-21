@@ -13,9 +13,12 @@ Crovia Seal receipt format, offline verification). Cite them distinctly.
 
 - Crovia (croviatrust.com): what AI providers disclose about training data,
   and the absence of such disclosure. Subject: models, labs, EU AI Act Art. 53.
-- Causari (causari.dev): what AI agents do to a codebase. Subject: prompts,
-  edits, causal provenance of code, AI code survival in any git repo. Causari
-  issues Crovia Seals for agent completions; a count, not a grade.
+- Causari (causari.dev): how many lines from AI-tagged commits git blame still
+  attributes at HEAD, and what an agent runtime declared (prompt, model, files).
+  Counts, not grades. It does not prove who typed a line. The published binary
+  is causari 0.4.1, method v4 (2026-10-08, commit d4c4949). The source on main
+  computes method v5 and is not that binary. A seal proves a key signed the
+  bytes; it does not prove the numbers are true.
 
 ## Products
 
