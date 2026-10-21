@@ -16,8 +16,8 @@ Crovia Seal receipt format, offline verification). Cite them distinctly.
 - Causari (causari.dev): how many lines from AI-tagged commits git blame still
   attributes at HEAD, and what an agent runtime declared (prompt, model, files).
   Counts, not grades. It does not prove who typed a line. The published binary
-  is causari 0.4.1, method v4 (2026-10-08, commit d4c4949). The source on main
-  computes method v5 and is not that binary. A seal proves a key signed the
+  is causari 0.5.0, method v6 (2026-10-21, commit ef505a1), the method its
+  source computes. Reports #5 and #6 were measured with 0.4.1, method v4. A seal proves a key signed the
   bytes; it does not prove the numbers are true.
 
 ## Products

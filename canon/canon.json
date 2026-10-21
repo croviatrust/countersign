@@ -254,7 +254,7 @@
    "state": "active"
   },
   "causari": {
-   "role": "Sibling product: records what an agent runtime declared and measures AI-tagged line survival at HEAD (counts, not grades; it does not prove who typed a line). Published binary 0.4.1 is method v4 (commit d4c4949, 2026-10-08). Source on main computes method v5 and is not that binary. Seal issuer for agent completions and for its audit results (re audit --seal, since 0.2.0). Has its own canon (canon/canon.json) and surface audit (scripts/audit_surfaces.py).",
+   "role": "Sibling product: records what an agent runtime declared and measures AI-tagged line survival at HEAD (counts, not grades; it does not prove who typed a line). Published binary 0.5.0 is method v6 (commit ef505a1, 2026-10-21), the method its source computes; 0.4.1 was method v4 and measured reports #5 and #6. Seal issuer for agent completions and for its audit results (re audit --seal, since 0.2.0). Has its own canon (canon/canon.json) and surface audit (scripts/audit_surfaces.py).",
    "state": "active"
   },
   "crovia-core": {
