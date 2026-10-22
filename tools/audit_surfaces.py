@@ -46,6 +46,7 @@ from concurrent.futures import ThreadPoolExecutor
 from contextlib import nullcontext
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any, Callable, Iterable, Iterator, Optional, TypeVar
 
@@ -137,6 +138,25 @@ def freshest_timestamp(obj: Any) -> Optional[datetime]:
     horizon = utcnow() + timedelta(minutes=5)
     candidates = [ts for ts in iter_timestamps(obj) if ts <= horizon]
     return max(candidates) if candidates else None
+
+
+# Append-only logs are rewritten on a schedule from a service. The timestamps
+# inside them are events: a quiet month is not a dead publisher. Freshness for
+# these paths is the HTTP Last-Modified of the republish.
+REPUBLISHED_LOGS = {"/registry/data/seal/public_log.jsonl"}
+
+
+def republish_age_hours(last_modified: Optional[str], now: datetime) -> Optional[float]:
+    """Hours since an HTTP Last-Modified, or None when the header is absent or unparseable."""
+    if not last_modified:
+        return None
+    try:
+        published = parsedate_to_datetime(last_modified)
+    except (TypeError, ValueError, IndexError):
+        return None
+    if published.tzinfo is None:
+        published = published.replace(tzinfo=timezone.utc)
+    return (now - published).total_seconds() / 3600.0
 
 
 def get_path(obj: Any, dotted: str) -> Any:
@@ -548,6 +568,9 @@ class Audit:
             self.add("data_files", surface, "high", "valid JSON" + ("L" if path.endswith(".jsonl") else ""), f"{type(exc).__name__}: {clip(str(exc), 120)}", "data file does not parse")
             return
         freshest = freshest_timestamp(parsed)
+        if path in REPUBLISHED_LOGS:
+            self._assess_republished_log(surface, result, freshest)
+            return
         if freshest is None:
             self.add("data_files", surface, "low", "a timestamp field in the top 3 levels", "none found", "no timestamp field to judge freshness")
             return
@@ -558,6 +581,27 @@ class Audit:
             self.add("data_files", surface, "high", "updated within 30 days", observed, "stale")
         elif age_hours > 48:
             self.add("data_files", surface, "medium", "updated within 48 h", observed, "stale")
+
+    def _assess_republished_log(self, surface: str, result: FetchResult, newest_event: Optional[datetime]) -> None:
+        """Freshness of an append-only log is the republish, not the newest event.
+
+        seal_public_log.py rewrites public_log.jsonl every ten minutes from the
+        seal service wall. A month without a new seal leaves the event timestamp
+        old while Last-Modified stays current; treating the event as the file's
+        age marked a living log stale.
+        """
+        age_hours = republish_age_hours(result.headers.get("last-modified"), utcnow())
+        event = newest_event.isoformat() if newest_event else "none"
+        if age_hours is None:
+            self.add("data_files", surface, "high", "Last-Modified present", f"header absent; newest seal {event}", "republisher heartbeat missing")
+            return
+        observed = f"Last-Modified {age_hours:.1f} h ago; newest seal {event}"
+        if age_hours > 30 * 24:
+            self.add("data_files", surface, "high", "republished within 30 days", observed, "republisher stopped")
+        elif age_hours > 48:
+            self.add("data_files", surface, "medium", "republished within 48 h", observed, "republisher late")
+        else:
+            self.add("data_files", surface, "info", "republished within 48 h", observed, "publisher heartbeat; seal timestamps are events")
 
     def _probe_heavy_file(self, path: str) -> None:
         surface = self.url(path)

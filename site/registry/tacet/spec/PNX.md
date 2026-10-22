@@ -142,7 +142,7 @@ sorted by host then port, with no duplicates. `connections` counts attempts;
 destination (zero when nothing was relayed); `ips` lists the addresses the
 name resolved to, sorted, possibly empty; `first_at` and `last_at` are RFC
 3339 UTC. `outcome` is one of `allowed` (the witness relayed the connection),
-`blocked` (the witness refused it under the policy), `failed` (the witness
+`blocked` (the policy did not allow it, so the witness did not relay it), `failed` (the witness
 would have relayed it and could not: resolution or connection error).
 
 **Disclosure.** `clear` lists host names. `salted` replaces each `host` by
@@ -156,7 +156,7 @@ a name can check whether it was reached. A `salted` entry MUST NOT carry
 `rules` is 0, `mode` is `observe` and no outcome is `blocked`. With
 `allowlist`, `hash` is `sha256:` followed by the SHA-256 of the CSC-1
 encoding of the policy document, `rules` is the number of its rules and
-`mode` is `enforce` (the witness refused what the document did not allow)
+`mode` is `enforce` (the witness did not relay what the document did not allow)
 or `observe` (the witness relayed everything and recorded it; outcomes are
 `allowed` or `failed`). The policy document is:
 
