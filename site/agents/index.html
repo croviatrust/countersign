@@ -131,6 +131,14 @@
 re pnx prove  --asset api_key=.env --assets-dir src/secret/
 re pnx verify .causari/pnx/&lt;run&gt;/proof.json \
   --asset api_key=.env --assets-dir src/secret/</div></div>
+    <div class="ag-card"><div class="k">LLM gateway</div><h3>LiteLLM (SDK or proxy)</h3>
+<div class="ag-code">pip install "crovia-tacet @ git+https://github.com/croviatrust/countersign#subdirectory=tacet/reference/python"
+
+# SDK
+litellm.callbacks = [PNXEgressLogger("pnx/egress.jsonl")]
+# proxy config.yaml
+litellm_settings:
+  callbacks: tacet.integrations.litellm.pnx_egress_logger</div></div>
     <div class="ag-card"><div class="k">Any pipeline</div><h3><code>tacet-pnx</code> (Python)</h3>
 <div class="ag-code">pip install crovia-tacet
 tacet-pnx keygen
