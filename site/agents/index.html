@@ -43,6 +43,19 @@
   .ag-final h2{font:300 32px/1.15 'Fraunces',var(--sans);color:#fff;margin-bottom:10px}
   .ag-final p{color:var(--text-soft);font-size:15px;max-width:640px;margin:0 auto 20px;line-height:1.6}
   .ag-final .ag-cta{justify-content:center}
+  .ag-demo-btns{display:flex;gap:10px;flex-wrap:wrap;margin:6px 0 16px}
+  .ag-demo-btns .cv-btn.on{border-color:var(--accent);color:var(--accent)}
+  .ag-verdict{border-radius:10px;padding:16px 18px;font:600 15px var(--sans);margin-bottom:12px}
+  .ag-verdict.ok{background:rgba(46,160,67,.12);border:1px solid rgba(46,160,67,.45);color:#4ade80}
+  .ag-verdict.warn{background:rgba(251,191,36,.10);border:1px solid rgba(251,191,36,.45);color:#fcd34d}
+  .ag-verdict.bad{background:rgba(248,81,73,.10);border:1px solid rgba(248,81,73,.45);color:#ff8a80}
+  .ag-verdict .sub{display:block;font:400 13px/1.55 var(--sans);color:var(--text-soft);margin-top:6px}
+  .ag-assets{width:100%;border-collapse:collapse;font:400 13px var(--mono);margin-bottom:12px}
+  .ag-assets td{border-top:1px solid var(--border);padding:8px 10px;color:var(--text-soft)}
+  .ag-assets td.v-absent{color:#4ade80}.ag-assets td.v-present{color:#ff8a80;font-weight:700}.ag-assets td.v-other{color:#fcd34d}
+  .ag-steps{font:400 12px/1.7 var(--mono);color:var(--text-muted)}
+  .ag-steps summary{cursor:pointer;color:var(--text-soft)}
+  .ag-steps .x{color:#ff8a80}
 </style>
 </head>
 <body>
@@ -61,6 +74,7 @@
     <p class="ag-lead">Your coding and support agents read source, secrets and customer data. When an auditor, a customer or an incident asks <i>"did any of this leave?"</i>, today the only answer is the agent vendor's own log. <b>PNX</b> (Proof of Non-Exfiltration) turns every agent run into a signed proof that none of your protected assets appeared in its outbound traffic, which anyone can verify offline without trusting you, the vendor or Crovia.</p>
     <div class="ag-cta">
       <a class="cv-btn cv-btn-primary" href="mailto:info@croviatrust.com?subject=Agent%20Evidence%20Pilot">Book a pilot</a>
+      <a class="cv-btn" href="#demo">See a live proof</a>
       <a class="cv-btn" href="#try">Try it in CI in 5 minutes</a>
       <a class="cv-btn" href="/registry/tacet/spec/#pnx">Read the specification</a>
     </div>
@@ -72,6 +86,19 @@
     <div class="ag-card"><div class="k">1 · Witness</div><h3>Everything the agent sends is fingerprinted</h3><p>A witness sits where outbound bytes are visible: Causari's local proxy (<code>re proxy --pnx</code>), your LLM gateway logs, or a CI step. Request bodies are cut into k-grams, hashed with a per-run salt and committed to a sparse Merkle map. The witness signs the <b>run sheet</b>, and an optional <b>reach record</b> lists every destination the run tried to reach under your allowlist.</p></div>
     <div class="ag-card"><div class="k">2 · Prove</div><h3>Per asset: absent, or exposed</h3><p>For each protected asset (API keys, customer files, source directories) the prover attaches a non-inclusion path against the run root. If an asset <i>did</i> appear, the same object becomes signed evidence of the exposure. Any shared substring of <b>47 bytes or more</b> is always detected, including inside JSON request bodies.</p></div>
     <div class="ag-card"><div class="k">3 · Verify</div><h3>Offline, by anyone, with open code</h3><p>The auditor gets the proof, a ~kilobyte <a href="/registry/seal/">Crovia Seal</a>, and optionally the assets. Three independent verifiers (Python, JavaScript in the browser, Rust) agree byte for byte on public conformance vectors. The proof contains no traffic bytes and nothing about the assets except their SHA-256.</p></div>
+  </div>
+
+  <div class="ag-head"><h2 id="demo">Verify a real proof, here, now</h2><p>These are the public PNX conformance proofs from the specification, verified in your browser by the same open-source code as <a href="/registry/seal/verify/">/registry/seal/verify/</a>. Nothing is sent to any server: open the network tab and check.</p></div>
+  <div class="ag-demo-btns">
+    <button class="cv-btn" data-case="clean">1 · Clean run</button>
+    <button class="cv-btn" data-case="exposure">2 · Leaky run</button>
+    <button class="cv-btn" data-case="tampered">3 · Someone edits the proof</button>
+  </div>
+  <div id="agDemo" class="ag-card" style="display:none">
+    <div id="agVerdict" class="ag-verdict"></div>
+    <table class="ag-assets" id="agAssets"></table>
+    <p id="agLegend" style="display:none;font-size:12.5px;color:var(--text-muted);margin:-4px 0 12px"><b>absent-partial</b>: asset shorter than the 47-byte guarantee, only exact k-grams proven absent. <b>undetectable</b>: shorter than 32 bytes, outside what PNX can judge (<a href="#limits">limits</a>).</p>
+    <details class="ag-steps"><summary id="agStepsSum">Every check the verifier ran</summary><div id="agSteps"></div></details>
   </div>
 
   <div class="ag-head"><h2 id="why">Why teams need this now</h2></div>
@@ -144,6 +171,50 @@ tacet-pnx verify pnx.proof.json --asset ...</div></div>
     <div class="cv-foot-meta">&copy; 2026 Crovia Trust · code Apache-2.0 · specifications CC0</div>
   </div>
 </footer>
+<script src="/registry/seal/verify/seal-core.js?v=20260920a"></script>
+<script src="/registry/seal/verify/ots-verify.js?v=20260920a"></script>
+<script src="/registry/seal/verify/tacet-verify.js?v=20260920a"></script>
+<script src="/registry/seal/verify/pnx-verify.js?v=20260928b"></script>
+<script>
+(() => {
+  const VEC = "/registry/tacet/spec/vectors/v1/pnx_004_sealed.json";
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const hexBytes = h => new Uint8Array((h.match(/../g) || []).map(b => parseInt(b, 16)));
+  const STORY = {
+    clean: "An agent run sent 4 request bodies (1,739 bytes) through the witness. Protected: an AWS key and a customer export.",
+    exposure: "Same construction, five protected assets. Two of them were in the request bodies the agent sent.",
+    tampered: "A sealed proof whose contents were changed after the seal was signed."
+  };
+  let vec = null;
+  async function show(which) {
+    document.querySelectorAll("[data-case]").forEach(b => b.classList.toggle("on", b.dataset.case === which));
+    const box = $("agDemo"), v = $("agVerdict"), tbl = $("agAssets"), st = $("agSteps");
+    box.style.display = "block"; v.className = "ag-verdict"; v.textContent = "verifying…"; tbl.innerHTML = ""; st.innerHTML = ""; $("agLegend").style.display = "none";
+    const steps = [];
+    try {
+      vec = vec || await (await fetch(VEC)).json();
+      const c = which === "tampered" ? vec.invalid.proof_modified_after_sealing : vec[which];
+      const assets = {}; for (const [k, h] of Object.entries(c.assets_hex)) assets[k] = hexBytes(h);
+      const r = await window.verifyPnx({ seal: c.seal, query: c.query, proof: c.proof }, steps, { assets });
+      const rows = Object.entries(r.assets);
+      const leaked = rows.filter(([, x]) => x === "present").map(([k]) => k);
+      if (r.verdict === "absent") { v.className = "ag-verdict ok"; v.innerHTML = "&#10003; Valid proof. No protected asset left during this run." }
+      else if (r.verdict === "present") { v.className = "ag-verdict warn"; v.innerHTML = "&#10003; Valid proof, and it is signed evidence of exposure: " + esc(leaked.join(", ")) + " left during this run." }
+      else { v.className = "ag-verdict warn"; v.innerHTML = "&#10003; Valid proof. Verdict: " + esc(r.verdict) + "." }
+      v.innerHTML += "<span class='sub'>" + esc(STORY[which]) + " Witness signature, sealed bundle, fingerprints and sparse Merkle paths all recomputed in this tab.</span>";
+      $("agLegend").style.display = rows.some(([, x]) => x !== "absent" && x !== "present") ? "block" : "none";
+      tbl.innerHTML = rows.map(([k, x]) => "<tr><td>" + esc(k) + "</td><td class='" + (x === "absent" ? "v-absent" : x === "present" ? "v-present" : "v-other") + "'>" + esc(x) + "</td></tr>").join("");
+    } catch (e) {
+      v.className = "ag-verdict bad";
+      v.innerHTML = "&#10007; Rejected: " + esc(e.message || e) + "<span class='sub'>" + esc(STORY[which] || "") + " The verifier refuses it: nobody can change a signed proof without it showing, Crovia included.</span>";
+    }
+    $("agStepsSum").textContent = "Every check the verifier ran (" + steps.length + ")";
+    st.innerHTML = steps.map(s => "<div" + (s.ok ? "" : " class='x'") + ">" + (s.hdr ? "" : s.ok ? "&#10003; " : "&#10007; ") + esc(s.label) + (s.det ? " <span style='opacity:.6'>— " + esc(s.det) + "</span>" : "") + "</div>").join("");
+  }
+  document.querySelectorAll("[data-case]").forEach(b => b.addEventListener("click", () => show(b.dataset.case)));
+})();
+</script>
 <script src="https://croviatrust.com/assets/crovia-shell.js?v=20260919g" defer></script>
 </body>
 </html>
