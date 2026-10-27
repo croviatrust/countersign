@@ -211,6 +211,7 @@
       if (href === '/registry/') return p === '/registry/' || p === '/registry/index.html';
       if (href === '/registry/embed/') return p.indexOf('/registry/embed') === 0;
       if (href === '/m/') return p.indexOf('/m/') === 0;
+      if (href === '/agents/') return p.indexOf('/agents') === 0;
       return false;
     }
     function a(href, label, ext) {
@@ -224,6 +225,7 @@
       a('/registry/seal/', 'Seal') +
       a('/registry/seal/verify/', 'Verify') +
       a('/registry/', 'Registry') +
+      a('/agents/', 'For agents') +
       a('https://causari.dev', 'Causari &#8599;', true) +
       '<div class="cv-nav-more">' +
       '<button class="cv-nav-more-btn" data-cv-more>More' +
