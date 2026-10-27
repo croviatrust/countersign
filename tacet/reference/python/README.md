@@ -40,3 +40,31 @@ tacet-pnx verify  run.sheet.json --policy egress-policy.json   # a sheet alone: 
 Exit codes: 0 valid and every asset absent (or a sheet alone) · 1 valid but present, undetectable,
 partial or outside-policy · 2 invalid. The GitHub Action `croviatrust/pnx-action` wraps the same
 three steps for CI (`../../action/`).
+
+## PNX witness for LiteLLM
+
+`tacet.integrations.litellm` turns LiteLLM (SDK or proxy) into a PNX egress
+witness: every request about to leave for a model provider is appended, as the
+exact provider request body, to a capture log that `tacet-pnx witness` reads.
+
+```python
+import litellm
+from tacet.integrations.litellm import PNXEgressLogger
+litellm.callbacks = [PNXEgressLogger("pnx/egress.jsonl")]
+```
+
+```yaml
+# LiteLLM proxy config.yaml (log path from PNX_EGRESS_LOG, default pnx/egress.jsonl)
+litellm_settings:
+  callbacks: tacet.integrations.litellm.pnx_egress_logger
+```
+
+```bash
+tacet-pnx witness pnx/egress.jsonl --run-id run-42 --key witness.key.json --sheet run.sheet.json --state run.state.json
+tacet-pnx prove   --state run.state.json --sheet run.sheet.json --asset-env STRIPE_KEY --asset customers=customers.csv --out pnx.proof.json
+```
+
+The capture log contains what left, so it is as private as the witness state.
+Traffic that does not go through LiteLLM (tool calls, shell, browser) is outside
+this witness (PNX §7); pair it with `re proxy --pnx` for those.
+

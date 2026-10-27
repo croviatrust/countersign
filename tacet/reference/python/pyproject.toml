@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "Apache-2.0" }
 authors = [{ name = "Crovia Trust", email = "info@croviatrust.com" }]
-keywords = ["ai", "transparency", "eu-ai-act", "merkle", "non-inclusion", "provenance", "crovia", "pnx", "non-exfiltration", "ai-agents", "dlp"]
+keywords = ["ai", "transparency", "eu-ai-act", "merkle", "non-inclusion", "provenance", "crovia", "pnx", "non-exfiltration", "ai-agents", "dlp", "litellm"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -23,6 +23,7 @@ dependencies = ["cryptography>=41.0.0"]
 
 [project.optional-dependencies]
 seal = ["crovia-seal>=0.5.0"]
+litellm = ["litellm>=1.40"]
 test = ["pytest>=7.0"]
 
 [project.scripts]
