@@ -117,7 +117,7 @@ tacet-pnx verify pnx.proof.json --asset ...</div></div>
     <b>Bytes the witness did not see.</b> Traffic that bypassed the witness, TLS it could not read and side channels are outside the proof. The proof is only as complete as the boundary that forces traffic through the witness, and it says which capture was used.<br>
     <b>Transformations it does not normalise.</b> Paraphrase, translation, summaries, base64, URL-encoding and UTF-16 are outside the proof. Raw bytes and JSON string values are covered.<br>
     <b>Very short assets.</b> Assets under 32 bytes cannot be covered. Assets that are short or only partly covered are reported as <code>undetectable</code> or <code>absent-partial</code> and are never counted as clean.<br>
-    <b>A single witness is one statement.</b> Countersigning by several independent witnesses removes that single point of trust and is part of production deployments.
+    <b>A single witness is one statement.</b> Countersigning by several independent witnesses (Countersign) removes that single point of trust.
   </div>
 
   <section class="ag-final">
