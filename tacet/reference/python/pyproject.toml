@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "crovia-tacet"
-version = "0.5.0"
+version = "0.5.1"
 description = "Reference implementation of TACET: verifiable silence proofs for AI training disclosure (Crovia Trust)"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -23,7 +23,7 @@ dependencies = ["cryptography>=41.0.0"]
 
 [project.optional-dependencies]
 seal = ["crovia-seal>=0.5.0"]
-litellm = ["litellm>=1.40"]
+litellm = ["litellm>=1.40,!=1.82.7,!=1.82.8,!=1.107.0"]
 test = ["pytest>=7.0"]
 
 [project.scripts]
